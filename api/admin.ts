@@ -31,8 +31,13 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 export async function checkSetupStatus(c: Context) {
-  const adminName = await getSetting('admin_name');
-  return c.json({ setupCompleted: !!adminName });
+  try {
+    const adminName = await getSetting('admin_name');
+    return c.json({ setupCompleted: !!adminName });
+  } catch (e: any) {
+    // Database not connected yet — treat as not set up
+    return c.json({ setupCompleted: false, error: 'database_not_connected' });
+  }
 }
 
 export async function setupAdmin(c: Context) {

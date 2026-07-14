@@ -77,7 +77,7 @@ router.beforeEach(async (to, _from, next) => {
       const res = await checkSetupStatus();
       setupStatus = res.setupCompleted;
     } catch {
-      setupStatus = true; // 请求失败时默认已完成，避免阻塞
+      setupStatus = false; // 请求失败时默认未初始化，跳转 setup 页面
     }
   }
 

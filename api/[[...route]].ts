@@ -45,12 +45,25 @@ let schemaInitialized = false;
 
 const app = new Hono();
 
+// ==================== Global Error Handler ====================
+app.onError((err, c) => {
+  console.error('Unhandled error:', err);
+  return c.json({ message: 'Internal Server Error', error: err.message }, 500);
+});
+
 // ==================== CORS & Options ====================
 app.use('*', async (c, next) => {
-  // Initialize DB schema on first request
-  if (!schemaInitialized) {
-    schemaInitialized = true;
-    await ensureSchema();
+  // Skip DB initialization for health check
+  const path = new URL(c.req.url).pathname;
+  if (path !== '/api/health') {
+    if (!schemaInitialized) {
+      schemaInitialized = true;
+      try {
+        await ensureSchema();
+      } catch (e) {
+        console.error('[DB] Schema init failed in middleware:', e);
+      }
+    }
   }
   await next();
 });
@@ -149,7 +162,16 @@ app.delete('/api/admin/backup/s3', adminAuth, deleteS3BackupHandler);
 app.get('/api/admin/backup/s3/download', adminAuth, downloadS3BackupHandler);
 
 // ==================== Health check ====================
-app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: Date.now() }));
+app.get('/api/health', (c) => {
+  const hasPostgres = !!process.env.POSTGRES_URL;
+  const hasKv = !!process.env.KV_REST_API_URL;
+  return c.json({
+    status: 'ok',
+    timestamp: Date.now(),
+    database: hasPostgres ? 'connected' : 'not_configured',
+    kv: hasKv ? 'connected' : 'not_configured',
+  });
+});
 
 export const GET = handle(app);
 export const POST = handle(app);

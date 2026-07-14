@@ -114,9 +114,9 @@ async function handleSubmit() {
 
 .setup-hint {
   font-size: 13px;
-  color: #57606a;
+  color: #888;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   line-height: 1.6;
   padding: 0 8px;
 }
