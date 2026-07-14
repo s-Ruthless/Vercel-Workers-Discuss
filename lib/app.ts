@@ -1,6 +1,6 @@
 /**
- * Hono App - 共享路由定义
- * 被 api/[[...route]].ts 和 api/admin/[...path].ts 同时引用
+ * Hono App - 路由定义
+ * 被 api/[[...route]].ts 引用，处理所有 /api/* 路由
  */
 import { Hono } from 'hono';
 import { adminAuth } from './auth.js';
@@ -156,5 +156,15 @@ app.post('/api/admin/backup/s3', adminAuth, triggerS3BackupHandler);
 app.get('/api/admin/backup/s3/list', adminAuth, listS3BackupsHandler);
 app.delete('/api/admin/backup/s3', adminAuth, deleteS3BackupHandler);
 app.get('/api/admin/backup/s3/download', adminAuth, downloadS3BackupHandler);
+
+// ==================== Debug catch-all ====================
+app.all('*', (c) => {
+  return c.json({
+    message: 'Route not found',
+    method: c.req.method,
+    path: c.req.path,
+    url: c.req.url,
+  }, 404);
+});
 
 export { app };
