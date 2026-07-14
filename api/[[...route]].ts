@@ -53,17 +53,19 @@ app.onError((err, c) => {
 
 // ==================== CORS & Options ====================
 app.use('*', async (c, next) => {
-  // Skip DB initialization for health check
-  const path = new URL(c.req.url).pathname;
-  if (path !== '/api/health') {
-    if (!schemaInitialized) {
+  try {
+    // Skip DB initialization for health check
+    const path = c.req.path;
+    if (path !== '/api/health' && !schemaInitialized) {
       schemaInitialized = true;
       try {
         await ensureSchema();
       } catch (e) {
-        console.error('[DB] Schema init failed in middleware:', e);
+        console.error('[DB] Schema init failed:', e);
       }
     }
+  } catch (e) {
+    console.error('[Middleware] error:', e);
   }
   await next();
 });
