@@ -344,8 +344,8 @@ function cancelSiteId() {
 <style scoped lang="less">
 @import "../../styles/components/data.less";
 
-.form-row { display: flex; gap: 12px; margin-top: 12px; }
-.form-group { margin-top: 12px; }
+.form-row { display: flex; gap: 14px; margin-top: 14px; }
+.form-group { margin-top: 14px; }
 .form-group.half { flex: 1; margin-top: 0; }
-.form-label { display: block; font-size: 13px; margin-bottom: 4px; color: var(--text-primary); }
+.form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary); }
 </style>

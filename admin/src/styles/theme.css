@@ -1,86 +1,144 @@
+/* ========================================
+   VWD Admin - macOS Design System
+   ======================================== */
+
 :root {
-  --bg-body: #f5f5f5;
-  --bg-card: #ffffff;
-  --bg-header: #24292f;
-  --bg-sider: #f6f8fa;
-  --bg-input: #ffffff;
-  --bg-hover: #eaeef2;
-  --bg-active: #d0ebff;
-  --bg-select: #24292f;
-  --primary-color: #0969da;
-  --text-primary: #24292f;
-  --text-secondary: #57606a;
+  /* —– Backgrounds —– */
+  --bg-body: #f5f5f7;
+  --bg-card: rgba(255, 255, 255, 0.72);
+  --bg-card-solid: #ffffff;
+  --bg-header: rgba(255, 255, 255, 0.6);
+  --bg-sider: rgba(245, 245, 247, 0.5);
+  --bg-input: rgba(255, 255, 255, 0.8);
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-active: rgba(0, 122, 255, 0.1);
+  --bg-select: rgba(255, 255, 255, 0.5);
+
+  /* —– Primary / Accent —– */
+  --primary-color: #007aff;
+  --primary-hover: #0066d6;
+  --primary-light: rgba(0, 122, 255, 0.08);
+
+  /* —– Text —– */
+  --text-primary: #1d1d1f;
+  --text-secondary: #86868b;
+  --text-tertiary: #aeaeb2;
   --text-inverse: #ffffff;
-  --text-link: #0969da;
-  --border-color: #d0d7de;
-  --border-input: #d0d7de;
-  --border-header: #57606a;
-  --color-success: #1a7f37;
-  --color-warning: #9a6700;
-  --color-danger: #d1242f;
-  --chart-line: #0ea5e9;
-  --chart-area-start: rgba(56, 189, 248, 0.80);
-  --chart-area-end: rgba(56, 189, 248, 0.2);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-login: 0 18px 45px rgba(15, 23, 42, 0.12);
-  --vwd-primary: #0969da;
-  --vwd-primary-hover: #0864ca;
-  --vwd-text: #24292f;
-  --vwd-text-secondary: #6e7781;
+  --text-link: #007aff;
+
+  /* —– Borders —– */
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-input: rgba(0, 0, 0, 0.1);
+  --border-header: rgba(0, 0, 0, 0.06);
+
+  /* —– Status Colors (Apple) —– */
+  --color-success: #34c759;
+  --color-warning: #ff9500;
+  --color-danger: #ff3b30;
+  --color-info: #5ac8fa;
+
+  /* —– Chart —– */
+  --chart-line: #0a84ff;
+  --chart-area-start: rgba(0, 122, 255, 0.35);
+  --chart-area-end: rgba(0, 122, 255, 0.02);
+
+  /* —– Shadows (layered, soft) —– */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 32px rgba(0, 0, 0, 0.06);
+  --shadow-login: 0 20px 60px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-popover: 0 4px 24px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
+  --shadow-focus: 0 0 0 4px rgba(0, 122, 255, 0.15);
+
+  /* —– Radius (Apple-style large) —– */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 999px;
+
+  /* —– Blur —– */
+  --blur-header: saturate(180%) blur(20px);
+  --blur-sidebar: saturate(180%) blur(24px);
+  --blur-card: saturate(180%) blur(12px);
+
+  /* —– Transitions —– */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* —– VWD Widget vars —– */
+  --vwd-primary: #007aff;
+  --vwd-primary-hover: #0066d6;
+  --vwd-text: #1d1d1f;
+  --vwd-text-secondary: #86868b;
   --vwd-bg: #ffffff;
   --vwd-bg-input: #ffffff;
-  --vwd-bg-secondary: #f6f8fa;
-  --vwd-bg-reply: #f6f8fa;
-  --vwd-bg-hover: #f6f8fa;
-  --vwd-bg-disabled: #f6f8fa;
-  --vwd-bg-avatar: #f6f8fa;
-  --vwd-border: #d0d7de;
-  --vwd-border-light: #eaeef2;
-  --vwd-error: #cf222e;
-  --vwd-bg-error: #ffebe9;
-  --vwd-border-error: #fd8c73;
-  --vwd-radius: 6px;
+  --vwd-bg-secondary: #f5f5f7;
+  --vwd-bg-reply: #f5f5f7;
+  --vwd-bg-hover: rgba(0, 0, 0, 0.04);
+  --vwd-bg-disabled: #f5f5f7;
+  --vwd-bg-avatar: #f5f5f7;
+  --vwd-border: rgba(0, 0, 0, 0.08);
+  --vwd-border-light: rgba(0, 0, 0, 0.05);
+  --vwd-error: #ff3b30;
+  --vwd-bg-error: rgba(255, 59, 48, 0.08);
+  --vwd-border-error: #ff3b30;
+  --vwd-radius: 10px;
 }
 
 :root.dark {
-  --bg-body: #0d1117;
-  --bg-card: #161b22;
-  --bg-header: #161b22;
-  --bg-sider: #010409;
-  --bg-input: #0d1117;
-  --bg-hover: #21262d;
-  --bg-active: #1f6feb33;
-  --bg-select: #161b22;
-  --primary-color: #58a6ff;
-  --text-primary: #c9d1d9;
-  --text-secondary: #8b949e;
-  --text-inverse: #f0f6fc;
-  --text-link: #58a6ff;
-  --border-color: #30363d;
-  --border-input: #30363d;
-  --border-header: #30363d;
-  --color-success: #3fb950;
-  --color-warning: #d29922;
-  --color-danger: #f85149;
-  --chart-line: #38bdf8;
-  --chart-area-start: rgba(56, 189, 248, 0.50);
-  --chart-area-end: rgba(56, 189, 248, 0.1);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.5);
-  --shadow-login: 0 18px 45px rgba(0, 0, 0, 0.4);
-  --vwd-primary: #58a6ff;
-  --vwd-primary-hover: #4094ff;
-  --vwd-text: #c9d1d9;
-  --vwd-text-secondary: #8b949e;
-  --vwd-bg: #0d1117;
-  --vwd-bg-input: #0d1117;
-  --vwd-bg-secondary: #161b22;
-  --vwd-bg-reply: #161b22;
-  --vwd-bg-hover: #161b22;
-  --vwd-bg-disabled: #161b22;
-  --vwd-bg-avatar: #161b22;
-  --vwd-border: #30363d;
-  --vwd-border-light: #21262d;
-  --vwd-error: #f85149;
-  --vwd-bg-error: #3d1614;
-  --vwd-border-error: #f85149;
+  --bg-body: #1c1c1e;
+  --bg-card: rgba(44, 44, 46, 0.72);
+  --bg-card-solid: #2c2c2e;
+  --bg-header: rgba(44, 44, 46, 0.6);
+  --bg-sider: rgba(28, 28, 30, 0.5);
+  --bg-input: rgba(58, 58, 60, 0.6);
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --bg-active: rgba(10, 132, 255, 0.18);
+  --bg-select: rgba(58, 58, 60, 0.5);
+
+  --primary-color: #0a84ff;
+  --primary-hover: #409cff;
+  --primary-light: rgba(10, 132, 255, 0.12);
+
+  --text-primary: #f5f5f7;
+  --text-secondary: #98989d;
+  --text-tertiary: #636366;
+  --text-inverse: #ffffff;
+  --text-link: #0a84ff;
+
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-input: rgba(255, 255, 255, 0.12);
+  --border-header: rgba(255, 255, 255, 0.06);
+
+  --color-success: #30d158;
+  --color-warning: #ff9f0a;
+  --color-danger: #ff453a;
+  --color-info: #64d2ff;
+
+  --chart-line: #0a84ff;
+  --chart-area-start: rgba(10, 132, 255, 0.3);
+  --chart-area-end: rgba(10, 132, 255, 0.02);
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.25), 0 8px 32px rgba(0, 0, 0, 0.2);
+  --shadow-login: 0 20px 60px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-popover: 0 4px 24px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
+  --shadow-focus: 0 0 0 4px rgba(10, 132, 255, 0.2);
+
+  --vwd-primary: #0a84ff;
+  --vwd-primary-hover: #409cff;
+  --vwd-text: #f5f5f7;
+  --vwd-text-secondary: #98989d;
+  --vwd-bg: #1c1c1e;
+  --vwd-bg-input: #2c2c2e;
+  --vwd-bg-secondary: #2c2c2e;
+  --vwd-bg-reply: #2c2c2e;
+  --vwd-bg-hover: rgba(255, 255, 255, 0.06);
+  --vwd-bg-disabled: #2c2c2e;
+  --vwd-bg-avatar: #2c2c2e;
+  --vwd-border: rgba(255, 255, 255, 0.1);
+  --vwd-border-light: rgba(255, 255, 255, 0.06);
+  --vwd-error: #ff453a;
+  --vwd-bg-error: rgba(255, 69, 58, 0.12);
+  --vwd-border-error: #ff453a;
 }

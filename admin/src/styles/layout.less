@@ -3,19 +3,31 @@
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-body);
+  background: transparent;
   border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--text-secondary);
-  border-radius: 10px;
-  transition: all 0.1s linear;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-pill);
+  transition: background 0.15s;
+}
+
+:root.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+:root.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .layout {
@@ -24,26 +36,33 @@
   height: 100%;
 }
 
+/* —– Header (macOS Toolbar with Vibrancy) —– */
 .layout-header {
-  height: 56px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 20px;
   background-color: var(--bg-header);
-  color: var(--text-inverse);
+  backdrop-filter: var(--blur-header);
+  -webkit-backdrop-filter: var(--blur-header);
+  color: var(--text-primary);
   border-bottom: 1px solid var(--border-header);
+  position: relative;
+  z-index: 100;
+  flex-shrink: 0;
 }
 
 .layout-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .layout-actions-wrapper {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   position: relative;
 }
 
@@ -53,12 +72,22 @@
 }
 
 .layout-domain-select {
-  padding: 6px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--border-header);
-  background-color: var(--bg-select);
-  color: var(--text-inverse);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-input);
+  backdrop-filter: var(--blur-card);
+  -webkit-backdrop-filter: var(--blur-card);
+  color: var(--text-primary);
   font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.layout-domain-select:hover {
+  background-color: var(--bg-hover);
 }
 
 .layout-sider-domain-filter {
@@ -67,25 +96,27 @@
 
 .layout-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .layout-button {
   text-decoration: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  border: 1px solid var(--border-header);
-  background-color: var(--bg-select);
-  color: var(--text-inverse);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background-color: transparent;
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 13px;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: all var(--transition-fast);
 }
 
 .layout-button:hover {
-  background-color: var(--border-header);
+  background-color: var(--bg-hover);
 }
 
 .layout-actions-toggle {
@@ -93,35 +124,46 @@
   align-items: center;
   justify-content: center;
   padding: 6px;
-  border-radius: 4px;
-  border: 1px solid var(--border-header);
-  background-color: var(--bg-select);
-  color: var(--text-inverse);
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: transparent;
+  color: var(--text-primary);
   cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.layout-actions-toggle:hover {
+  background-color: var(--bg-hover);
 }
 
 .layout-actions-dropdown {
   display: none;
 }
 
+/* —– Body —– */
 .layout-body {
   display: flex;
   flex: 1;
   min-height: 0;
 }
 
+/* —– Sidebar (macOS Sidebar with Vibrancy) —– */
 .layout-sider {
-  width: 180px;
+  width: 200px;
   background-color: var(--bg-sider);
+  backdrop-filter: var(--blur-sidebar);
+  -webkit-backdrop-filter: var(--blur-sidebar);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 90;
 }
 
 .menu {
   list-style: none;
-  margin: 0;
-  padding: 12px 0;
+  margin: 8px 8px 0;
+  padding: 0;
   flex: 1;
   overflow-y: auto;
 }
@@ -130,11 +172,12 @@
   padding: 12px 16px;
   border-top: 1px solid var(--border-color);
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   text-align: center;
-  line-height: 1.5;
+  line-height: 1.6;
   cursor: pointer;
   user-select: none;
+  transition: background-color var(--transition-fast);
 }
 
 .layout-sider-footer:hover {
@@ -148,13 +191,17 @@
 }
 
 .menu-item {
-  padding: 10px 16px;
+  padding: 8px 12px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 2px;
+  transition: all var(--transition-fast);
 }
 
 .menu-item span {
@@ -165,6 +212,7 @@
 
 .menu-item-icon {
   flex: 0 0 auto;
+  opacity: 0.7;
 }
 
 .menu-item:hover {
@@ -172,15 +220,21 @@
 }
 
 .menu-item.active {
-  background-color: var(--bg-active);
+  background-color: var(--primary-color);
+  color: #ffffff;
   font-weight: 600;
-  color: var(--primary-color);
 }
 
+.menu-item.active .menu-item-icon {
+  opacity: 1;
+}
+
+/* —– Content —– */
 .layout-content {
   flex: 1;
-  padding: 16px 20px 40px;
+  padding: 24px 28px 48px;
   overflow: auto;
+  background-color: var(--bg-body);
 }
 
 .layout-menu-toggle {
@@ -188,18 +242,24 @@
   align-items: center;
   justify-content: center;
   padding: 6px 10px;
-  border-radius: 4px;
-  border: 1px solid var(--border-header);
-  background-color: var(--bg-select);
-  color: var(--text-inverse);
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: transparent;
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 13px;
+  transition: background-color var(--transition-fast);
+}
+
+.layout-menu-toggle:hover {
+  background-color: var(--bg-hover);
 }
 
 .layout-sider-mask {
   display: none;
 }
 
+/* —– Responsive —– */
 @media (max-width: 768px) {
   .layout {
     height: 100vh;
@@ -224,14 +284,14 @@
 
   .layout-sider {
     position: fixed;
-    top: 56px;
+    top: 52px;
     left: 0;
     bottom: 0;
-    width: 220px;
+    width: 240px;
     max-width: 80%;
     border-right: 1px solid var(--border-color);
     transform: translateX(-100%);
-    transition: transform 0.2s ease-out;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
   }
 
@@ -241,17 +301,19 @@
 
   .layout-sider-mask {
     position: fixed;
-    top: 56px;
+    top: 52px;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: 900;
     display: block;
   }
 
   .layout-content {
-    padding: 12px;
+    padding: 16px;
   }
 
   .layout-actions {
@@ -264,7 +326,7 @@
 
   .layout-sider-domain-filter {
     display: block;
-    padding: 12px 16px 0;
+    padding: 12px 16px 4px;
   }
 
   .layout-sider-domain-filter .layout-domain-select {
@@ -278,14 +340,16 @@
 
   .layout-actions-dropdown {
     position: fixed;
-    top: 56px;
+    top: 52px;
     right: 12px;
-    background-color: var(--bg-card);
+    background-color: var(--bg-card-solid);
+    backdrop-filter: var(--blur-card);
+    -webkit-backdrop-filter: var(--blur-card);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    box-shadow: var(--shadow-card);
-    padding: 6px 0;
-    min-width: 160px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-popover);
+    padding: 6px;
+    min-width: 180px;
     z-index: 1100;
     display: flex;
     flex-direction: column;
@@ -293,13 +357,16 @@
 
   .layout-actions-item {
     padding: 8px 14px;
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 500;
     background: none;
     border: none;
+    border-radius: var(--radius-sm);
     text-align: left;
     cursor: pointer;
     color: var(--text-primary);
     width: 100%;
+    transition: background-color var(--transition-fast);
   }
 
   .layout-actions-item:hover {
@@ -311,6 +378,6 @@
   }
 
   .layout-actions-item-danger:hover {
-    background-color: rgba(209, 36, 47, 0.1);
+    background-color: rgba(255, 59, 48, 0.1);
   }
 }

@@ -3,48 +3,58 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* —– Toast (macOS Notification Style) —– */
 .toast {
   position: fixed;
-  top: 20px;
+  top: 24px;
   left: 50%;
-  min-width: 220px;
-  max-width: 320px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  box-shadow: var(--shadow-card);
+  min-width: 240px;
+  max-width: 360px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-popover);
+  backdrop-filter: var(--blur-card);
+  -webkit-backdrop-filter: var(--blur-card);
   z-index: 1000;
   opacity: 0;
-  transform: translate(-50%, -10px);
-  animation: toast-slide-in 0.3s ease-out forwards;
+  transform: translate(-50%, -12px);
+  animation: toast-slide-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .toast-success {
-  background-color: var(--color-success);
-  color: var(--text-inverse);
+  background-color: rgba(52, 199, 89, 0.92);
+  color: #ffffff;
 }
 
 .toast-error {
-  background-color: var(--color-danger);
-  color: var(--text-inverse);
+  background-color: rgba(255, 59, 48, 0.92);
+  color: #ffffff;
 }
 
 @keyframes toast-slide-in {
-  from { opacity: 0; transform: translate(-50%, -10px); }
+  from { opacity: 0; transform: translate(-50%, -12px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
+/* —– Page —– */
 .page {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
   position: relative;
 }
 
 .page-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 22px;
+  font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .page-hint {
@@ -57,26 +67,32 @@ button {
   color: var(--color-danger);
 }
 
+/* —– Card (macOS Container) —– */
 .card {
   background-color: var(--bg-card);
-  border-radius: 6px;
+  backdrop-filter: var(--blur-card);
+  -webkit-backdrop-filter: var(--blur-card);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
-  padding: 12px 18px;
+  padding: 18px 22px;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-base);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 0;
-  transition: background-color 0.2s;
+  padding: 4px 0;
+  transition: background-color var(--transition-fast);
 }
 
 .card-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
 
 .card-subtitle {
@@ -93,30 +109,46 @@ button {
   justify-content: flex-end;
 }
 
+/* —– Button (macOS Style) —– */
 .card-button {
-  padding: 8px 14px;
-  border-radius: 4px;
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
   border: none;
   background-color: var(--primary-color);
   color: var(--text-inverse);
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   min-width: 100px;
+  transition: all var(--transition-fast);
+}
+
+.card-button:not(:disabled):hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+}
+
+.card-button:not(:disabled):active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .card-button.secondary {
-  background-color: var(--bg-sider);
+  background-color: var(--bg-input);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
 }
 
 .card-button.secondary:hover {
   background-color: var(--bg-hover);
+  box-shadow: none;
 }
 
 .card-button:disabled {
-  opacity: 0.7;
+  opacity: 0.5;
   cursor: default;
+  transform: none !important;
 }
 
 .card-title-row {
@@ -124,10 +156,11 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .card-desc {
   font-size: 14px;
   color: var(--text-secondary);
+  line-height: 1.5;
 }

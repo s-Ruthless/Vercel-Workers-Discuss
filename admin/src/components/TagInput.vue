@@ -77,10 +77,16 @@ function removeItem(value: string) {
 
 <style scoped lang="less">
 .tag-input {
-  padding: 4px 6px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-input);
   background-color: var(--bg-input);
+  transition: all var(--transition-fast);
+}
+
+.tag-input:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-focus);
 }
 
 .tag-input-inner {
@@ -93,12 +99,14 @@ function removeItem(value: string) {
   display: inline-flex;
   align-items: center;
   max-width: 100%;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background-color: var(--bg-sider);
-  color: var(--text-primary);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary-light);
+  color: var(--primary-color);
   font-size: 13px;
+  font-weight: 500;
   position: relative;
+  transition: all var(--transition-fast);
 }
 
 .tag-input-tag-text {
@@ -126,6 +134,7 @@ function removeItem(value: string) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--radius-pill);
 }
 
 .tag-input-tag-remove:hover {

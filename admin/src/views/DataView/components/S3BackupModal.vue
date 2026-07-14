@@ -116,27 +116,57 @@ watch(() => props.visible, (newVal) => {
 </script>
 
 <style scoped lang="less">
-.s3-backup-modal { max-width: 600px; width: 90%; max-height: 70vh; display: flex; flex-direction: column; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
-.modal-title { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-primary); }
-.modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary); padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s; }
+.s3-backup-modal { max-width: 620px; width: 90%; max-height: 70vh; display: flex; flex-direction: column; }
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
+}
+.modal-title { margin: 0; font-size: 17px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
+.modal-close {
+  background: none; border: none; font-size: 22px; cursor: pointer;
+  color: var(--text-secondary); padding: 0; width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm); transition: all var(--transition-fast);
+  line-height: 1;
+}
 .modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
 .modal-content { overflow-y: auto; flex: 1; }
-.loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; gap: 8px; }
-.loading-spinner { width: 24px; height: 24px; border: 2px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
-.loading-spinner.small { width: 14px; height: 14px; }
-.loading-text { color: var(--text-secondary); font-size: 14px; }
-.empty-backup-list { text-align: center; padding: 40px; color: var(--text-secondary); }
+.loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px; gap: 10px; }
+.loading-spinner {
+  width: 28px; height: 28px; border: 2.5px solid var(--border-color);
+  border-top-color: var(--primary-color); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.loading-spinner.small { width: 16px; height: 16px; border-width: 2px; }
+.loading-text { color: var(--text-secondary); font-size: 14px; font-weight: 500; }
+.empty-backup-list { text-align: center; padding: 48px; color: var(--text-secondary); font-size: 14px; }
 .backup-list { display: flex; flex-direction: column; gap: 8px; }
-.backup-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-sider); gap: 12px; }
+.backup-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 16px; border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); background: var(--bg-hover); gap: 12px;
+  transition: all var(--transition-fast);
+}
+.backup-item:hover { background-color: rgba(0, 0, 0, 0.06); border-color: rgba(0, 0, 0, 0.12); }
 .backup-info { flex: 1; min-width: 0; }
-.backup-name { font-size: 14px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.backup-name {
+  font-size: 14px; font-weight: 600; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;
+}
 .backup-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-secondary); }
 .backup-actions { display: flex; gap: 8px; flex-shrink: 0; }
-.backup-btn { width: 32px; height: 32px; border: 1px solid var(--border-color); background: var(--bg-card); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: all 0.2s; }
-.backup-btn:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }
-.backup-btn.download:hover { color: var(--primary-color); }
-.backup-btn.delete:hover { color: #ef4444; }
-.backup-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.backup-btn {
+  width: 34px; height: 34px; border: 1px solid var(--border-color);
+  background: var(--bg-card-solid); border-radius: var(--radius-sm);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary); transition: all var(--transition-fast);
+}
+.backup-btn:hover:not(:disabled) {
+  background: var(--bg-hover); color: var(--text-primary);
+  transform: translateY(-1px);
+}
+.backup-btn.download:hover { color: var(--primary-color); border-color: var(--primary-color); }
+.backup-btn.delete:hover { color: #ff3b30; border-color: rgba(255, 59, 48, 0.3); }
+.backup-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>

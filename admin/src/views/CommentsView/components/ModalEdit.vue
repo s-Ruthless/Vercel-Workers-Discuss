@@ -88,27 +88,51 @@ function handleSubmit() { emit("submit"); }
 <style scoped lang="less">
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: stretch;
+  background-color: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex; align-items: stretch;
   justify-content: flex-end; z-index: 2000;
+  animation: overlay-fade-in 0.2s ease;
+}
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .modal {
-  margin: 0; background-color: var(--bg-card); border-radius: 0;
-  box-shadow: var(--shadow-card); width: 100%; max-width: 600px;
-  padding: 20px 20px 24px; display: flex; flex-direction: column; gap: 16px;
-  transform: translateX(0); animation: drawer-in 0.2s ease-out; overflow-y: auto;
+  margin: 0; background-color: var(--bg-card-solid);
+  border-radius: 0;
+  box-shadow: var(--shadow-popover);
+  width: 100%; max-width: 580px;
+  padding: 24px 24px 28px; display: flex; flex-direction: column; gap: 18px;
+  transform: translateX(0); animation: drawer-in 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto;
 }
-.modal-title { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-primary); }
-.modal-body { display: flex; flex-direction: column; gap: 12px; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
-.modal-btn { padding: 8px 16px; border-radius: 4px; font-size: 14px; cursor: pointer; border: 1px solid transparent; }
-.modal-btn.primary { background-color: var(--primary-color); color: var(--text-inverse); }
-.modal-btn.secondary { background-color: var(--bg-sider); border-color: var(--border-color); color: var(--text-primary); }
-.modal-btn:hover { opacity: 0.9; }
+.modal-title {
+  margin: 0; font-size: 20px; font-weight: 700; color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+.modal-body { display: flex; flex-direction: column; gap: 14px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+.modal-btn {
+  padding: 9px 20px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  border: 1px solid transparent; transition: all var(--transition-fast);
+}
+.modal-btn.primary {
+  background-color: var(--primary-color); color: var(--text-inverse);
+}
+.modal-btn.primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+.modal-btn.secondary {
+  background-color: var(--bg-hover); border-color: var(--border-color); color: var(--text-primary);
+}
+.modal-btn.secondary:hover { background-color: rgba(0, 0, 0, 0.06); }
 .form-item { display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-size: 13px; color: var(--text-secondary); }
+.form-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
 .form-input {
-  padding: 8px 10px; border-radius: 4px; border: 1px solid var(--border-color);
-  background-color: var(--bg-input); color: var(--text-primary); font-size: 13px; outline: none;
+  padding: 9px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-input);
+  background-color: var(--bg-input); color: var(--text-primary); font-size: 14px; outline: none;
+  transition: all var(--transition-fast);
 }
-.form-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 1px rgba(9, 105, 218, 0.2); }
+.form-input:focus { border-color: var(--primary-color); box-shadow: var(--shadow-focus); }
+.form-input:hover:not(:focus) { border-color: rgba(0, 0, 0, 0.15); }
 </style>

@@ -2,6 +2,7 @@
  * 工具函数
  */
 import type { Context } from 'hono';
+import { createHash } from 'node:crypto';
 
 export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -76,10 +77,7 @@ export async function getCravatar(
     return `${avatarPrefix}/${DEFAULT_HASH}?s=120&d=retro`;
   }
 
-  const msgUint8 = new TextEncoder().encode(identifier);
-  const hashBuffer = await crypto.subtle.digest('MD5', msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  const hashHex = createHash('md5').update(identifier).digest('hex');
 
   return `${avatarPrefix}/${hashHex}?s=120&d=retro`;
 }
