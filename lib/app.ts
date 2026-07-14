@@ -1,6 +1,6 @@
 /**
  * Hono App - 路由定义
- * 被 api/[[...route]].ts 引用，处理所有 /api/* 路由
+ * 被 api/[...route].ts 引用，处理所有 /api/* 路由
  */
 import { Hono } from 'hono';
 import { adminAuth } from './auth.js';
@@ -11,7 +11,7 @@ import {
   getLikeStatus, likePage,
   likeComment,
   getPublicConfig, getEmotions,
-} from '../api/public.js';
+} from '../src/public.js';
 import {
   adminLogin, getAdminComments, deleteComment, updateStatus,
   updateComment, getStats, getVisitOverview, getVisitPages,
@@ -33,7 +33,7 @@ import {
   triggerS3BackupHandler, listS3BackupsHandler,
   deleteS3BackupHandler, downloadS3BackupHandler,
   checkSetupStatus, setupAdmin,
-} from '../api/admin.js';
+} from '../src/admin.js';
 
 // Initialize schema on first cold start
 let schemaInitialized = false;

@@ -35,7 +35,9 @@
 ```
 cwd-vercel/
 ├── api/                  # Vercel Serverless Functions（Hono 框架）
-│   ├── [[...route]].ts   #   路由入口（Catch-all 路由）
+│   ├── [...route].ts     #   路由入口（Catch-all 路由）
+│   └── health.ts         #   独立健康检查端点
+├── src/                  # API 逻辑层（非 Serverless Function）
 │   ├── admin.ts          #   管理后台 API 逻辑
 │   └── public.ts         #   公开 API（评论、点赞、统计）
 ├── lib/                  # 工具层
