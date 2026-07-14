@@ -19,7 +19,7 @@
       <div class="action-row">
         <span class="action-label">{{ t("data.sections.comments.importLabel") }}</span>
         <select v-model="importSource" class="form-select" style="min-width: 120px">
-          <option value="cwd">{{ t("data.sections.comments.source.cwd") }}</option>
+          <option value="vwd">{{ t("data.sections.comments.source.cwd") }}</option>
           <option value="twikoo">{{ t("data.sections.comments.source.twikoo") }}</option>
           <option value="artalk">{{ t("data.sections.comments.source.artalk") }}</option>
           <option value="valine">{{ t("data.sections.comments.source.valine") }}</option>
@@ -147,7 +147,7 @@ const { t } = useI18n();
 
 const exporting = ref(false);
 const importing = ref(false);
-const importSource = ref("cwd");
+const importSource = ref("vwd");
 const fileInput = ref<HTMLInputElement | null>(null);
 const toastMessage = ref("");
 const toastType = ref<"success" | "error">("success");
@@ -230,9 +230,9 @@ async function executeExport(apiFunc: () => Promise<any>, fileNamePrefix: string
 }
 
 const handleExportComments = () => executeExport(exportComments, "comments-export");
-const handleExportConfig = () => executeExport(exportConfig, "cwd-config");
-const handleExportStats = () => executeExport(() => exportStats(currentSiteId.value), "cwd-stats");
-const handleExportBackup = () => executeExport(exportBackup, "cwd-full-backup");
+const handleExportConfig = () => executeExport(exportConfig, "vwd-config");
+const handleExportStats = () => executeExport(() => exportStats(currentSiteId.value), "vwd-stats");
+const handleExportBackup = () => executeExport(exportBackup, "vwd-full-backup");
 
 function triggerFileInput(mode: string) {
   currentImportMode.value = mode;

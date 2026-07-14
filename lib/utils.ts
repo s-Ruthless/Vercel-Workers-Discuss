@@ -94,7 +94,7 @@ export function replaceEmotionSyntax(content: string, emotionUrl: string): strin
     if (!/^[a-zA-Z]+$/.test(pkg) || !/^[a-zA-Z0-9]+$/.test(icon)) {
       return match;
     }
-    return `<img src="${baseUrl}/${pkg}/${icon}.png" alt="${icon}" title="${icon}" class="cwd-emotion-img" referrerpolicy="no-referrer" loading="eager">`;
+    return `<img src="${baseUrl}/${pkg}/${icon}.png" alt="${icon}" title="${icon}" class="vwd-emotion-img" referrerpolicy="no-referrer" loading="eager">`;
   });
 }
 

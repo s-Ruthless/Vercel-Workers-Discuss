@@ -2,9 +2,6 @@
  * VWD Comment System - Vercel 入口
  * 使用 Hono 框架 + Vercel adapter
  * 所有 API 路由通过 /api/ 前缀访问
- *
- * 路由路径与 cwd-api (Cloudflare Workers) 完全兼容，
- * 确保前端 widget 和 admin 无需修改即可切换到 Vercel。
  */
 import { Hono } from 'hono';
 import { handle } from 'hono/vercel';

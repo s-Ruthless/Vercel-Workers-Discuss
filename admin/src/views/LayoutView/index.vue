@@ -20,10 +20,7 @@
           </select>
         </div>
         <div class="layout-actions">
-          <a class="layout-button" href="https://cwd.js.org" target="_blank">
-            {{ t("layout.docs") }}
-          </a>
-          <a class="layout-button" href="https://github.com/anghunk/cwd" target="_blank">
+          <a class="layout-button" href="https://github.com/s-Ruthless/Vercel-Workers-Discuss" target="_blank">
             Github
           </a>
           <button class="layout-button" @click="cycleTheme" :title="themeTitle" type="button">
@@ -44,9 +41,6 @@
           <PhDotsThreeVertical :size="20" bold />
         </button>
         <div v-if="isActionsOpen" class="layout-actions-dropdown">
-          <button class="layout-actions-item" type="button" @click="openDocs">
-            {{ t("layout.docs") }}
-          </button>
           <button class="layout-actions-item" type="button" @click="openGithub">
             Github
           </button>
@@ -266,8 +260,7 @@ function goAnalytics() { router.push({ name: "analytics" }); closeSider(); }
 function goData() { router.push({ name: "data" }); closeSider(); }
 function goSettings() { router.push({ name: "settings" }); closeSider(); }
 
-function openDocs() { window.open("https://cwd.js.org", "_blank"); closeActions(); }
-function openGithub() { window.open("https://github.com/anghunk/cwd", "_blank"); closeActions(); }
+function openGithub() { window.open("https://github.com/s-Ruthless/Vercel-Workers-Discuss", "_blank"); closeActions(); }
 
 function handleLogout() { logoutAdmin(); router.push({ name: "login" }); closeSider(); }
 function handleLogoutFromActions() { closeActions(); handleLogout(); }

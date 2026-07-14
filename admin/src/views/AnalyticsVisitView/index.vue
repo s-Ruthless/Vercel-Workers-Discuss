@@ -169,8 +169,8 @@ const monthPercentageChange = computed(() => calculateChange(overview.value.mont
 const itemsByPv = ref<VisitPageItem[]>([]);
 const itemsByLatest = ref<VisitPageItem[]>([]);
 const visitTab = ref<"pv" | "latest">("pv");
-const visitTabStorageKey = "cwd-analytics-visit-tab";
-const chartRangeStorageKey = "cwd-analytics-visit-chart-range";
+const visitTabStorageKey = "vwd-analytics-visit-tab";
+const chartRangeStorageKey = "vwd-analytics-visit-chart-range";
 
 const items = computed<VisitPageItem[]>(() => {
   return visitTab.value === "latest" ? itemsByLatest.value : itemsByPv.value;

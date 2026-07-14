@@ -102,7 +102,7 @@ const statsSummary = ref({ total: 0, approved: 0, pending: 0, rejected: 0 });
 const domainStats = ref<DomainStat[]>([]);
 const last7Days = ref<{ date: string; total: number }[]>([]);
 const chartRange = ref<"7" | "30">("7");
-const chartRangeStorageKey = "cwd-stats-chart-range";
+const chartRangeStorageKey = "vwd-stats-chart-range";
 const { currentSiteId } = useSite();
 
 const toastMessage = ref("");

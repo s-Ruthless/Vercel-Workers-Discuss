@@ -1,6 +1,5 @@
 /**
  * 管理 API 路由
- * 路由路径与 cwd-api (Cloudflare Workers) 完全兼容
  */
 import { Context } from 'hono';
 import { marked } from 'marked';
