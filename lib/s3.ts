@@ -3,7 +3,10 @@
  * 支持 AWS S3, Cloudflare R2, MinIO 等
  * 使用 aws4fetch 进行请求签名
  */
-import { AwsClient } from 'aws4fetch';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const { AwsClient } = require('aws4fetch') as typeof import('aws4fetch');
 
 export interface S3Config {
   endpoint: string;
@@ -20,7 +23,7 @@ export interface S3Object {
 }
 
 export class S3Client {
-  private client: AwsClient;
+  private client: any;
   private bucket: string;
   private endpoint: string;
 

@@ -2,9 +2,12 @@
  * 邮件通知模块
  * 使用 nodemailer 发送邮件（Vercel Node.js 环境）
  */
-import nodemailer from 'nodemailer';
+import { createRequire } from 'module';
 import { getSetting, getSettings, setSetting } from './db.js';
 import { isValidEmail } from './utils.js';
+
+const require = createRequire(import.meta.url);
+const nodemailer = require('nodemailer') as typeof import('nodemailer');
 
 export type EmailNotificationSettings = {
   globalEnabled: boolean;
