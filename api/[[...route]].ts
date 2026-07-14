@@ -164,16 +164,8 @@ app.delete('/api/admin/backup/s3', adminAuth, deleteS3BackupHandler);
 app.get('/api/admin/backup/s3/download', adminAuth, downloadS3BackupHandler);
 
 // ==================== Health check ====================
-app.get('/api/health', (c) => {
-  const hasPostgres = !!process.env.POSTGRES_URL;
-  const hasKv = !!process.env.KV_REST_API_URL;
-  return c.json({
-    status: 'ok',
-    timestamp: Date.now(),
-    database: hasPostgres ? 'connected' : 'not_configured',
-    kv: hasKv ? 'connected' : 'not_configured',
-  });
-});
+// NOTE: /api/health is handled by api/health.ts (standalone, no dependencies)
+// This route in Hono will never be reached because Vercel resolves api/health.ts first
 
 export const GET = handle(app);
 export const POST = handle(app);

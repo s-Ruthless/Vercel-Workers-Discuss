@@ -4,7 +4,7 @@
  */
 import { Context } from 'hono';
 import { marked } from 'marked';
-import xss, { whiteList as xssWhiteList } from 'xss';
+import { createRequire } from 'module';
 import { queryAll, queryFirst, execute, query, getSetting, getSettings, setSetting, deleteSetting } from '../lib/db.js';
 import { kvGet, kvSet, kvDelete } from '../lib/kv.js';
 import { getClientIp, replaceEmotionSyntax, checkContent, isValidEmail } from '../lib/utils.js';
@@ -19,6 +19,11 @@ import {
   loadEmailNotificationSettings, saveEmailNotificationSettings,
   sendTestEmail, getAdminNotifyEmail,
 } from '../lib/email.js';
+
+const require = createRequire(import.meta.url);
+const xssModule = require('xss') as any;
+const xss = xssModule as ((html: string, options?: any) => string);
+const xssWhiteList = xssModule.whiteList;
 
 // ==================== 初始化设置 ====================
 

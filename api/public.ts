@@ -3,7 +3,7 @@
  */
 import { Context } from 'hono';
 import { marked } from 'marked';
-import xss, { whiteList as xssWhiteList } from 'xss';
+import { createRequire } from 'module';
 import UAParser from 'ua-parser-js';
 import { queryAll, queryFirst, execute, query } from '../lib/db.js';
 import { kvGet, kvSet, kvDelete } from '../lib/kv.js';
@@ -17,6 +17,11 @@ import {
   loadEmailNotificationSettings, saveEmailNotificationSettings,
   sendCommentReplyNotification, sendCommentNotification, getAdminNotifyEmail,
 } from '../lib/email.js';
+
+const require = createRequire(import.meta.url);
+const xssModule = require('xss') as any;
+const xss = xssModule as ((html: string, options?: any) => string);
+const xssWhiteList = xssModule.whiteList;
 
 // ==================== 获取评论列表 ====================
 export async function getComments(c: Context) {
