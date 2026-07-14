@@ -5,6 +5,11 @@ node_modules/
 # Build output (built by Vite & copy-assets during build step)
 public/admin/
 public/emotion/
+public/vwd.js
+
+# Widget build artifacts
+widget/dist/
+widget/node_modules/
 
 # Environment
 .env

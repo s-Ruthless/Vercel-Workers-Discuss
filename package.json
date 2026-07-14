@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "build": "npm --prefix ./admin install && npm --prefix ./admin run build && node scripts/copy-assets.cjs",
+    "build": "npm --prefix ./widget install && npm --prefix ./widget run build && npm --prefix ./admin install && npm --prefix ./admin run build && node scripts/copy-assets.cjs",
+    "build:widget": "npm --prefix ./widget install && npm --prefix ./widget run build",
     "build:admin": "npm --prefix ./admin install && npm --prefix ./admin run build",
     "build:assets": "node scripts/copy-assets.cjs",
     "deploy": "npm run build && vercel --prod",

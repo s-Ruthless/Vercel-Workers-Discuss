@@ -1,0 +1,41 @@
+{
+  "name": "vwd-widget",
+  "version": "0.1.0",
+  "description": "VWD (Vercel Workers Discuss) - plug-and-play commenting system widget for Vercel deployment.",
+  "type": "module",
+  "author": "anghunk",
+  "license": "Apache-2.0",
+  "main": "./dist/vwd.umd.js",
+  "module": "./dist/vwd.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vwd.es.js",
+      "require": "./dist/vwd.umd.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "vercel",
+    "comment",
+    "vwd"
+  ],
+  "devDependencies": {
+    "terser": "^5.44.1",
+    "vite": "^6.0.11",
+    "vite-plugin-css-injected-by-js": "^3.3.1"
+  },
+  "dependencies": {
+    "dompurify": "^3.3.1",
+    "marked": "^17.0.1",
+    "node-emoji": "^2.2.0"
+  }
+}
