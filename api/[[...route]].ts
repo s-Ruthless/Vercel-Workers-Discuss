@@ -37,6 +37,7 @@ import {
   getS3SettingsHandler, saveS3SettingsHandler,
   triggerS3BackupHandler, listS3BackupsHandler,
   deleteS3BackupHandler, downloadS3BackupHandler,
+  checkSetupStatus, setupAdmin,
 } from './admin.js';
 
 // Initialize schema on first cold start
@@ -75,6 +76,10 @@ app.get('/api/emotions', getEmotions);
 app.get('/api/config/comments', getPublicConfig);
 
 // ==================== Admin API ====================
+// Setup (no auth required, only works once)
+app.get('/api/admin/setup-status', checkSetupStatus);
+app.post('/api/admin/setup', setupAdmin);
+
 // Login (no auth required)
 app.post('/api/admin/login', adminLogin);
 

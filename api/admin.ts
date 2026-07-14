@@ -20,6 +20,51 @@ import {
   sendTestEmail, getAdminNotifyEmail,
 } from '../lib/email.js';
 
+// ==================== 初始化设置 ====================
+
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+export async function checkSetupStatus(c: Context) {
+  const adminName = await getSetting('admin_name');
+  return c.json({ setupCompleted: !!adminName });
+}
+
+export async function setupAdmin(c: Context) {
+  // 如果已经设置过管理员，拒绝再次设置
+  const existing = await getSetting('admin_name');
+  if (existing) {
+    return c.json({ message: '管理员账户已初始化，如需修改请登录后在设置中操作' }, 400);
+  }
+
+  const data = await c.req.json();
+  const name = (data.name || '').trim();
+  const password = data.password || '';
+
+  if (!name || name.length < 2) {
+    return c.json({ message: '用户名至少 2 个字符' }, 400);
+  }
+  if (!password || password.length < 6) {
+    return c.json({ message: '密码至少 6 个字符' }, 400);
+  }
+
+  const passwordHash = await hashPassword(password);
+  await setSetting('admin_name', name);
+  await setSetting('admin_password_hash', passwordHash);
+
+  // 自动登录，颁发 token
+  const ip = getClientIp(c);
+  const tempKey = crypto.randomUUID();
+  await kvSet(`token:${tempKey}`, JSON.stringify({ user: name, ip }), 172800);
+
+  return c.json({ data: { key: tempKey, message: '设置成功' } });
+}
+
 // ==================== 登录 ====================
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 30 * 60;
@@ -34,9 +79,16 @@ export async function adminLogin(c: Context) {
   const isBlocked = await kvGet(blockKey);
   if (isBlocked) return c.json({ message: 'IP 已被封禁，30 分钟后重试' }, 403);
 
-  const ADMIN_NAME = process.env.ADMIN_NAME || 'Admin';
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password';
-  const isValid = data.name === ADMIN_NAME && data.password === ADMIN_PASSWORD;
+  // 从数据库读取管理员凭据
+  const adminName = await getSetting('admin_name');
+  const adminPasswordHash = await getSetting('admin_password_hash');
+
+  if (!adminName || !adminPasswordHash) {
+    return c.json({ message: '管理员账户尚未初始化，请先完成初始设置', needSetup: true }, 400);
+  }
+
+  const inputHash = await hashPassword(data.password || '');
+  const isValid = data.name === adminName && inputHash === adminPasswordHash;
 
   if (!isValid) {
     const attempts = parseInt((await kvGet(attemptKey)) || '0') + 1;

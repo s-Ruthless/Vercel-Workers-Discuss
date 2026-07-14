@@ -164,6 +164,28 @@ export type S3BackupItem = {
 
 /* --- Auth --- */
 
+export type SetupStatusResponse = {
+  setupCompleted: boolean;
+};
+
+export type SetupResponse = {
+  data: {
+    key: string;
+    message: string;
+  };
+};
+
+export async function checkSetupStatus(): Promise<SetupStatusResponse> {
+  return await get<SetupStatusResponse>('/api/admin/setup-status');
+}
+
+export async function setupAdmin(name: string, password: string): Promise<string> {
+  const res = await post<SetupResponse>('/api/admin/setup', { name, password });
+  const key = res.data.key;
+  localStorage.setItem('vwd_admin_token', key);
+  return key;
+}
+
 export async function loginAdmin(name: string, password: string): Promise<string> {
   const res = await post<AdminLoginResponse>('/api/admin/login', { name, password });
   const key = res.data.key;

@@ -67,7 +67,12 @@ async function handleSubmit() {
     await loginAdmin(name.value, password.value);
     router.push({ name: "comments" });
   } catch (e: any) {
-    error.value = e.message || "登录失败";
+    const msg = e.message || "登录失败";
+    if (msg.includes("尚未初始化") || msg.includes("needSetup")) {
+      router.push({ name: "setup" });
+      return;
+    }
+    error.value = msg;
   } finally {
     submitting.value = false;
   }
