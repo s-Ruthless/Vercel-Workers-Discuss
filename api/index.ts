@@ -1,6 +1,7 @@
 /**
- * VWD Comment System - Vercel 入口 (catch-all)
- * 处理所有 /api/* 路由（api/ 子目录下的独立文件除外）
+ * VWD Comment System - Vercel API 入口
+ * 所有 /api/* 请求（除 /api/health 外）通过 vercel.json rewrite 路由到这里
+ * Hono 应用根据原始 URL 进行内部路由
  */
 import { handle } from 'hono/vercel';
 import { app } from '../lib/app.js';

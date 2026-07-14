@@ -1,6 +1,6 @@
 /**
  * Hono App - 路由定义
- * 被 api/[...route].ts 引用，处理所有 /api/* 路由
+ * 被 api/index.ts 引用，处理所有 /api/* 路由
  */
 import { Hono } from 'hono';
 import { adminAuth } from './auth.js';
