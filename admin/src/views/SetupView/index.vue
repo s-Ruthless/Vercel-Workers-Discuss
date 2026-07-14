@@ -73,6 +73,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { setupAdmin } from "../../api/admin";
+import { setSetupStatus } from "../../router";
 
 const router = useRouter();
 const name = ref("");
@@ -100,6 +101,7 @@ async function handleSubmit() {
   submitting.value = true;
   try {
     await setupAdmin(name.value.trim(), password.value);
+    setSetupStatus(true);
     router.push({ name: "comments" });
   } catch (e: any) {
     error.value = e.message || "设置失败";

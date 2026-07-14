@@ -3,6 +3,11 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 // 缓存初始化状态，避免每次路由切换都请求 API
 let setupStatus: boolean | null = null;
 
+// 允许外部更新缓存状态（设置完成后调用）
+export function setSetupStatus(value: boolean) {
+  setupStatus = value;
+}
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/setup',
