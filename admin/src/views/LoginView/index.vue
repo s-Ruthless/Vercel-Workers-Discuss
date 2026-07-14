@@ -1,39 +1,16 @@
 <template>
   <div class="login-page">
-    <!-- Left: Animated Characters -->
-    <div class="login-anim-side">
-      <div class="login-anim-logo">💬 VWD</div>
-      <div class="login-anim-stage">
-        <AnimatedCharacters
-          :isTyping="isTyping"
-          :showPassword="showPassword"
-          :passwordLength="password.length"
-        />
-      </div>
-      <div class="login-anim-footer">
-        Vercel Workers Discuss 评论系统
-      </div>
-    </div>
-
-    <!-- Right: Login Form -->
-    <div class="login-form-side">
+    <div class="login-container">
       <div class="login-card">
         <div class="login-icon"></div>
         <div class="login-subtitle">
           <h1 class="login-title">VWD</h1>
-          - 评论系统管理面板
+          - Vercel Workers Discuss 评论系统管理面板
         </div>
         <form class="login-form" @submit.prevent="handleSubmit">
           <div class="form-item">
             <label class="form-label">管理员账号</label>
-            <input
-              v-model="name"
-              class="form-input"
-              type="text"
-              autocomplete="username"
-              @focus="isTyping = true"
-              @blur="isTyping = false"
-            />
+            <input v-model="name" class="form-input" type="text" autocomplete="username" />
           </div>
           <div class="form-item">
             <label class="form-label">密码</label>
@@ -43,8 +20,6 @@
                 class="form-input"
                 :type="showPassword ? 'text' : 'password'"
                 autocomplete="current-password"
-                @focus="isTyping = true"
-                @blur="isTyping = false"
               />
               <button
                 type="button"
@@ -65,6 +40,7 @@
         </form>
       </div>
     </div>
+    <div class="login-bg"></div>
   </div>
 </template>
 
@@ -72,7 +48,6 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { loginAdmin } from "../../api/admin";
-import AnimatedCharacters from "../../components/AnimatedCharacters.vue";
 
 const router = useRouter();
 const name = ref("");
@@ -80,7 +55,6 @@ const password = ref("");
 const showPassword = ref(false);
 const submitting = ref(false);
 const error = ref("");
-const isTyping = ref(false);
 
 async function handleSubmit() {
   if (!name.value || !password.value) {
