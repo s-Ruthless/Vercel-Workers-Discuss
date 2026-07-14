@@ -1,39 +1,107 @@
 /* ========================================
    Login / Setup Page — macOS Big Sur Style
+   with Animated Characters (two-column layout)
    ======================================== */
 
 .login-page {
   display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: 100vh;
-  padding: 20px;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
 }
 
-/* Animated gradient background */
-.login-page::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #43e97b 100%);
-  background-size: 400% 400%;
-  animation: gradient-shift 15s ease infinite;
+/* ==================== Left: Animation Side ==================== */
+.login-anim-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #a8b4c0 0%, #8a9aae 30%, #6b7e94 60%, #9ba8b8 100%);
   z-index: 0;
 }
 
-:root.dark .login-page::before {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #533483 75%, #1a1a2e 100%);
-  background-size: 400% 400%;
-  opacity: 0.9;
+:root.dark .login-anim-side {
+  background: linear-gradient(135deg, #2a2a3e 0%, #1e2a3e 30%, #1a2332 60%, #2d2d3f 100%);
 }
 
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Decorative blurred orbs */
+.login-anim-side::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  right: 15%;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.login-anim-side::after {
+  content: '';
+  position: absolute;
+  bottom: 10%;
+  left: 10%;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(108, 63, 245, 0.1);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.login-anim-logo {
+  position: relative;
+  z-index: 2;
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.login-anim-stage {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  max-height: 450px;
+}
+
+.login-anim-footer {
+  position: relative;
+  z-index: 2;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* ==================== Right: Form Side ==================== */
+.login-form-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+  background: rgba(245, 245, 247, 0.98);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  z-index: 1;
+}
+
+:root.dark .login-form-side {
+  background: rgba(28, 28, 30, 0.98);
 }
 
 .login-container {
@@ -50,12 +118,18 @@
   width: 100%;
   max-width: 420px;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+:root.dark .login-card {
+  background: rgba(44, 44, 46, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .login-icon {
@@ -66,10 +140,10 @@
   height: 72px;
   margin: 0 auto 20px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #6c3ff5, #4facfe);
   border: 1px solid rgba(255, 255, 255, 0.3);
   font-size: 36px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(108, 63, 245, 0.25);
 }
 
 .login-icon::after {
@@ -81,9 +155,12 @@
   font-size: 1.8rem;
   font-weight: 700;
   text-align: center;
-  color: #ffffff;
+  color: #1d1d1f;
   letter-spacing: 0.02em;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+:root.dark .login-title {
+  color: #f5f5f7;
 }
 
 .login-subtitle {
@@ -94,8 +171,12 @@
   margin: 8px 0 32px;
   font-size: 13px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.7);
+  color: #86868b;
   font-weight: 500;
+}
+
+:root.dark .login-subtitle {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .login-form {
@@ -112,30 +193,50 @@
 
 .form-label {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #6e6e73;
   font-weight: 500;
   letter-spacing: 0.02em;
+}
+
+:root.dark .form-label {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .form-input {
   padding: 12px 16px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   font-size: 15px;
   outline: none;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.6);
+  color: #1d1d1f;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+:root.dark .form-input {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
 .form-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(0, 0, 0, 0.3);
+}
+
+:root.dark .form-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .form-input:focus {
-  border-color: rgba(255, 255, 255, 0.5);
-  background-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+  border-color: #6c3ff5;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 4px rgba(108, 63, 245, 0.12);
+}
+
+:root.dark .form-input:focus {
+  border-color: #7c5ff5;
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 4px rgba(124, 95, 245, 0.2);
 }
 
 .form-input-wrapper {
@@ -160,25 +261,29 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.5);
+  color: #86868b;
   padding: 0;
   transition: color 0.15s ease;
   border-radius: 6px;
 }
 
+:root.dark .password-toggle {
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .password-toggle:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
+  color: #6c3ff5;
+  background-color: rgba(108, 63, 245, 0.08);
 }
 
 .form-error {
   font-size: 13px;
-  color: #ffd0cf;
+  color: #ff3b30;
   margin-top: 4px;
   padding: 8px 12px;
-  background: rgba(255, 59, 48, 0.2);
+  background: rgba(255, 59, 48, 0.08);
   border-radius: 8px;
-  border: 1px solid rgba(255, 59, 48, 0.3);
+  border: 1px solid rgba(255, 59, 48, 0.2);
 }
 
 .form-button {
@@ -186,14 +291,15 @@
   padding: 13px 0;
   border-radius: 12px;
   border: none;
-  background: rgba(255, 255, 255, 0.95);
-  color: #1d1d1f;
+  background: linear-gradient(135deg, #6c3ff5, #4facfe);
+  color: #ffffff;
   font-size: 16px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
   letter-spacing: 0.02em;
+  box-shadow: 0 4px 12px rgba(108, 63, 245, 0.25);
 }
 
 .form-button:disabled {
@@ -202,9 +308,8 @@
 }
 
 .form-button:not(:disabled):hover {
-  background: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 6px 20px rgba(108, 63, 245, 0.35);
 }
 
 .form-button:not(:disabled):active {
@@ -214,4 +319,56 @@
 
 .login-bg {
   display: none;
+}
+
+.setup-hint {
+  font-size: 13px;
+  color: #86868b;
+  text-align: center;
+  margin-bottom: 28px;
+  line-height: 1.6;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+:root.dark .setup-hint {
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ==================== Responsive ==================== */
+@media (max-width: 900px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .login-anim-side {
+    min-height: 280px;
+    padding: 24px;
+  }
+
+  .login-anim-stage {
+    max-height: 220px;
+  }
+
+  .login-form-side {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .login-anim-side {
+    min-height: 200px;
+  }
+
+  .login-anim-stage {
+    max-height: 160px;
+  }
+
+  .login-card {
+    padding: 32px 24px 28px;
+  }
 }

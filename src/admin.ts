@@ -6,7 +6,7 @@ import { marked } from 'marked';
 import { createRequire } from 'module';
 import { queryAll, queryFirst, execute, query, getSetting, getSettings, setSetting, deleteSetting } from '../lib/db.js';
 import { kvGet, kvSet, kvDelete } from '../lib/kv.js';
-import { getClientIp, replaceEmotionSyntax, checkContent, isValidEmail } from '../lib/utils.js';
+import { getClientIp, getCravatar, replaceEmotionSyntax, checkContent, isValidEmail } from '../lib/utils.js';
 import { S3Client } from '../lib/s3.js';
 import {
   loadCommentSettings, saveCommentSettings as saveCommentSettingsLib,
@@ -158,8 +158,16 @@ export async function getAdminComments(c: Context) {
     [...params, limit, offset]
   );
 
+  const settings = await loadCommentSettings();
+  const data = await Promise.all(results.map(async (row: any) => ({
+    ...row,
+    created: Number(row.created),
+    avatar: await getCravatar(row.email, row.name, settings.avatarPrefix || undefined),
+    isAdmin: !!(settings.adminEmail && row.email === settings.adminEmail),
+  })));
+
   return c.json({
-    data: results,
+    data,
     pagination: { page, limit, total: Math.ceil(totalCount / limit), totalCount },
   });
 }

@@ -1,6 +1,22 @@
 <template>
   <div class="login-page">
-    <div class="login-container">
+    <!-- Left: Animated Characters -->
+    <div class="login-anim-side">
+      <div class="login-anim-logo">💬 VWD</div>
+      <div class="login-anim-stage">
+        <AnimatedCharacters
+          :isTyping="isTyping"
+          :showPassword="showPassword"
+          :passwordLength="password.length"
+        />
+      </div>
+      <div class="login-anim-footer">
+        Vercel Workers Discuss 评论系统
+      </div>
+    </div>
+
+    <!-- Right: Setup Form -->
+    <div class="login-form-side">
       <div class="login-card">
         <div class="login-icon"></div>
         <div class="login-subtitle">
@@ -13,7 +29,15 @@
         <form class="login-form" @submit.prevent="handleSubmit">
           <div class="form-item">
             <label class="form-label">管理员账号</label>
-            <input v-model="name" class="form-input" type="text" autocomplete="username" placeholder="至少 2 个字符" />
+            <input
+              v-model="name"
+              class="form-input"
+              type="text"
+              autocomplete="username"
+              placeholder="至少 2 个字符"
+              @focus="isTyping = true"
+              @blur="isTyping = false"
+            />
           </div>
           <div class="form-item">
             <label class="form-label">密码</label>
@@ -24,6 +48,8 @@
                 :type="showPassword ? 'text' : 'password'"
                 autocomplete="new-password"
                 placeholder="至少 6 个字符"
+                @focus="isTyping = true"
+                @blur="isTyping = false"
               />
               <button
                 type="button"
@@ -45,6 +71,8 @@
                 :type="showConfirm ? 'text' : 'password'"
                 autocomplete="new-password"
                 placeholder="再次输入密码"
+                @focus="isTyping = true"
+                @blur="isTyping = false"
               />
               <button
                 type="button"
@@ -65,7 +93,6 @@
         </form>
       </div>
     </div>
-    <div class="login-bg"></div>
   </div>
 </template>
 
@@ -74,6 +101,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { setupAdmin } from "../../api/admin";
 import { setSetupStatus } from "../../router";
+import AnimatedCharacters from "../../components/AnimatedCharacters.vue";
 
 const router = useRouter();
 const name = ref("");
@@ -83,6 +111,7 @@ const showPassword = ref(false);
 const showConfirm = ref(false);
 const submitting = ref(false);
 const error = ref("");
+const isTyping = ref(false);
 
 async function handleSubmit() {
   if (!name.value || name.value.trim().length < 2) {
@@ -113,16 +142,4 @@ async function handleSubmit() {
 
 <style scoped lang="less">
 @import "../../styles/components/login.less";
-
-.setup-hint {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
-  margin-bottom: 28px;
-  line-height: 1.6;
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
 </style>

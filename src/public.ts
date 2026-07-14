@@ -85,6 +85,10 @@ export async function getComments(c: Context) {
 
   const allComments = await Promise.all(results.map(async (row: any) => ({
     ...row,
+    id: Number(row.id),
+    parentId: row.parentId ? Number(row.parentId) : null,
+    created: Number(row.created),
+    likes: Number(row.likes) || 0,
     avatar: await getCravatar(row.email, row.name, avatarPrefix || undefined),
     isAdmin: adminEmail && row.email === adminEmail,
     replies: [],

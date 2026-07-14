@@ -195,8 +195,9 @@ const visiblePages = computed(() => {
   return pages;
 });
 
-function formatDate(value: number) {
-  const d = new Date(value);
+function formatDate(value: number | string) {
+  const num = typeof value === "string" ? parseInt(value, 10) : value;
+  const d = new Date(num);
   if (Number.isNaN(d.getTime())) return String(value);
   return d.toLocaleString();
 }
