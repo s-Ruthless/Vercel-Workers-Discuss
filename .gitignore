@@ -1,0 +1,22 @@
+node_modules/
+.vercel/
+.wrangler/
+
+# Build output (built by Vite & copy-assets during build step)
+public/admin/
+public/emotion/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
