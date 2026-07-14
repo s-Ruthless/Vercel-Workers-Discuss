@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VWD Comments</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container { text-align: center; }
+    h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    p { color: #888; margin-bottom: 2rem; }
+    .links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    a {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    a.primary { background: #fff; color: #000; }
+    a.primary:hover { background: #e0e0e0; }
+    a.secondary { border: 1px solid #333; color: #fff; }
+    a.secondary:hover { border-color: #555; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>VWD Comments</h1>
+    <p>Vercel Workers Discuss - Comment System</p>
+    <div class="links">
+      <a class="primary" href="/admin/">Admin Panel</a>
+      <a class="secondary" href="/api/health">API Health</a>
+    </div>
+  </div>
+</body>
+</html>
