@@ -104,19 +104,6 @@
                   <textarea v-model="commentPlaceholder" class="form-input" rows="3" style="height: 90px; resize: none" :placeholder="t('settings.feature.placeholderHint')"></textarea>
                   <div class="form-hint">{{ t("settings.feature.placeholderHint") }}</div>
                 </div>
-                <div class="form-item">
-                  <label class="form-label">{{ t("settings.feature.widgetLanguage") }}</label>
-                  <select v-model="widgetLanguage" class="form-input">
-                    <option value="auto">Auto (Browser Default)</option>
-                    <option v-for="lang in languageOptions" :key="lang.value" :value="lang.value">{{ lang.label }}</option>
-                  </select>
-                  <div class="form-hint">{{ t("settings.feature.widgetLanguageHint") }}</div>
-                </div>
-                <div class="form-item">
-                  <label class="form-label">{{ t("settings.feature.emotionUrl") }}</label>
-                  <input v-model="emotionUrl" class="form-input" type="text" placeholder="https://cdn.example.com/emotion" />
-                  <div class="form-hint">{{ t("settings.feature.emotionUrlHint") }}</div>
-                </div>
                 <div class="card-actions">
                   <button class="card-button" :disabled="savingFeature" @click="saveFeature">
                     <span v-if="savingFeature">{{ t("settings.feature.saving") }}</span>
@@ -135,13 +122,6 @@
                   <label class="form-label">{{ t("settings.display.layoutTitle") }}</label>
                   <input v-model="adminLayoutTitle" class="form-input" type="text" placeholder="VWD 评论系统" />
                   <div class="form-hint">{{ t("settings.display.layoutTitleHint") }}</div>
-                </div>
-                <div class="form-item">
-                  <label class="form-label">{{ t("settings.display.adminLanguage") }}</label>
-                  <select v-model="adminLanguage" class="form-input">
-                    <option v-for="lang in languageOptions" :key="lang.value" :value="lang.value">{{ lang.label }}</option>
-                  </select>
-                  <div class="form-hint">{{ t("settings.display.adminLanguageHint") }}</div>
                 </div>
                 <div class="card-actions">
                   <button class="card-button" :disabled="savingDisplay" @click="saveDisplay">
@@ -206,6 +186,11 @@
                   <label class="form-label">{{ t("settings.emailNotify.replyTemplate") }}</label>
                   <div class="form-hint">{{ t("settings.emailNotify.replyTemplateHint") }}</div>
                   <textarea v-model="templateReply" class="form-input" rows="10" placeholder="留空则使用默认模板"></textarea>
+                </div>
+                <div class="form-item">
+                  <label class="form-label">{{ t("settings.emailNotify.approvedTemplate") }}</label>
+                  <div class="form-hint">{{ t("settings.emailNotify.approvedTemplateHint") }}</div>
+                  <textarea v-model="templateApproved" class="form-input" rows="10" placeholder="留空则使用默认模板"></textarea>
                 </div>
                 <div v-if="message && messageType === 'error'" class="form-message form-message-error">{{ message }}</div>
                 <div class="card-actions" style="justify-content: space-between">
@@ -277,7 +262,7 @@ import {
 } from "../../api/admin";
 import TagInput from "../../components/TagInput.vue";
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
@@ -302,28 +287,6 @@ const telegramNotifyEnabled = ref(false);
 const savingTelegram = ref(false);
 const settingUpWebhook = ref(false);
 const testingTelegram = ref(false);
-
-const languageOptions = [
-  { value: "en-US", label: "English" },
-  { value: "zh-CN", label: "简体中文" },
-  { value: "zh-TW", label: "繁體中文" },
-  { value: "es", label: "Español" },
-  { value: "pt", label: "Português" },
-  { value: "fr", label: "Français" },
-  { value: "de", label: "Deutsch" },
-  { value: "ja", label: "日本語" },
-  { value: "ko", label: "한국어" },
-  { value: "ru", label: "Русский" },
-  { value: "it", label: "Italiano" },
-  { value: "nl", label: "Nederlands" },
-  { value: "ar", label: "العربية" },
-  { value: "hi", label: "हिन्दी" },
-  { value: "id", label: "Bahasa Indonesia" },
-];
-
-const adminLanguage = ref("zh-CN");
-const widgetLanguage = ref("auto");
-const emotionUrl = ref("");
 
 type TabKey = "comment" | "feature" | "display" | "emailNotify" | "telegramNotify";
 const validTabs: TabKey[] = ["comment", "feature", "display", "emailNotify", "telegramNotify"];
@@ -388,8 +351,26 @@ const DEFAULT_ADMIN_TEMPLATE = `<div style="background-color:#f4f4f5;padding:24p
   </div>
 </div>`;
 
+const DEFAULT_APPROVED_TEMPLATE = `<div style="background-color:#f4f4f5;padding:24px 0;">
+  <div style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;color:#111827;">
+    <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;background:linear-gradient(135deg,#2563eb,#4f46e5);">
+      <h1 style="margin:0;font-size:18px;line-height:1.4;color:#f9fafb;">评论审核通过</h1>
+    </div>
+    <div style="padding:24px 28px;">
+      <p style="margin:0 0 10px 0;font-size:14px;color:#374151;">
+        Hi <span style="font-weight:600;">\${commentAuthor}</span>，你在文章 <span style="font-weight:600;">《\${postTitle}》</span>下的评论已通过审核：
+      </p>
+      <div style="margin:0 0 18px 0;padding:14px 16px;border-radius:10px;background:#f9fafb;border:1px solid #e5e7eb;">
+        <div style="font-size:14px;color:#374151;">\${commentContent}</div>
+      </div>
+      <a href="\${postUrl}" style="display:inline-block;padding:10px 22px;border-radius:999px;background:#2563eb;color:#ffffff;font-size:14px;font-weight:500;text-decoration:none;">打开文章查看评论</a>
+    </div>
+  </div>
+</div>`;
+
 const templateAdmin = ref(DEFAULT_ADMIN_TEMPLATE);
 const templateReply = ref(DEFAULT_REPLY_TEMPLATE);
+const templateApproved = ref(DEFAULT_APPROVED_TEMPLATE);
 
 function onProviderChange() {
   if (smtpProvider.value === "qq") { smtpHost.value = "smtp.qq.com"; smtpPort.value = 465; smtpSecure.value = true; }
@@ -404,6 +385,7 @@ function showToast(msg: string, type: "success" | "error" = "success") {
 function resetTemplatesToDefault() {
   templateAdmin.value = DEFAULT_ADMIN_TEMPLATE;
   templateReply.value = DEFAULT_REPLY_TEMPLATE;
+  templateApproved.value = DEFAULT_APPROVED_TEMPLATE;
 }
 
 async function load() {
@@ -427,10 +409,6 @@ async function load() {
     enableImageLightbox.value = featureRes.enableImageLightbox;
     enableEmoji.value = featureRes.enableEmoji;
     commentPlaceholder.value = featureRes.commentPlaceholder || "";
-    adminLanguage.value = featureRes.adminLanguage || "zh-CN";
-    widgetLanguage.value = featureRes.widgetLanguage || "auto";
-    emotionUrl.value = featureRes.emotionUrl || "";
-    if (featureRes.adminLanguage) { locale.value = featureRes.adminLanguage; localStorage.setItem("admin_language", featureRes.adminLanguage); }
     telegramBotToken.value = telegramRes.botToken || "";
     telegramChatId.value = telegramRes.chatId || "";
     telegramNotifyEnabled.value = telegramRes.notifyEnabled;
@@ -438,6 +416,7 @@ async function load() {
     if (emailNotifyRes.templates) {
       templateAdmin.value = emailNotifyRes.templates.admin || DEFAULT_ADMIN_TEMPLATE;
       templateReply.value = emailNotifyRes.templates.reply || DEFAULT_REPLY_TEMPLATE;
+      templateApproved.value = emailNotifyRes.templates.approved || DEFAULT_APPROVED_TEMPLATE;
     }
     if (emailNotifyRes.smtp) {
       smtpHost.value = emailNotifyRes.smtp.host;
@@ -463,7 +442,7 @@ async function saveEmail() {
     const res = await saveEmailNotifySettings({
       globalEnabled: emailGlobalEnabled.value,
       smtp: { host: smtpHost.value, port: smtpPort.value, user: smtpUser.value, pass: smtpPass.value, secure: smtpSecure.value },
-      templates: { reply: templateReply.value, admin: templateAdmin.value },
+      templates: { reply: templateReply.value, admin: templateAdmin.value, approved: templateApproved.value },
     });
     showToast(res.message || "保存成功", "success");
   } catch (e: any) { message.value = e.message || "保存失败"; messageType.value = "error"; }
@@ -506,7 +485,7 @@ async function saveFeature() {
     const res = await saveFeatureSettings({
       enableArticleLike: enableArticleLike.value, enableCommentLike: enableCommentLike.value,
       enableImageLightbox: enableImageLightbox.value, enableEmoji: enableEmoji.value,
-      commentPlaceholder: commentPlaceholder.value, widgetLanguage: widgetLanguage.value, emotionUrl: emotionUrl.value,
+      commentPlaceholder: commentPlaceholder.value,
     });
     showToast(res.message || t("common.saveSuccess"), "success");
   } catch (e: any) { showToast(e.message || t("common.saveFailed"), "error"); }
@@ -519,10 +498,7 @@ async function saveDisplay() {
   savingDisplay.value = true; message.value = "";
   try {
     const res = await saveAdminDisplaySettings({ layoutTitle: adminLayoutTitle.value });
-    await saveFeatureSettings({ adminLanguage: adminLanguage.value });
     if (updateSiteTitle) updateSiteTitle(adminLayoutTitle.value);
-    locale.value = adminLanguage.value;
-    localStorage.setItem("admin_language", adminLanguage.value);
     showToast(res.message || "保存成功", "success");
   } catch (e: any) { message.value = e.message || "保存失败"; messageType.value = "error"; }
   finally { savingDisplay.value = false; }

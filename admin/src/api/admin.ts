@@ -60,6 +60,7 @@ export type EmailNotifySettingsResponse = {
   templates?: {
     reply?: string;
     admin?: string;
+    approved?: string;
   };
 };
 
@@ -133,9 +134,6 @@ export type FeatureSettingsResponse = {
   enableImageLightbox: boolean;
   enableEmoji: boolean;
   commentPlaceholder?: string;
-  adminLanguage?: string;
-  widgetLanguage?: string;
-  emotionUrl?: string;
 };
 
 export type AdminDisplaySettingsResponse = {
@@ -286,6 +284,7 @@ export function saveEmailNotifySettings(data: {
   templates?: {
     reply?: string;
     admin?: string;
+    approved?: string;
   };
 }): Promise<{ message: string }> {
   return put<{ message: string }>('/api/admin/settings/email-notify', data);
@@ -316,9 +315,6 @@ export function saveFeatureSettings(data: {
   enableImageLightbox?: boolean;
   enableEmoji?: boolean;
   commentPlaceholder?: string;
-  adminLanguage?: string;
-  widgetLanguage?: string;
-  emotionUrl?: string;
 }): Promise<{ message: string }> {
   return put<{ message: string }>('/api/admin/settings/features', data);
 }

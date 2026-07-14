@@ -16,7 +16,7 @@ import {
 import { loadFeatureSettings, saveFeatureSettings } from '../lib/featureSettings.js';
 import {
   loadEmailNotificationSettings, saveEmailNotificationSettings,
-  sendTestEmail, getAdminNotifyEmail,
+  sendTestEmail, getAdminNotifyEmail, sendCommentApprovedNotification,
 } from '../lib/email.js';
 
 const require = createRequire(import.meta.url);
@@ -190,6 +190,34 @@ export async function updateStatus(c: Context) {
 
   const success = await execute(`UPDATE "Comment" SET status = $1 WHERE id = $2`, [status, id]);
   if (!success) return c.json({ message: 'Update failed' }, 500);
+
+  // 审核通过时发送邮件通知评论者
+  if (status === 'approved') {
+    try {
+      const comment = await queryFirst<{ email: string; name: string; post_title: string; post_url: string | null; post_slug: string; content_html: string; status: string }>(
+        `SELECT email, name, post_url, post_slug, content_html, status FROM "Comment" WHERE id = $1`, [id]
+      );
+      if (comment && comment.email) {
+        const prevStatus = comment.status;
+        // Only notify if the comment was previously not approved
+        if (prevStatus !== 'approved') {
+          const emailSettings = await loadEmailNotificationSettings();
+          if (emailSettings.globalEnabled) {
+            await sendCommentApprovedNotification({
+              toEmail: comment.email,
+              commentAuthor: comment.name,
+              postTitle: comment.post_slug,
+              postUrl: comment.post_url || '',
+              commentContent: comment.content_html,
+            }, emailSettings.smtp, emailSettings.templates?.approved);
+          }
+        }
+      }
+    } catch (e: any) {
+      console.error('Approved notification failed:', e?.message);
+    }
+  }
+
   return c.json({ message: `Comment status updated, id: ${id}, status: ${status}.` });
 }
 
@@ -293,13 +321,9 @@ export async function updateComment(c: Context) {
   }
   const contentText = cleanedContent;
 
-  // Load emotion URL
-  const featureSettings = await loadFeatureSettings();
-  let emotionUrl = featureSettings.emotionUrl || '';
-  if (!emotionUrl) {
-    const reqUrl = new URL(c.req.url);
-    emotionUrl = `${reqUrl.origin}/emotion`;
-  }
+  // Auto-detect emotion URL from request origin
+  const reqUrl = new URL(c.req.url);
+  const emotionUrl = `${reqUrl.origin}/emotion`;
 
   const contentWithEmotion = replaceEmotionSyntax(cleanedContent, emotionUrl);
   const html = await marked.parse(contentWithEmotion, { async: true });
@@ -861,9 +885,6 @@ export async function updateFeatureSettings(c: Context) {
       enableEmoji: typeof body.enableEmoji === 'boolean' ? body.enableEmoji : undefined,
       commentPlaceholder: typeof body.commentPlaceholder === 'string' ? body.commentPlaceholder.trim() : undefined,
       visibleDomains: Array.isArray(body.visibleDomains) ? body.visibleDomains : undefined,
-      adminLanguage: typeof body.adminLanguage === 'string' ? body.adminLanguage : undefined,
-      widgetLanguage: typeof body.widgetLanguage === 'string' ? body.widgetLanguage : undefined,
-      emotionUrl: typeof body.emotionUrl === 'string' ? body.emotionUrl.trim() : undefined,
     });
     return c.json({ message: '保存成功！' });
   } catch (e: any) {

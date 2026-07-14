@@ -186,13 +186,9 @@ export async function postComment(c: Context) {
   const name = checkContent(rawName) || 'Anonymous';
   const url = rawUrl?.trim() || null;
 
-  // Load emotion URL
-  const featureSettings = await loadFeatureSettings();
-  let emotionUrl = featureSettings.emotionUrl || '';
-  if (!emotionUrl) {
-    const reqUrl = new URL(c.req.url);
-    emotionUrl = `${reqUrl.origin}/emotion`;
-  }
+  // Auto-detect emotion URL from request origin
+  const reqUrl = new URL(c.req.url);
+  const emotionUrl = `${reqUrl.origin}/emotion`;
 
   const contentWithEmotion = replaceEmotionSyntax(cleanedContent, emotionUrl);
   const html = await marked.parse(contentWithEmotion, { async: true });
@@ -290,10 +286,9 @@ export async function getPublicConfig(c: Context) {
     // Strip sensitive fields
     const { adminKey, adminKeySet, blockedIps, blockedEmails, ...publicSettings } = settings as any;
 
-    // Auto-detect emotion URL from request origin, fallback to manual override
+    // Auto-detect emotion URL from request origin
     const url = new URL(c.req.url);
-    const autoEmotionUrl = `${url.origin}/emotion`;
-    const emotionUrl = featureSettings.emotionUrl || autoEmotionUrl;
+    const emotionUrl = `${url.origin}/emotion`;
 
     return c.json({ ...publicSettings, ...featureSettings, emotionUrl });
   } catch (e: any) {

@@ -266,12 +266,8 @@
       "imageLightboxHint": "Enable fullscreen preview for images in comments.",
       "placeholder": "Placeholder Text",
       "placeholderHint": "Custom placeholder for comment input.",
-      "widgetLanguage": "Widget Language",
-      "widgetLanguageHint": "Language for the frontend widget.",
       "emoji": "Enable Emoji",
       "emojiHint": "Show emoji button in comment and reply forms so users can insert emoji images.",
-      "emotionUrl": "Emoji CDN URL (Optional)",
-      "emotionUrlHint": "By default, the /emotion directory under the current API address is used automatically. To use a custom CDN, enter the CDN base URL (without sub-directory), e.g. https://cdn.example.com/emotion",
       "save": "Save",
       "saving": "Saving..."
     },
@@ -292,6 +288,8 @@
       "adminTemplateHint": "Vars: ${commentAuthor}, ${postTitle}, ${postUrl}, ${commentContent}",
       "replyTemplate": "Reply Template (HTML)",
       "replyTemplateHint": "Vars: ${toName}, ${replyAuthor}, ${postTitle}, ${postUrl}, ${parentComment}, ${replyContent}",
+      "approvedTemplate": "Approved Template (HTML)",
+      "approvedTemplateHint": "Vars: ${commentAuthor}, ${postTitle}, ${postUrl}, ${commentContent}",
       "testBtn": "Send Test Email",
       "testingBtn": "Sending...",
       "resetBtn": "Reset Templates",
@@ -316,8 +314,6 @@
       "title": "Display Settings",
       "layoutTitle": "Admin Title",
       "layoutTitleHint": "Displayed in top navigation bar.",
-      "adminLanguage": "Admin Language",
-      "adminLanguageHint": "Language for the admin panel.",
       "save": "Save",
       "saving": "Saving..."
     }

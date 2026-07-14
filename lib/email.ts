@@ -21,6 +21,7 @@ export type EmailNotificationSettings = {
   templates?: {
     reply?: string;
     admin?: string;
+    approved?: string;
   };
 };
 
@@ -72,6 +73,27 @@ const DEFAULT_ADMIN_TEMPLATE = `<div style="background-color:#f4f4f5;padding:24p
   </div>
 </div>`;
 
+const DEFAULT_APPROVED_TEMPLATE = `<div style="background-color:#f4f4f5;padding:24px 0;">
+  <div style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;color:#111827;">
+    <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;background:linear-gradient(135deg,#2563eb,#4f46e5);">
+      <h1 style="margin:0;font-size:18px;line-height:1.4;color:#f9fafb;">评论审核通过</h1>
+      <p style="margin:4px 0 0;font-size:12px;color:#e5e7eb;">你的评论已通过管理员审核</p>
+    </div>
+    <div style="padding:24px 28px;">
+      <p style="margin:0 0 10px 0;font-size:14px;color:#374151;">
+        Hi <span style="font-weight:600;">\${commentAuthor}</span>，你在文章
+        <span style="font-weight:600;">《\${postTitle}》</span>下的评论已通过审核：
+      </p>
+      <div style="margin:0 0 18px 0;padding:14px 16px;border-radius:10px;background:#f9fafb;border:1px solid #e5e7eb;">
+        <div style="font-size:14px;color:#374151;">\${commentContent}</div>
+      </div>
+      <div style="text-align:center;">
+        <a href="\${postUrl}" style="display:inline-block;padding:10px 22px;border-radius:999px;background:#2563eb;color:#ffffff;font-size:14px;font-weight:500;text-decoration:none;">打开文章查看评论</a>
+      </div>
+    </div>
+  </div>
+</div>`;
+
 function replaceTemplate(template: string, variables: Record<string, string>): string {
   return template.replace(/\$\{(\w+)\}/g, (_, key) => variables[key] || '');
 }
@@ -110,7 +132,7 @@ export async function loadEmailNotificationSettings(): Promise<EmailNotification
   const keys = [
     'email_notify_enabled', 'email_smtp_host', 'email_smtp_port',
     'email_smtp_user', 'email_smtp_pass', 'email_smtp_secure',
-    'email_template_reply', 'email_template_admin',
+    'email_template_reply', 'email_template_admin', 'email_template_approved',
   ];
   const map = await getSettings(keys);
 
@@ -125,6 +147,7 @@ export async function loadEmailNotificationSettings(): Promise<EmailNotification
   const templates = {
     reply: map.get('email_template_reply') || DEFAULT_REPLY_TEMPLATE,
     admin: map.get('email_template_admin') || DEFAULT_ADMIN_TEMPLATE,
+    approved: map.get('email_template_approved') || DEFAULT_APPROVED_TEMPLATE,
   };
 
   return { globalEnabled, smtp, templates };
@@ -148,6 +171,7 @@ export async function saveEmailNotificationSettings(settings: {
   if (settings.templates) {
     if (settings.templates.reply !== undefined) await setSetting('email_template_reply', settings.templates.reply);
     if (settings.templates.admin !== undefined) await setSetting('email_template_admin', settings.templates.admin);
+    if (settings.templates.approved !== undefined) await setSetting('email_template_approved', settings.templates.approved);
   }
 }
 
@@ -209,6 +233,24 @@ export async function sendCommentNotification(
   });
 
   await dispatchMail({ to: [toEmail], subject: `新评论提醒 - ${postTitle}`, html }, smtp);
+}
+
+export async function sendCommentApprovedNotification(
+  params: {
+    toEmail: string; commentAuthor: string; postTitle: string;
+    postUrl: string; commentContent: string;
+  },
+  smtp?: EmailNotificationSettings['smtp'],
+  template?: string
+): Promise<void> {
+  const { toEmail, commentAuthor, postTitle, postUrl, commentContent } = params;
+  if (!isValidEmail(toEmail)) return;
+
+  const html = replaceTemplate(template || DEFAULT_APPROVED_TEMPLATE, {
+    toEmail, commentAuthor, postTitle, postUrl, commentContent,
+  });
+
+  await dispatchMail({ to: [toEmail], subject: `评论审核通过 - ${postTitle}`, html }, smtp);
 }
 
 export async function getAdminNotifyEmail(): Promise<string> {
