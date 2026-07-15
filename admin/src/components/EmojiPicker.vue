@@ -54,10 +54,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { getEmojiPacks, type EmojiPack } from "../../utils/emoji";
+import { getEmojiPacks, type EmojiPack } from "../utils/emoji";
 
 const props = defineProps<{
-  target: HTMLTextAreaElement | null;
+  target?: HTMLTextAreaElement | null;
 }>();
 
 const emit = defineEmits<{
