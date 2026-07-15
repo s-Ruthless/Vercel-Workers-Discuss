@@ -245,7 +245,7 @@
       "adminEmail": "管理员邮箱",
       "adminBadge": "博主标签文字（留空使用默认图标）",
       "adminEnabled": "是否开启博主标签显示",
-      "avatarPrefix": "头像前缀（默认：https://gravatar.com/avatar）",
+      "avatarPrefix": "头像前缀（默认：https://weavatar.com/avatar）",
       "securityTitle": "安全设置",
       "requireReview": "新评论是否审核后再显示",
       "adminKey": "管理员评论密钥（设置后前台使用管理员邮箱评论需输入此密钥。）",

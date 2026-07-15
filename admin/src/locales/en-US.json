@@ -245,7 +245,7 @@
       "adminEmail": "Admin Email",
       "adminBadge": "Admin Badge Text (Empty for default icon)",
       "adminEnabled": "Show Admin Badge",
-      "avatarPrefix": "Avatar Prefix (Default: https://gravatar.com/avatar)",
+      "avatarPrefix": "Avatar Prefix (Default: https://weavatar.com/avatar)",
       "securityTitle": "Security",
       "requireReview": "Require Review for New Comments",
       "adminKey": "Admin Key (Required for admin email comments)",
