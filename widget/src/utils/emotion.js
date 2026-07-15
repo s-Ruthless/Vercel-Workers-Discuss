@@ -99,6 +99,7 @@ export function getEmojiPacks() {
 
 /**
  * 获取表情图片 URL
+ * prefix 仅用于短代码语法（:aru_smile:），不参与文件名
  * @param {Object} pack - 表情包对象
  * @param {string} item - 表情项名称
  * @returns {string} 图片 URL
@@ -106,11 +107,6 @@ export function getEmojiPacks() {
 export function getEmojiUrl(pack, item) {
   const folder = (pack.folder || '').replace(/\/+$/, '');
   const ext = pack.type || 'png';
-  // 远程包（Waline CDN）：文件名含 prefix
-  // 本地包：文件名不含 prefix
-  if (pack.prefix && pack.remote) {
-    return `${folder}/${pack.prefix}${item}.${ext}`;
-  }
   return `${folder}/${item}.${ext}`;
 }
 
