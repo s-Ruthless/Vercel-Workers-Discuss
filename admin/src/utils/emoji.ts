@@ -114,7 +114,7 @@ export function replaceEmojiSyntax(html: string): string {
     const pf = pack.prefix || '';
     const url = `${folder}/${pf}${item}.${ext}`;
 
-    return `<img src="${url}" alt="${packKey}_${item}" class="vwd-emotion-img" referrerpolicy="no-referrer" loading="lazy" style="display:inline-block;vertical-align:middle;height:1.5em;width:auto;margin:0 2px;">`;
+    return `<img src="${url}" alt="${packKey}_${item}" class="vwd-emotion-img" referrerpolicy="no-referrer" loading="lazy" style="display:inline-block;vertical-align:middle;height:3.0em;width:auto;margin:0 2px;">`;
   });
 }
 
