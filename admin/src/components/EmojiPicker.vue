@@ -18,7 +18,7 @@
           @click="activeTab = i"
           type="button"
         >
-          {{ pack.icon || pack.name }}
+          {{ pack.name }}
         </button>
       </div>
       <div v-if="packs[activeTab] && packs[activeTab].type === 'text'" class="emoji-grid-text">
@@ -90,11 +90,13 @@ function getEmojiUrl(pack: EmojiPack, item: string): string {
 
 function insertText(text: string) {
   emit("insert", text);
+  panelVisible.value = false;
 }
 
 function insertImage(pack: EmojiPack, item: string) {
   const code = `:${pack.prefix}${item}:`;
   emit("insert", code);
+  panelVisible.value = false;
 }
 
 function closeOnOutside(e: MouseEvent) {

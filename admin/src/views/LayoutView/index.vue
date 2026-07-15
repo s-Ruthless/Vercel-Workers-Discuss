@@ -204,6 +204,13 @@ function toggleAccent() { isAccentOpen.value = !isAccentOpen.value; }
 function closeAccent() { isAccentOpen.value = false; }
 function selectAccent(color: string) { setAccent(color); closeAccent(); }
 
+function closeAccentOnOutside(e: MouseEvent) {
+  const el = e.target as HTMLElement;
+  if (!el.closest(".accent-dropdown") && !el.closest("[title=\"主题色\"]")) {
+    isAccentOpen.value = false;
+  }
+}
+
 type SiteOption = { label: string; value: string };
 const siteOptions = ref<SiteOption[]>([]);
 const defaultSiteId = "default";
@@ -275,6 +282,7 @@ onMounted(() => {
   loadSites();
   loadVersion();
   loadDisplaySettings();
+  document.addEventListener("click", closeAccentOnOutside);
 });
 
 function isRouteActive(name: string) {
