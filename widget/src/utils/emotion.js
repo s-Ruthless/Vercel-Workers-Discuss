@@ -43,22 +43,11 @@ export async function loadEmojiPacks(emojiConfig, apiOrigin) {
         const res = await fetch(`${folder}/info.json`);
         if (res.ok) {
           const info = await res.json();
-          // 尝试加载 meta.json 获取中文文本映射
-          let textMap = {};
-          try {
-            const metaRes = await fetch(`${folder}/meta.json`);
-            if (metaRes.ok) {
-              const meta = await metaRes.json();
-              if (meta.items) {
-                textMap = meta.items;
-              }
-            }
-          } catch (e) {}
           packs.push({
             ...info,
             folder,
             remote: true,
-            textMap,
+            textMap: {},
           });
         }
       } catch (e) {
