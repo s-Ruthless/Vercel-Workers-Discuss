@@ -3,7 +3,7 @@
  * 支持前端配置表情包，使用 :prefix_item: 短代码
  */
 import { Component } from './Component.js';
-import { getEmojiUrl, getTabIconUrl } from '../utils/emotion.js';
+import { getEmojiUrl } from '../utils/emotion.js';
 
 export class EmojiPicker extends Component {
   constructor(container, props = {}) {
@@ -66,34 +66,15 @@ export class EmojiPicker extends Component {
       });
     });
 
-    // Tab 栏：显示每个包的代表图标或名称
+    // Tab 栏：统一显示文字名称
     const tabs = packs.map(function (pack, index) {
-      const tabChildren = [];
-      if (pack.type === 'text') {
-        // 文本表情包：显示名称
-        tabChildren.push(self.createTextElement('span', pack.name || '颜'));
-      } else {
-        const iconUrl = getTabIconUrl(pack);
-        if (iconUrl) {
-          tabChildren.push(self.createElement('img', {
-            attributes: {
-              src: iconUrl,
-              alt: pack.name,
-              loading: 'lazy',
-              referrerpolicy: 'no-referrer',
-            },
-          }));
-        } else {
-          tabChildren.push(self.createTextElement('span', pack.name || ''));
-        }
-      }
       return self.createElement('div', {
         className: 'vwd-emoji-tab ' + (index === self.state.activeCategory ? 'vwd-emoji-tab-active' : ''),
         attributes: {
           onClick: function (e) { self.handleTabChange(index, e); },
           title: pack.name || '',
         },
-        children: tabChildren,
+        text: pack.name || '',
       });
     });
 
