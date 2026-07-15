@@ -4,8 +4,8 @@
       <div class="login-card">
         <div class="login-icon"></div>
         <div class="login-subtitle">
-          <h1 class="login-title">VWD</h1>
-          - 初始化管理员账户
+          <h1 class="login-title">VWD Comments</h1>
+          <p>初始化管理员账户</p>
         </div>
         <div class="setup-hint">
           首次使用，请设置管理员账号和密码。设置完成后将自动登录。

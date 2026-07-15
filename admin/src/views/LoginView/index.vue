@@ -4,8 +4,8 @@
       <div class="login-card">
         <div class="login-icon"></div>
         <div class="login-subtitle">
-          <h1 class="login-title">VWD</h1>
-          - Vercel Workers Discuss 评论系统管理面板
+          <h1 class="login-title">VWD Comments</h1>
+          <p>Vercel Workers Discuss · 评论系统</p>
         </div>
         <form class="login-form" @submit.prevent="handleSubmit">
           <div class="form-item">

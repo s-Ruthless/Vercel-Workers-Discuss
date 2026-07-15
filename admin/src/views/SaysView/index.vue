@@ -85,23 +85,34 @@
     <!-- Edit/Create Modal -->
     <div v-if="modalVisible" class="modal-overlay" @click.self="closeModal">
       <div class="modal">
-        <h3 class="modal-title">{{ editingId ? t("says.editTitle") : t("says.createTitle") }}</h3>
+        <div class="modal-header">
+          <h3 class="modal-title">{{ editingId ? t("says.editTitle") : t("says.createTitle") }}</h3>
+          <button class="modal-close" @click="closeModal" type="button">✕</button>
+        </div>
         <div class="modal-body">
-          <div class="form-group">
-            <label class="form-label">{{ t("says.content") }}</label>
-            <textarea v-model="modalContent" class="form-input" rows="8" :placeholder="t('says.contentPlaceholder')" style="resize: vertical; font-family: inherit;"></textarea>
+          <div class="modal-section">
+            <div class="modal-section-title">📝 内容</div>
+            <div class="form-group">
+              <textarea v-model="modalContent" class="form-input form-textarea" rows="8" :placeholder="t('says.contentPlaceholder')"></textarea>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">{{ t("says.tags") }}</label>
-            <input v-model="modalTags" class="form-input" :placeholder="t('says.tagsHint')" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ t("says.status") }}</label>
-            <select v-model="modalStatus" class="form-input">
-              <option value="published">{{ t("says.statusPublished") }}</option>
-              <option value="draft">{{ t("says.statusDraft") }}</option>
-              <option value="hidden">{{ t("says.statusHidden") }}</option>
-            </select>
+          <div class="modal-row">
+            <div class="modal-section modal-section-half">
+              <div class="modal-section-title">🏷 标签</div>
+              <div class="form-group">
+                <input v-model="modalTags" class="form-input" :placeholder="t('says.tagsHint')" />
+              </div>
+            </div>
+            <div class="modal-section modal-section-half">
+              <div class="modal-section-title">📋 状态</div>
+              <div class="form-group">
+                <select v-model="modalStatus" class="form-input">
+                  <option value="published">{{ t("says.statusPublished") }}</option>
+                  <option value="draft">{{ t("says.statusDraft") }}</option>
+                  <option value="hidden">{{ t("says.statusHidden") }}</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-actions">
@@ -331,26 +342,49 @@ watch(currentSiteId, () => { page.value = 1; loadSays(1); });
 }
 .modal {
   background: var(--bg-card-solid); border-radius: var(--radius-lg); max-width: 600px; width: 90%;
-  max-height: 80vh; overflow-y: auto; padding: 24px; box-shadow: var(--shadow-popover);
-  display: flex; flex-direction: column; gap: 16px;
+  max-height: 80vh; overflow-y: auto; padding: 0; box-shadow: var(--shadow-popover);
+  display: flex; flex-direction: column;
 }
-.modal-title { margin: 0; font-size: 17px; font-weight: 600; }
-.modal-body { display: flex; flex-direction: column; gap: 14px; }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--border-color);
+}
+.modal-title { margin: 0; font-size: 17px; font-weight: 600; color: var(--text-primary); }
+.modal-close {
+  width: 28px; height: 28px; border: none; background: transparent; cursor: pointer;
+  font-size: 16px; color: var(--text-secondary); border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center; transition: all var(--transition-fast);
+}
+.modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+.modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+.modal-section {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 16px; background: var(--bg-hover); border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+.modal-section-half { flex: 1; }
+.modal-row { display: flex; gap: 16px; }
+.modal-section-title {
+  font-size: 13px; font-weight: 600; color: var(--text-secondary);
+  margin-bottom: 2px;
+}
 .form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
 .form-input {
-  width: 100%; padding: 8px 12px; font-size: 14px; line-height: 1.5; color: var(--text-primary);
-  background: var(--bg-input); border: 1px solid var(--border-light); border-radius: var(--radius-sm);
-  font-family: inherit;
+  width: 100%; padding: 10px 14px; font-size: 14px; line-height: 1.5; color: var(--text-primary);
+  background: var(--bg-input); border: 1px solid var(--border-input); border-radius: var(--radius-sm);
+  font-family: inherit; transition: all var(--transition-fast); box-sizing: border-box;
 }
-.form-input:focus { outline: none; border-color: var(--primary-color); }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.form-input:focus { outline: none; border-color: var(--primary-color); box-shadow: var(--shadow-focus); }
+.form-textarea { resize: vertical; min-height: 120px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid var(--border-color); }
 .modal-btn {
-  padding: 8px 18px; border-radius: var(--radius-sm); border: none; font-size: 14px; font-weight: 500; cursor: pointer;
+  padding: 8px 20px; border-radius: var(--radius-sm); border: none; font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: all var(--transition-fast);
 }
 .modal-btn.primary { background: var(--primary-color); color: var(--text-inverse); }
 .modal-btn.primary:hover { background: var(--primary-hover); }
-.modal-btn.secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-light); }
+.modal-btn.secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); }
+.modal-btn.secondary:hover { background: var(--bg-hover); }
 .modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* Toast */

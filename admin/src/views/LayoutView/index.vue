@@ -23,11 +23,30 @@
           <a class="layout-button" href="https://github.com/s-Ruthless/Vercel-Workers-Discuss" target="_blank">
             Github
           </a>
+          <button class="layout-button" @click="toggleAccent" title="主题色" type="button">
+            <PhPalette :size="16" />
+          </button>
           <button class="layout-button" @click="cycleTheme" :title="themeTitle" type="button">
             <PhSun v-if="theme === 'light'" :size="16" />
             <PhMoon v-else-if="theme === 'dark'" :size="16" />
             <PhAirplay v-else :size="16" />
           </button>
+          <div v-if="isAccentOpen" class="accent-dropdown">
+            <div class="accent-dropdown-title">主题色</div>
+            <div class="accent-swatches">
+              <button
+                v-for="preset in accentPresets"
+                :key="preset.color"
+                class="accent-swatch"
+                :class="{ 'accent-swatch-active': accentColor === preset.color }"
+                :style="{ background: preset.color }"
+                :title="preset.name"
+                @click="selectAccent(preset.color)"
+                type="button"
+              />
+            </div>
+            <button class="accent-reset" @click="selectAccent('#007aff')" type="button">重置默认</button>
+          </div>
           <button class="layout-button" @click="handleLogout">
             {{ t("layout.logout") }}
           </button>
@@ -137,11 +156,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, provide, computed } from "vue";
+import { ref, onMounted, provide, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { logoutAdmin, fetchAdminDisplaySettings, fetchSiteList } from "../../api/admin";
 import { useTheme } from "../../composables/useTheme";
+import { useAccentColor, ACCENT_PRESETS } from "../../composables/useAccentColor";
 import { useSite } from "../../composables/useSite";
 
 const SITE_TITLE_KEY = "vwd_admin_site_title";
@@ -150,10 +170,12 @@ const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 const { theme, setTheme } = useTheme();
+const { accentColor, setAccent, initAccent } = useAccentColor();
 const { currentSiteId } = useSite();
 
 const isMobileSiderOpen = ref(false);
 const isActionsOpen = ref(false);
+const isAccentOpen = ref(false);
 const adminVersion = ref("0.2.0");
 const apiVersion = ref("");
 const checkedApiBaseUrl = ref("");
@@ -167,11 +189,16 @@ const themeTitle = computed(() => {
   return t("layout.theme.system");
 });
 
+const accentPresets = ACCENT_PRESETS;
+
 function cycleTheme() {
   if (theme.value === "system") setTheme("light");
   else if (theme.value === "light") setTheme("dark");
   else setTheme("system");
 }
+function toggleAccent() { isAccentOpen.value = !isAccentOpen.value; }
+function closeAccent() { isAccentOpen.value = false; }
+function selectAccent(color: string) { setAccent(color); closeAccent(); }
 
 type SiteOption = { label: string; value: string };
 const siteOptions = ref<SiteOption[]>([]);
@@ -240,6 +267,7 @@ async function loadDisplaySettings() {
 provide("updateSiteTitle", updateTitle);
 
 onMounted(() => {
+  initAccent();
   loadSites();
   loadVersion();
   loadDisplaySettings();
@@ -307,4 +335,67 @@ function closeVersionModal() { versionModalVisible.value = false; }
 }
 .modal-btn:hover { background-color: var(--primary-hover); }
 .modal-btn:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+
+/* Accent color dropdown */
+.accent-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover);
+  padding: 14px 16px;
+  z-index: 1000;
+  min-width: 200px;
+  animation: modal-scale-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.accent-dropdown-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.accent-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.accent-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.accent-swatch:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.accent-swatch-active {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 2px var(--bg-card-solid), 0 0 0 4px var(--text-primary);
+}
+.accent-reset {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card-solid);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.accent-reset:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
 </style>
