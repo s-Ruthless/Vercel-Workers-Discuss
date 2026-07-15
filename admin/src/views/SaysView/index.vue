@@ -9,21 +9,21 @@
     <div v-else-if="says.length === 0" class="page-hint">{{ t("says.empty") }}</div>
     <div v-else class="says-list">
       <div v-for="item in says" :key="item.id" class="say-card">
-        <div class="say-card-header">
+        <div class="say-content" v-html="item.contentHtml"></div>
+        <div class="say-footer">
           <span class="say-status-tag" :class="'say-status-' + item.status">{{ statusLabel(item.status) }}</span>
+          <div v-if="item.tags && item.tags.length" class="say-tags">
+            <span v-for="tag in item.tags" :key="tag" class="say-tag">{{ tag }}</span>
+          </div>
           <span class="say-time">{{ formatTime(item.created) }}</span>
           <span class="say-likes">👍 {{ item.likes }}</span>
-        </div>
-        <div class="say-content" v-html="item.contentHtml"></div>
-        <div v-if="item.tags && item.tags.length" class="say-tags">
-          <span v-for="tag in item.tags" :key="tag" class="say-tag">{{ tag }}</span>
-        </div>
-        <div class="say-actions">
-          <button v-if="item.status !== 'published'" class="card-button small primary" @click="changeStatus(item.id, 'published')" type="button">{{ t("says.actions.publish") }}</button>
-          <button v-if="item.status !== 'draft'" class="card-button small secondary" @click="changeStatus(item.id, 'draft')" type="button">{{ t("says.actions.draft") }}</button>
-          <button v-if="item.status !== 'hidden'" class="card-button small secondary" @click="changeStatus(item.id, 'hidden')" type="button">{{ t("says.actions.hide") }}</button>
-          <button class="card-button small secondary" @click="openEditModal(item)" type="button">{{ t("says.edit") }}</button>
-          <button class="card-button small danger" @click="handleDelete(item.id)" type="button">{{ t("says.delete") }}</button>
+          <div class="say-actions">
+            <button v-if="item.status !== 'published'" class="card-button small primary" @click="changeStatus(item.id, 'published')" type="button">{{ t("says.actions.publish") }}</button>
+            <button v-if="item.status !== 'draft'" class="card-button small secondary" @click="changeStatus(item.id, 'draft')" type="button">{{ t("says.actions.draft") }}</button>
+            <button v-if="item.status !== 'hidden'" class="card-button small secondary" @click="changeStatus(item.id, 'hidden')" type="button">{{ t("says.actions.hide") }}</button>
+            <button class="card-button small secondary" @click="openEditModal(item)" type="button">{{ t("says.edit") }}</button>
+            <button class="card-button small danger" @click="handleDelete(item.id)" type="button">{{ t("says.delete") }}</button>
+          </div>
         </div>
       </div>
     </div>
@@ -202,26 +202,8 @@ watch(currentSiteId, () => { page.value = 1; loadSays(); });
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
-.say-card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-.say-status-tag {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-.say-status-published { background: #dafbe1; color: #1a7f37; }
-.say-status-draft { background: #fff8c5; color: #9a6700; }
-.say-status-hidden { background: #f6f8fa; color: #6e7781; }
-.say-time { margin-left: auto; }
-.say-likes { }
 .say-content {
   font-size: 14px;
   line-height: 1.6;
@@ -239,6 +221,25 @@ watch(currentSiteId, () => { page.value = 1; loadSays(); });
 .say-content :deep(blockquote) { margin: 8px 0; padding: 0 12px; border-left: 4px solid var(--border-light); color: var(--text-secondary); }
 .say-content :deep(ul), .say-content :deep(ol) { padding-left: 1.7em; margin: 0 0 8px; }
 .say-content :deep(h1), .say-content :deep(h2), .say-content :deep(h3) { margin-top: 16px; margin-bottom: 8px; font-weight: 600; }
+
+.say-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.say-status-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.say-status-published { background: #dafbe1; color: #1a7f37; }
+.say-status-draft { background: #fff8c5; color: #9a6700; }
+.say-status-hidden { background: #f6f8fa; color: #6e7781; }
 .say-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .say-tag {
   padding: 2px 8px;
@@ -247,7 +248,10 @@ watch(currentSiteId, () => { page.value = 1; loadSays(); });
   font-size: 12px;
   color: var(--text-secondary);
 }
-.say-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.say-time { white-space: nowrap; }
+.say-likes { white-space: nowrap; }
+.say-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+
 .card-button {
   padding: 6px 14px;
   border-radius: var(--radius-sm);
