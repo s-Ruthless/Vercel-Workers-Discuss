@@ -881,6 +881,7 @@ export async function updateFeatureSettings(c: Context) {
       enableImageLightbox: typeof body.enableImageLightbox === 'boolean' ? body.enableImageLightbox : undefined,
       enableEmoji: typeof body.enableEmoji === 'boolean' ? body.enableEmoji : undefined,
       commentPlaceholder: typeof body.commentPlaceholder === 'string' ? body.commentPlaceholder.trim() : undefined,
+      emojiPaths: Array.isArray(body.emojiPaths) ? body.emojiPaths : undefined,
       visibleDomains: Array.isArray(body.visibleDomains) ? body.visibleDomains : undefined,
     });
     return c.json({ message: '保存成功！' });
