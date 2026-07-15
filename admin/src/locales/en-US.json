@@ -269,7 +269,7 @@
       "emoji": "Enable Emoji",
       "emojiHint": "Show emoji button in comment and reply forms so users can insert emoji images.",
 "emojiPaths": "Emoji Pack Paths",
-"emojiPathsHint": "One path per line, each pointing to a directory with info.json. Leave empty to use built-in emoji packs.",
+"emojiPathsHint": "One path per line, each pointing to a directory with info.json. Leave empty to use built-in emoji packs. Changing emoji packs will break existing emoji in old comments. It is recommended to append new paths rather than replacing old ones.",
       "save": "Save",
       "saving": "Saving..."
     },

@@ -269,7 +269,7 @@
       "emoji": "开启表情功能",
       "emojiHint": "开启后，评论框和回复框中会显示表情按钮，用户可以插入表情图片。",
 "emojiPaths": "表情包路径",
-"emojiPathsHint": "每行一个路径，指向包含 info.json 的目录。留空则使用内置阿鲁和 Twemoji 表情包。",
+"emojiPathsHint": "每行一个路径，指向包含 info.json 的目录。留空则使用内置阿鲁和 Twemoji 表情包。更换表情包会导致旧评论中的表情无法渲染，建议追加新路径而非替换旧路径。",
       "save": "保存",
       "saving": "保存中..."
     },
