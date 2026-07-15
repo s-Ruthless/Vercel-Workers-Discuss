@@ -12,7 +12,9 @@
 
 基于 Vercel Serverless 平台的自托管评论系统，使用 Vercel Postgres 和 Vercel KV 作为数据存储。
 
-完全脱离 Cloudflare，深度适配 Vercel 生态，开箱即用。
+深度适配 Vercel 生态，开箱即用。
+
+本项目参考了 CWD (Cloudflare Workers Discuss) 和 [Waline](https://waline.js.org/) 评论系统的设计与实现。
 
 </div>
 
