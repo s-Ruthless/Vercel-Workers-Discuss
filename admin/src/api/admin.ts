@@ -129,11 +129,12 @@ export type LikeStatsResponse = {
 };
 
 export type FeatureSettingsResponse = {
-  enableCommentLike: boolean;
-  enableArticleLike: boolean;
-  enableImageLightbox: boolean;
-  enableEmoji: boolean;
-  commentPlaceholder?: string;
+enableCommentLike: boolean;
+enableArticleLike: boolean;
+enableImageLightbox: boolean;
+enableEmoji: boolean;
+commentPlaceholder?: string;
+emojiPaths?: string[];
 };
 
 export type AdminDisplaySettingsResponse = {
@@ -310,13 +311,14 @@ export function fetchFeatureSettings(): Promise<FeatureSettingsResponse> {
 }
 
 export function saveFeatureSettings(data: {
-  enableCommentLike?: boolean;
-  enableArticleLike?: boolean;
-  enableImageLightbox?: boolean;
-  enableEmoji?: boolean;
-  commentPlaceholder?: string;
+enableCommentLike?: boolean;
+enableArticleLike?: boolean;
+enableImageLightbox?: boolean;
+enableEmoji?: boolean;
+commentPlaceholder?: string;
+emojiPaths?: string[];
 }): Promise<{ message: string }> {
-  return put<{ message: string }>('/api/admin/settings/features', data);
+return put<{ message: string }>('/api/admin/settings/features', data);
 }
 
 /* --- Settings: Admin Display --- */

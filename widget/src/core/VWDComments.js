@@ -86,6 +86,7 @@ export class VWDComments {
         enableImageLightbox: typeof data.enableImageLightbox === 'boolean' ? data.enableImageLightbox : false,
         commentPlaceholder: typeof data.commentPlaceholder === 'string' ? data.commentPlaceholder : undefined,
         enableEmoji: typeof data.enableEmoji === 'boolean' ? data.enableEmoji : true,
+        emojiPaths: Array.isArray(data.emojiPaths) ? data.emojiPaths : undefined,
       };
     } catch (e) {
       return {};
@@ -166,13 +167,13 @@ export class VWDComments {
       this.config.enableEmoji = serverConfig.enableEmoji;
       this.config.commentPlaceholder = typeof serverConfig.commentPlaceholder === 'string' ? serverConfig.commentPlaceholder : this.config.commentPlaceholder;
 
-      // 初始化表情包（Waline 风格：前端配置）
+      // 初始化表情包（从后台配置读取，Waline 风格）
       this.config.apiOrigin = this.config.apiBaseUrl ? this.config.apiBaseUrl.replace(/\/+$/, '') : '';
       const defaultEmoji = [
         `${this.config.apiOrigin}/emotion/aru`,
         `${this.config.apiOrigin}/emotion/twemoji`,
       ];
-      this.config.emoji = this.config.emoji || defaultEmoji;
+      this.config.emoji = serverConfig.emojiPaths && serverConfig.emojiPaths.length > 0 ? serverConfig.emojiPaths : defaultEmoji;
       this.config.emojiPacks = [];
       if (this.config.enableEmoji !== false) {
         initEmojiPacks(this.config.emoji, this.config.apiOrigin)

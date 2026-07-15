@@ -104,8 +104,13 @@
                   <textarea v-model="commentPlaceholder" class="form-input" rows="3" style="height: 90px; resize: none" :placeholder="t('settings.feature.placeholderHint')"></textarea>
                   <div class="form-hint">{{ t("settings.feature.placeholderHint") }}</div>
                 </div>
-                <div class="card-actions">
-                  <button class="card-button" :disabled="savingFeature" @click="saveFeature">
+<div class="form-item">
+<label class="form-label">{{ t("settings.feature.emojiPaths") }}</label>
+<textarea v-model="emojiPathsText" class="form-input" rows="3" style="height: 80px; resize: none" :placeholder="t('settings.feature.emojiPathsHint')"></textarea>
+<div class="form-hint">{{ t("settings.feature.emojiPathsHint") }}</div>
+</div>
+<div class="card-actions">
+<button class="card-button" :disabled="savingFeature" @click="saveFeature">
                     <span v-if="savingFeature">{{ t("settings.feature.saving") }}</span>
                     <span v-else>{{ t("settings.feature.save") }}</span>
                   </button>
@@ -281,6 +286,7 @@ const enableCommentLike = ref(true);
 const enableImageLightbox = ref(true);
 const enableEmoji = ref(true);
 const commentPlaceholder = ref("");
+const emojiPathsText = ref("");
 const telegramBotToken = ref("");
 const telegramChatId = ref("");
 const telegramNotifyEnabled = ref(false);
@@ -407,8 +413,9 @@ async function load() {
     enableArticleLike.value = featureRes.enableArticleLike;
     enableCommentLike.value = featureRes.enableCommentLike;
     enableImageLightbox.value = featureRes.enableImageLightbox;
-    enableEmoji.value = featureRes.enableEmoji;
-    commentPlaceholder.value = featureRes.commentPlaceholder || "";
+enableEmoji.value = featureRes.enableEmoji;
+commentPlaceholder.value = featureRes.commentPlaceholder || "";
+emojiPathsText.value = Array.isArray(featureRes.emojiPaths) ? featureRes.emojiPaths.join("\n") : "";
     telegramBotToken.value = telegramRes.botToken || "";
     telegramChatId.value = telegramRes.chatId || "";
     telegramNotifyEnabled.value = telegramRes.notifyEnabled;
@@ -482,11 +489,12 @@ async function saveComment() {
 async function saveFeature() {
   savingFeature.value = true; message.value = "";
   try {
-    const res = await saveFeatureSettings({
-      enableArticleLike: enableArticleLike.value, enableCommentLike: enableCommentLike.value,
-      enableImageLightbox: enableImageLightbox.value, enableEmoji: enableEmoji.value,
-      commentPlaceholder: commentPlaceholder.value,
-    });
+const res = await saveFeatureSettings({
+enableArticleLike: enableArticleLike.value, enableCommentLike: enableCommentLike.value,
+enableImageLightbox: enableImageLightbox.value, enableEmoji: enableEmoji.value,
+commentPlaceholder: commentPlaceholder.value,
+emojiPaths: emojiPathsText.value.trim() ? emojiPathsText.value.split("\n").map(s => s.trim()).filter(Boolean) : [],
+});
     showToast(res.message || t("common.saveSuccess"), "success");
   } catch (e: any) { showToast(e.message || t("common.saveFailed"), "error"); }
   finally { savingFeature.value = false; }

@@ -79,9 +79,8 @@ export interface VWDCommentsConfig {
 
   /**
    * Emoji pack configuration (Waline style)
-   * Array of URLs (each pointing to a directory containing info.json)
-   * or pack config objects
-   * @default [apiBaseUrl + '/emotion/aru', apiBaseUrl + '/emotion/twemoji']
+   * Configured in admin settings, loaded from server config.
+   * @deprecated Use admin settings instead
    */
   emoji?: (string | object)[];
 

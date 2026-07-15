@@ -268,6 +268,8 @@
       "placeholderHint": "Custom placeholder for comment input.",
       "emoji": "Enable Emoji",
       "emojiHint": "Show emoji button in comment and reply forms so users can insert emoji images.",
+"emojiPaths": "Emoji Pack Paths",
+"emojiPathsHint": "One path per line, each pointing to a directory with info.json. Leave empty to use built-in emoji packs.",
       "save": "Save",
       "saving": "Saving..."
     },

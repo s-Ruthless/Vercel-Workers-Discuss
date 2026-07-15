@@ -268,6 +268,8 @@
       "placeholderHint": "自定义评论输入框的提示文字，支持换行。留空则使用默认值。",
       "emoji": "开启表情功能",
       "emojiHint": "开启后，评论框和回复框中会显示表情按钮，用户可以插入表情图片。",
+"emojiPaths": "表情包路径",
+"emojiPathsHint": "每行一个路径，指向包含 info.json 的目录。留空则使用内置阿鲁和 Twemoji 表情包。",
       "save": "保存",
       "saving": "保存中..."
     },

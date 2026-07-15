@@ -9,6 +9,7 @@ export type FeatureSettings = {
   enableImageLightbox: boolean;
   enableEmoji: boolean;
   commentPlaceholder?: string;
+  emojiPaths?: string[];
   visibleDomains?: string[];
 };
 
@@ -19,6 +20,7 @@ export async function loadFeatureSettings(): Promise<FeatureSettings> {
     'comment_feature_image_lightbox',
     'comment_feature_emoji',
     'comment_feature_placeholder',
+    'comment_feature_emoji_paths',
     'admin_visible_domains',
   ]);
 
@@ -28,6 +30,12 @@ export async function loadFeatureSettings(): Promise<FeatureSettings> {
   const enableEmoji = map.get('comment_feature_emoji') !== '0';
   const commentPlaceholder = map.get('comment_feature_placeholder') || undefined;
 
+  let emojiPaths: string[] | undefined;
+  const rawEmojiPaths = map.get('comment_feature_emoji_paths');
+  if (rawEmojiPaths) {
+    try { emojiPaths = JSON.parse(rawEmojiPaths); } catch { /* ignore */ }
+  }
+
   let visibleDomains: string[] | undefined;
   const raw = map.get('admin_visible_domains');
   if (raw) {
@@ -36,7 +44,7 @@ export async function loadFeatureSettings(): Promise<FeatureSettings> {
 
   return {
     enableCommentLike, enableArticleLike, enableImageLightbox, enableEmoji,
-    commentPlaceholder, visibleDomains,
+    commentPlaceholder, emojiPaths, visibleDomains,
   };
 }
 
@@ -51,6 +59,8 @@ export async function saveFeatureSettings(settings: Partial<FeatureSettings>): P
     await setSetting('comment_feature_emoji', settings.enableEmoji ? '1' : '0');
   if (settings.commentPlaceholder !== undefined)
     await setSetting('comment_feature_placeholder', settings.commentPlaceholder);
+  if (settings.emojiPaths !== undefined)
+    await setSetting('comment_feature_emoji_paths', JSON.stringify(settings.emojiPaths));
   if (settings.visibleDomains !== undefined)
     await setSetting('admin_visible_domains', JSON.stringify(settings.visibleDomains));
 }
