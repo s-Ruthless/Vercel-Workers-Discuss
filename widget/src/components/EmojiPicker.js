@@ -71,7 +71,7 @@ export class EmojiPicker extends Component {
       const tabChildren = [];
       if (pack.type === 'text') {
         // 文本表情包：显示名称
-        tabChildren.push(self.createTextNode(pack.name || '颜'));
+        tabChildren.push(self.createTextElement('span', pack.name || '颜'));
       } else {
         const iconUrl = getTabIconUrl(pack);
         if (iconUrl) {
@@ -84,7 +84,7 @@ export class EmojiPicker extends Component {
             },
           }));
         } else {
-          tabChildren.push(self.createTextNode(pack.name || ''));
+          tabChildren.push(self.createTextElement('span', pack.name || ''));
         }
       }
       return self.createElement('div', {
