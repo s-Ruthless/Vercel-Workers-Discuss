@@ -37,12 +37,13 @@
 ```
 vwd/
 ├── api/                  # Vercel Serverless Functions（Hono 框架）
-│   ├── [...route].ts     #   路由入口（Catch-all 路由）
+│   ├── index.ts          #   路由入口（API 统一入口）
 │   └── health.ts         #   独立健康检查端点
 ├── src/                  # API 逻辑层（非 Serverless Function）
 │   ├── admin.ts          #   管理后台 API 逻辑
 │   └── public.ts         #   公开 API（评论、点赞、统计）
 ├── lib/                  # 工具层
+│   ├── app.ts            #   Hono 应用实例与路由注册
 │   ├── auth.ts           #   管理员鉴权中间件（基于 Vercel KV）
 │   ├── db.ts             #   Vercel Postgres 数据库访问层
 │   ├── kv.ts             #   Vercel KV 封装
@@ -51,7 +52,7 @@ vwd/
 │   ├── commentSettings.ts#   评论设置读写
 │   ├── featureSettings.ts#   功能开关设置
 │   ├── emotion.ts        #   表情资源处理
-│   └── utils.ts          #   通用工具（IP 获取、UA 解析等）
+│   └── utils.ts          #   通用工具（IP 获取、UA 解析、头像等）
 ├── admin/                # 管理后台前端（Vue 3 + Vite + TypeScript）
 │   ├── src/
 │   │   ├── api/          #   API 请求封装
