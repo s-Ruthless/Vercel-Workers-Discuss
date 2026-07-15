@@ -1155,9 +1155,10 @@ cursor: default;
 .vwd-btn-emoji {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  font-size: 13px;
+  justify-content: center;
+  padding: 6px 8px;
+  font-size: 18px;
+  line-height: 1;
 }
 
 .vwd-reply-emoji-wrapper {

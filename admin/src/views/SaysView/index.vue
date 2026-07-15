@@ -93,8 +93,8 @@
           <div class="modal-section">
             <div class="modal-section-title">📝 内容</div>
             <div class="form-group form-group-content">
-              <div class="textarea-wrapper">
-                <textarea ref="modalTextareaRef" v-model="modalContent" class="form-input form-textarea" rows="8" :placeholder="t('says.contentPlaceholder')" @click="closeEmojiPanel"></textarea>
+              <textarea ref="modalTextareaRef" v-model="modalContent" class="form-input form-textarea" rows="8" :placeholder="t('says.contentPlaceholder')" @click="closeEmojiPanel"></textarea>
+              <div class="textarea-toolbar">
                 <EmojiPicker @insert="handleEmojiInsert" />
               </div>
             </div>
@@ -367,8 +367,8 @@ watch(currentSiteId, () => { page.value = 1; loadSays(1); });
   display: flex; align-items: center; justify-content: center; z-index: 2000;
 }
 .modal {
-  background: var(--bg-card-solid); border-radius: var(--radius-lg); max-width: 600px; width: 90%;
-  max-height: 80vh; overflow-y: auto; padding: 0; box-shadow: var(--shadow-popover);
+  background: var(--bg-card-solid); border-radius: var(--radius-lg); max-width: 720px; width: 90%;
+  max-height: 85vh; overflow-y: auto; padding: 0; box-shadow: var(--shadow-popover);
   display: flex; flex-direction: column;
 }
 .modal-header {
@@ -396,12 +396,8 @@ watch(currentSiteId, () => { page.value = 1; loadSays(1); });
   margin-bottom: 2px;
 }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group-content { gap: 4px; }
-.textarea-wrapper { position: relative; }
-.textarea-wrapper > .emoji-picker-wrapper {
-  position: absolute;
-  bottom: 8px; right: 8px;
-}
+.form-group-content { gap: 8px; }
+.textarea-toolbar { display: flex; align-items: center; gap: 8px; }
 .form-input {
   width: 100%; padding: 10px 14px; font-size: 14px; line-height: 1.5; color: var(--text-primary);
   background: var(--bg-input); border: 1px solid var(--border-input); border-radius: var(--radius-sm);

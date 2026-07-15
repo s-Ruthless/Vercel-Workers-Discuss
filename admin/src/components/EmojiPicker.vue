@@ -124,8 +124,9 @@ onMounted(() => {
   position: absolute;
   bottom: calc(100% + 6px);
   left: 0;
-  width: 320px;
-  max-height: 280px;
+  width: 280px;
+  max-width: calc(100vw - 32px);
+  max-height: 260px;
   background: var(--bg-card-solid);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);

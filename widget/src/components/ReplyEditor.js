@@ -106,7 +106,7 @@ export class ReplyEditor extends Component {
                         this.toggleEmojiPicker();
                       },
                     },
-                    text: '😊 ' + this.t('emoji'),
+                    text: '😊',
                   }),
                   this.createElement('div', {
                     className: 'vwd-emoji-picker-container',
