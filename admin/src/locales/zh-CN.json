@@ -65,6 +65,7 @@
     "statusPublished": "已发布",
     "statusDraft": "草稿",
     "statusHidden": "隐藏",
+    "statusAll": "全部状态",
     "publish": "发布",
     "saveDraft": "存为草稿",
     "cancel": "取消",

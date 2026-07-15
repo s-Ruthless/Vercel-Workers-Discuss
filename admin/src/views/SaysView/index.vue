@@ -1,37 +1,86 @@
 <template>
   <div class="page">
-    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-      <h2 class="page-title">{{ t("says.title") }}</h2>
-      <button class="card-button primary" @click="openCreateModal" type="button">{{ t("says.createBtn") }}</button>
-    </div>
-    <div v-if="toastVisible" class="toast" :class="toastType === 'error' ? 'toast-error' : 'toast-success'">{{ toastMessage }}</div>
-    <div v-if="loading" class="page-hint">{{ t("common.loading") }}</div>
-    <div v-else-if="says.length === 0" class="page-hint">{{ t("says.empty") }}</div>
-    <div v-else class="says-list">
-      <div v-for="item in says" :key="item.id" class="say-card">
-        <div class="say-content" v-html="item.contentHtml"></div>
-        <div class="say-footer">
-          <span class="say-status-tag" :class="'say-status-' + item.status">{{ statusLabel(item.status) }}</span>
-          <div v-if="item.tags && item.tags.length" class="say-tags">
-            <span v-for="tag in item.tags" :key="tag" class="say-tag">{{ tag }}</span>
-          </div>
-          <span class="say-time">{{ formatTime(item.created) }}</span>
-          <span class="say-likes">👍 {{ item.likes }}</span>
-          <div class="say-actions">
-            <button v-if="item.status !== 'published'" class="card-button small primary" @click="changeStatus(item.id, 'published')" type="button">{{ t("says.actions.publish") }}</button>
-            <button v-if="item.status !== 'draft'" class="card-button small secondary" @click="changeStatus(item.id, 'draft')" type="button">{{ t("says.actions.draft") }}</button>
-            <button v-if="item.status !== 'hidden'" class="card-button small secondary" @click="changeStatus(item.id, 'hidden')" type="button">{{ t("says.actions.hide") }}</button>
-            <button class="card-button small secondary" @click="openEditModal(item)" type="button">{{ t("says.edit") }}</button>
-            <button class="card-button small danger" @click="handleDelete(item.id)" type="button">{{ t("says.delete") }}</button>
-          </div>
-        </div>
+    <h2 class="page-title">{{ t("says.title") }}</h2>
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <select v-model="statusFilter" class="toolbar-select">
+          <option value="">{{ t("says.statusAll") }}</option>
+          <option value="published">{{ t("says.statusPublished") }}</option>
+          <option value="draft">{{ t("says.statusDraft") }}</option>
+          <option value="hidden">{{ t("says.statusHidden") }}</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <button class="toolbar-button" @click="openCreateModal">{{ t("says.createBtn") }}</button>
+        <button class="toolbar-button" @click="loadSays(page)">↻</button>
       </div>
     </div>
-    <div v-if="totalPages > 1" class="pagination">
-      <button class="card-button small secondary" :disabled="page <= 1" @click="goPage(page - 1)" type="button">上一页</button>
-      <span class="page-info">{{ page }} / {{ totalPages }}</span>
-      <button class="card-button small secondary" :disabled="page >= totalPages" @click="goPage(page + 1)" type="button">下一页</button>
+    <div v-if="loading" class="page-hint">{{ t("common.loading") }}</div>
+    <div v-else-if="error" class="page-error">{{ error }}</div>
+    <div v-else>
+      <div class="comment-table">
+        <div class="table-header">
+          <div class="table-cell table-cell-content">内容</div>
+          <div class="table-cell table-cell-tags">标签</div>
+          <div class="table-cell table-cell-time">时间</div>
+          <div class="table-cell table-cell-status">状态</div>
+          <div class="table-cell table-cell-actions">操作</div>
+        </div>
+        <div v-for="item in filteredSays" :key="item.id" class="table-row">
+          <div class="table-cell table-cell-content">
+            <div class="cell-content-text" v-html="item.contentHtml"></div>
+            <span v-if="item.likes" class="cell-likes-number">
+              <PhThumbsUp :size="13" />
+              {{ item.likes }}
+            </span>
+          </div>
+          <div class="table-cell table-cell-tags">
+            <div class="cell-tags-wrapper" v-if="item.tags && item.tags.length">
+              <span v-for="tag in item.tags" :key="tag" class="cell-tag">{{ tag }}</span>
+            </div>
+          </div>
+          <div class="table-cell table-cell-time">
+            <span class="cell-time-text">{{ formatDate(item.created) }}</span>
+          </div>
+          <div class="table-cell table-cell-status">
+            <div class="cell-status-wrapper">
+              <span class="cell-status" :class="`cell-status-${item.status === 'published' ? 'approved' : item.status === 'draft' ? 'pending' : 'rejected'}`">
+                {{ statusLabel(item.status) }}
+              </span>
+            </div>
+          </div>
+          <div class="table-cell table-cell-actions">
+            <div class="table-actions">
+              <select class="status-select" :value="item.status" @change="handleStatusChange(item, $event)">
+                <option value="published">{{ t("says.statusPublished") }}</option>
+                <option value="draft">{{ t("says.statusDraft") }}</option>
+                <option value="hidden">{{ t("says.statusHidden") }}</option>
+              </select>
+              <button class="table-action" @click="openEditModal(item)">{{ t("says.edit") }}</button>
+              <button class="table-action table-action-danger" @click="handleDelete(item.id)">{{ t("says.delete") }}</button>
+            </div>
+          </div>
+        </div>
+        <div v-if="filteredSays.length === 0" class="table-empty">
+          {{ t("says.empty") }}
+        </div>
+      </div>
+      <div v-if="totalPages > 1" class="pagination">
+        <button class="pagination-button" :disabled="page <= 1" @click="goPage(page - 1)">上一页</button>
+        <template v-for="p in visiblePages" :key="p">
+          <button
+            class="pagination-button"
+            :class="{ 'pagination-button-active': p === page }"
+            :disabled="p === page"
+            @click="goPage(p)"
+          >{{ p }}</button>
+        </template>
+        <button class="pagination-button" :disabled="page >= totalPages" @click="goPage(page + 1)">下一页</button>
+      </div>
     </div>
+
+    <!-- Toast -->
+    <div v-if="toastVisible" class="toast" :class="toastType === 'error' ? 'toast-error' : 'toast-success'">{{ toastMessage }}</div>
 
     <!-- Edit/Create Modal -->
     <div v-if="modalVisible" class="modal-overlay" @click.self="closeModal">
@@ -68,18 +117,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import "../../styles/markdown.css";
+import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { fetchSays, createSay, updateSay, deleteSay, updateSayStatus, type SayItem } from "../../api/admin";
 import { useSite } from "../../composables/useSite";
+import { initEmojiPacks } from "../../utils/emoji";
+import { fetchFeatureSettings } from "../../api/admin";
 
 const { t } = useI18n();
 const { currentSiteId } = useSite();
 
 const loading = ref(false);
+const error = ref("");
 const says = ref<SayItem[]>([]);
 const page = ref(1);
 const totalPages = ref(1);
+const statusFilter = ref("");
 const toastMessage = ref("");
 const toastType = ref<"success" | "error">("success");
 const toastVisible = ref(false);
@@ -90,6 +144,25 @@ const editingId = ref<number | null>(null);
 const modalContent = ref("");
 const modalTags = ref("");
 const modalStatus = ref("published");
+
+const filteredSays = computed(() => {
+  if (!statusFilter.value) return says.value;
+  return says.value.filter((item) => item.status === statusFilter.value);
+});
+
+const visiblePages = computed(() => {
+  const total = totalPages.value;
+  const current = page.value;
+  const maxVisible = 7;
+  if (total <= maxVisible) return Array.from({ length: total }, (_, i) => i + 1);
+  let start = current - Math.floor(maxVisible / 2);
+  let end = current + Math.floor(maxVisible / 2);
+  if (start < 1) { start = 1; end = maxVisible; }
+  else if (end > total) { end = total; start = total - maxVisible + 1; }
+  const pages: number[] = [];
+  for (let i = start; i <= end; i++) pages.push(i);
+  return pages;
+});
 
 function showToast(msg: string, type: "success" | "error" = "success") {
   toastMessage.value = msg; toastType.value = type; toastVisible.value = true;
@@ -102,28 +175,47 @@ function statusLabel(status: string): string {
   return t("says.statusHidden");
 }
 
-function formatTime(ts: number): string {
-  const d = new Date(ts);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+function formatDate(value: number) {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleString();
 }
 
-async function loadSays() {
+async function loadSays(targetPage?: number) {
+  const p = typeof targetPage === "number" ? targetPage : page.value;
   loading.value = true;
+  error.value = "";
   try {
-    const res = await fetchSays(page.value, currentSiteId.value);
+    const res = await fetchSays(p, currentSiteId.value);
     says.value = res.data;
+    page.value = res.pagination.page;
     totalPages.value = res.pagination.total;
   } catch (e: any) {
-    showToast(e.message || "加载失败", "error");
+    error.value = e.message || "加载失败";
   } finally {
     loading.value = false;
   }
 }
 
 function goPage(p: number) {
-  if (p >= 1 && p <= totalPages.value) {
-    page.value = p;
-    loadSays();
+  if (p < 1 || p > totalPages.value) return;
+  loadSays(p);
+}
+
+function handleStatusChange(item: SayItem, event: Event) {
+  const target = event.target as HTMLSelectElement;
+  const status = target.value;
+  if (!status || status === item.status) return;
+  changeStatus(item.id, status);
+}
+
+async function changeStatus(id: number, status: string) {
+  try {
+    await updateSayStatus(id, status);
+    showToast("状态更新成功");
+    await loadSays();
+  } catch (e: any) {
+    showToast(e.message || "更新失败", "error");
   }
 }
 
@@ -144,6 +236,7 @@ function openEditModal(item: SayItem) {
 }
 
 function closeModal() {
+  if (submitting.value) return;
   modalVisible.value = false;
 }
 
@@ -168,16 +261,6 @@ async function handleSubmit() {
   }
 }
 
-async function changeStatus(id: number, status: string) {
-  try {
-    await updateSayStatus(id, status);
-    showToast("状态更新成功");
-    await loadSays();
-  } catch (e: any) {
-    showToast(e.message || "更新失败", "error");
-  }
-}
-
 async function handleDelete(id: number) {
   if (!confirm(t("says.confirmDelete"))) return;
   try {
@@ -189,88 +272,59 @@ async function handleDelete(id: number) {
   }
 }
 
-onMounted(() => { loadSays(); });
-watch(currentSiteId, () => { page.value = 1; loadSays(); });
+onMounted(() => {
+  fetchFeatureSettings()
+    .then((res) => {
+      initEmojiPacks(window.location.origin, res.emojiPaths).catch(() => {});
+    })
+    .catch(() => {
+      initEmojiPacks(window.location.origin).catch(() => {});
+    });
+  loadSays(1);
+});
+
+watch(currentSiteId, () => { page.value = 1; loadSays(1); });
 </script>
 
 <style scoped lang="less">
-.says-list { display: flex; flex-direction: column; gap: 16px; }
-.say-card {
-  background: var(--bg-card-solid);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-light);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.say-content {
+@import "../../styles/components/comments.less";
+
+/* Says-specific column widths */
+.table-cell-content { flex-direction: column; flex: 1; align-items: flex-start !important; justify-content: center; min-width: 200px; }
+.table-cell-tags { width: 150px; flex-shrink: 0; }
+.table-cell-time { width: 140px; flex-shrink: 0; }
+.table-cell-status { width: 90px; flex-shrink: 0; }
+.table-cell-actions { width: 230px; flex-shrink: 0; }
+
+.cell-content-text {
   font-size: 14px;
   line-height: 1.6;
   color: var(--text-primary);
   word-wrap: break-word;
+  max-height: 120px;
+  overflow-y: auto;
 }
-.say-content :deep(p) { margin: 0 0 8px; }
-.say-content :deep(p:last-child) { margin-bottom: 0; }
-.say-content :deep(img) { max-width: 100%; height: auto; border-radius: 8px; }
-.say-content :deep(pre) { padding: 12px; overflow-x: auto; background: var(--bg-secondary); border-radius: 6px; font-size: 0.9em; }
-.say-content :deep(code) { font-family: ui-monospace, monospace; background: var(--bg-secondary); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.9em; }
-.say-content :deep(pre code) { padding: 0; background: transparent; }
-.say-content :deep(a) { color: var(--primary-color); text-decoration: none; }
-.say-content :deep(a:hover) { text-decoration: underline; }
-.say-content :deep(blockquote) { margin: 8px 0; padding: 0 12px; border-left: 4px solid var(--border-light); color: var(--text-secondary); }
-.say-content :deep(ul), .say-content :deep(ol) { padding-left: 1.7em; margin: 0 0 8px; }
-.say-content :deep(h1), .say-content :deep(h2), .say-content :deep(h3) { margin-top: 16px; margin-bottom: 8px; font-weight: 600; }
+.cell-content-text :deep(p) { margin: 0 0 8px; }
+.cell-content-text :deep(p:last-child) { margin-bottom: 0; }
+.cell-content-text :deep(img) { max-width: 100%; height: auto; border-radius: 8px; }
+.cell-content-text :deep(pre) { padding: 12px; overflow-x: auto; background: var(--bg-secondary); border-radius: 6px; font-size: 0.9em; }
+.cell-content-text :deep(code) { font-family: ui-monospace, monospace; background: var(--bg-secondary); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.9em; }
+.cell-content-text :deep(pre code) { padding: 0; background: transparent; }
+.cell-content-text :deep(a) { color: var(--primary-color); text-decoration: none; }
+.cell-content-text :deep(blockquote) { margin: 8px 0; padding: 0 12px; border-left: 4px solid var(--border-light); color: var(--text-secondary); }
+.cell-content-text :deep(ul), .cell-content-text :deep(ol) { padding-left: 1.7em; margin: 0 0 8px; }
 
-.say-footer {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-.say-status-tag {
+.cell-tags-wrapper { display: flex; flex-wrap: wrap; gap: 4px; }
+.cell-tag {
   padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  flex-shrink: 0;
-}
-.say-status-published { background: #dafbe1; color: #1a7f37; }
-.say-status-draft { background: #fff8c5; color: #9a6700; }
-.say-status-hidden { background: #f6f8fa; color: #6e7781; }
-.say-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.say-tag {
-  padding: 2px 8px;
-  background: var(--bg-secondary);
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-.say-time { white-space: nowrap; }
-.say-likes { white-space: nowrap; }
-.say-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
-
-.card-button {
-  padding: 6px 14px;
+  background-color: var(--bg-hover);
   border-radius: var(--radius-sm);
-  border: none;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+  font-size: 12px;
+  color: var(--text-secondary);
 }
-.card-button.primary { background: var(--primary-color); color: var(--text-inverse); }
-.card-button.primary:hover { background: var(--primary-hover); }
-.card-button.secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-light); }
-.card-button.secondary:hover { background: var(--bg-hover); }
-.card-button.small { padding: 4px 10px; font-size: 12px; }
-.card-button.danger { background: #feebe9; color: #cf222e; }
-.card-button.danger:hover { background: #fd8c73; color: #fff; }
-.card-button:disabled { opacity: 0.6; cursor: not-allowed; }
-.pagination { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 20px 0; }
-.page-info { font-size: 13px; color: var(--text-secondary); }
+.cell-time-text { font-size: 12px; color: var(--text-tertiary); white-space: nowrap; }
+
+/* Modal */
 .modal-overlay {
   position: fixed; inset: 0; background-color: rgba(0,0,0,0.25); backdrop-filter: blur(4px);
   display: flex; align-items: center; justify-content: center; z-index: 2000;
@@ -298,4 +352,13 @@ watch(currentSiteId, () => { page.value = 1; loadSays(); });
 .modal-btn.primary:hover { background: var(--primary-hover); }
 .modal-btn.secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-light); }
 .modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Toast */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  padding: 10px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500;
+  z-index: 3000; box-shadow: var(--shadow-card);
+}
+.toast-success { background: var(--color-success); color: #fff; }
+.toast-error { background: var(--color-danger); color: #fff; }
 </style>
