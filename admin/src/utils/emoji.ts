@@ -18,6 +18,15 @@ let _loaded = false;
 let _loadingPromise: Promise<EmojiPack[]> | null = null;
 
 /**
+ * 重置表情包缓存，允许重新加载
+ */
+export function reloadEmojiPacks() {
+  _packs = [];
+  _loaded = false;
+  _loadingPromise = null;
+}
+
+/**
  * 初始化表情包
  * @param apiOrigin - API 源地址
  * @param emojiPaths - 用户配置的表情包路径数组（可选）

@@ -21,32 +21,30 @@
           {{ pack.icon || pack.name }}
         </button>
       </div>
-      <div class="emoji-grid">
-        <template v-if="packs[activeTab] && packs[activeTab].type === 'text'">
-          <button
-            v-for="(item, idx) in (packs[activeTab]?.items || [])"
-            :key="idx"
-            class="emoji-item-text"
-            @click="insertText(item)"
-            type="button"
-          >{{ item }}</button>
-        </template>
-        <template v-else>
-          <button
-            v-for="(item, idx) in (packs[activeTab]?.items || [])"
-            :key="idx"
-            class="emoji-item-img"
-            @click="insertImage(packs[activeTab], item)"
-            type="button"
-          >
-            <img
-              :src="getEmojiUrl(packs[activeTab], item)"
-              :alt="item"
-              loading="lazy"
-              referrerpolicy="no-referrer"
-            />
-          </button>
-        </template>
+      <div v-if="packs[activeTab] && packs[activeTab].type === 'text'" class="emoji-grid-text">
+        <button
+          v-for="(item, idx) in (packs[activeTab]?.items || [])"
+          :key="idx"
+          class="emoji-item-text"
+          @click="insertText(item)"
+          type="button"
+        >{{ item }}</button>
+      </div>
+      <div v-else class="emoji-grid">
+        <button
+          v-for="(item, idx) in (packs[activeTab]?.items || [])"
+          :key="idx"
+          class="emoji-item-img"
+          @click="insertImage(packs[activeTab], item)"
+          type="button"
+        >
+          <img
+            :src="getEmojiUrl(packs[activeTab], item)"
+            :alt="item"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+          />
+        </button>
       </div>
     </div>
   </div>
@@ -54,7 +52,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { getEmojiPacks, type EmojiPack } from "../utils/emoji";
+import { getEmojiPacks, reloadEmojiPacks, initEmojiPacks, type EmojiPack } from "../utils/emoji";
+import { fetchFeatureSettings } from "../api/admin";
 
 const props = defineProps<{
   target?: HTMLTextAreaElement | null;
@@ -68,7 +67,17 @@ const packs = ref<EmojiPack[]>([]);
 const panelVisible = ref(false);
 const activeTab = ref(0);
 
-function togglePanel() {
+async function togglePanel() {
+  if (!panelVisible.value) {
+    reloadEmojiPacks();
+    try {
+      const res = await fetchFeatureSettings();
+      await initEmojiPacks(window.location.origin, res.emojiPaths);
+    } catch {
+      await initEmojiPacks(window.location.origin);
+    }
+    packs.value = getEmojiPacks();
+  }
   panelVisible.value = !panelVisible.value;
 }
 
@@ -84,7 +93,7 @@ function insertText(text: string) {
 }
 
 function insertImage(pack: EmojiPack, item: string) {
-  const code = `:${pack.prefix}${item}`;
+  const code = `:${pack.prefix}${item}:`;
   emit("insert", code);
 }
 
@@ -165,6 +174,16 @@ onMounted(() => {
   overflow-y: auto;
   flex: 1;
 }
+.emoji-grid-text {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  overflow-y: auto;
+  flex: 1;
+  align-items: center;
+  align-content: flex-start;
+}
 .emoji-item-img {
   width: 36px; height: 36px;
   border: none; background: transparent; cursor: pointer;
@@ -175,10 +194,12 @@ onMounted(() => {
 .emoji-item-img:hover { background: var(--bg-hover); }
 .emoji-item-img img { width: 28px; height: 28px; object-fit: contain; }
 .emoji-item-text {
-  width: 36px; height: 36px;
+  min-height: 32px;
+  padding: 4px 8px;
   border: none; background: transparent; cursor: pointer;
   border-radius: var(--radius-sm);
-  font-size: 18px;
+  font-size: 16px;
+  white-space: nowrap;
   display: flex; align-items: center; justify-content: center;
   transition: background var(--transition-fast);
 }
