@@ -112,6 +112,10 @@ export async function deleteSetting(key: string): Promise<void> {
  */
 export async function ensureSchema(): Promise<void> {
   try {
+    // Clean up deprecated tables
+    await db.query('DROP TABLE IF EXISTS page_stats');
+    await db.query('DROP TABLE IF EXISTS page_visit_daily');
+
     await db.query(`CREATE TABLE IF NOT EXISTS "Comment" (
       id SERIAL PRIMARY KEY,
       created BIGINT NOT NULL,
