@@ -118,8 +118,8 @@ export class VWDComments {
       const serverConfig = await this._loadServerConfig();
       if (!this._mounted) return;
 
-      // 设置语言
-      let lang = this.config.lang || serverConfig.widgetLanguage || 'auto';
+      // 设置语言（前端配置，auto 自动检测浏览器语言）
+      let lang = this.config.lang || 'auto';
       if (lang === 'auto' && typeof navigator !== 'undefined') {
         const browserLang = navigator.language || navigator.userLanguage;
         if (browserLang.toLowerCase().startsWith('en')) {
