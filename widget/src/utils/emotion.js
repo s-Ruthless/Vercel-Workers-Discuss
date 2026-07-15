@@ -66,7 +66,7 @@ export async function loadEmojiPacks(emojiConfig, apiOrigin) {
 
 /**
  * 获取表情图片 URL
- * prefix 仅用于短代码语法（:aru_smile:），不参与文件名
+ * 文件名格式: prefix + item + .type (如 bb_doge.png)
  * @param {Object} pack - 表情包对象
  * @param {string} item - 表情项名称
  * @returns {string} 图片 URL
@@ -74,7 +74,8 @@ export async function loadEmojiPacks(emojiConfig, apiOrigin) {
 export function getEmojiUrl(pack, item) {
   const folder = (pack.folder || '').replace(/\/+$/, '');
   const ext = pack.type || 'png';
-  return `${folder}/${item}.${ext}`;
+  const prefix = pack.prefix || '';
+  return `${folder}/${prefix}${item}.${ext}`;
 }
 
 /**
