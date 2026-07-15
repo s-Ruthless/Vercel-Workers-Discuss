@@ -76,6 +76,19 @@ export interface VWDCommentsConfig {
    * Placeholder text for comment input
    */
   commentPlaceholder?: string;
+
+  /**
+   * Emoji pack configuration (Waline style)
+   * Array of URLs (each pointing to a directory containing info.json)
+   * or pack config objects
+   * @default [apiBaseUrl + '/emotion/aru', apiBaseUrl + '/emotion/twemoji']
+   */
+  emoji?: (string | object)[];
+
+  /**
+   * Enable/Disable emoji picker
+   */
+  enableEmoji?: boolean;
 }
 
 export class VWDComments {

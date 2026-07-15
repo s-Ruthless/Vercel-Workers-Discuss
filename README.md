@@ -25,7 +25,7 @@
 - **S3 备份**：兼容 AWS S3 / Cloudflare R2 / MinIO，支持自动备份与恢复
 - **访问统计**：PV 统计、页面访问明细、每日趋势图表
 - **点赞功能**：文章点赞和评论点赞
-- **表情系统**：内置阿鲁表情包和 Twemoji，支持自定义表情包
+- **表情系统**：Waline 风格前端配置表情包，内置阿鲁和 Twemoji，支持自定义 CDN 表情包
 - **数据迁移**：支持从 Twikoo、Artalk、Valine 导入评论数据
 - **多站点**：支持多站点管理，通过 site_id 隔离数据
 - **安全**：IP/邮箱黑名单、域名白名单、评论审核机制
@@ -79,7 +79,7 @@ cwd-vercel/
 ├── sql/
 │   └── schema.sql        #   PostgreSQL 数据表定义
 ├── scripts/
-│   ├── copy-assets.cjs   #   构建脚本：复制表情资源 + 生成 OwO.json
+│   ├── copy-assets.cjs   #   构建脚本：复制表情资源
 │   └── init-db.cjs       #   数据库初始化脚本
 ├── vercel.json           #   Vercel 配置（路由、CORS、函数超时）
 ├── package.json
@@ -273,7 +273,7 @@ npm run build # 构建到 dist/ 并自动复制到 ../public/vwd.js
 | POST | `/api/like` | 文章点赞 |
 | POST | `/api/analytics/visit` | 上报访问记录 |
 | GET | `/api/analytics/pv` | 获取页面 PV |
-| GET | `/api/emotions` | 获取表情列表 |
+| ~~GET~~ | `/api/emotions` | ~~已移除（改为前端配置）~~ |
 | GET | `/api/config/comments` | 获取公开配置 |
 | GET | `/api/health` | 健康检查 |
 

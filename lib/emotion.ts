@@ -1,39 +1,38 @@
 /**
- * 表情数据生成
- * 自动扫描 public/emotion 目录生成 OwO.json
+ * 表情数据生成 (Waline 风格 info.json 格式)
+ * 自动扫描 emotion 目录，为每个表情包生成 info.json
  */
 import fs from 'fs';
 import path from 'path';
 
-export function generateOwoData(emotionDir: string): Record<string, any> {
-  const result: Record<string, any> = {};
-
-  // 1. 颜文字
-  const emoticonsPath = path.join(emotionDir, 'emoticons.json');
-  if (fs.existsSync(emoticonsPath)) {
-    const emoticons = JSON.parse(fs.readFileSync(emoticonsPath, 'utf-8'));
-    result['颜文字'] = { type: 'text', container: emoticons };
-  }
-
-  // 2. 图片表情包
+export function generateInfoJson(emotionDir: string): void {
   const entries = fs.readdirSync(emotionDir, { withFileTypes: true });
+
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
     const pkgDir = path.join(emotionDir, entry.name);
     const metaPath = path.join(pkgDir, 'meta.json');
 
+    // 如果已有 info.json 则跳过
+    const infoPath = path.join(pkgDir, 'info.json');
+    if (fs.existsSync(infoPath)) continue;
+
     if (!fs.existsSync(metaPath)) continue;
 
+    // 从旧版 meta.json 生成 info.json
     const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
     const items = meta.items || {};
-    const container = Object.entries(items).map(([icon, text]) => ({ icon, text }));
+    const itemNames = Object.keys(items);
 
-    result[meta.displayName || entry.name] = {
-      type: 'image',
-      name: entry.name,
-      container,
+    const info = {
+      name: meta.displayName || entry.name,
+      prefix: `${entry.name}_`,
+      type: 'png',
+      icon: itemNames[0] || '',
+      items: itemNames,
     };
-  }
 
-  return result;
+    fs.writeFileSync(infoPath, JSON.stringify(info, null, 2), 'utf-8');
+    console.log(`[emotion] Generated info.json for ${entry.name}`);
+  }
 }

@@ -5,7 +5,7 @@ import { Component } from './Component.js';
 import { ReplyEditor } from './ReplyEditor.js';
 import { formatRelativeTime } from '@/utils/date.js';
 import { replaceEmojiInHtml } from '@/utils/markdown.js';
-import { replaceEmotionUrlsInHtml } from '@/utils/emotion.js';
+import { replaceEmojiSyntax, replaceEmotionUrlsInHtml } from '@/utils/emotion.js';
 
 export class CommentItem extends Component {
   static _likeDebounce = new Map();
@@ -180,7 +180,7 @@ export class CommentItem extends Component {
     // 设置评论内容
     const contentEl = root.querySelector('.vwd-comment-content');
     if (contentEl) {
-      contentEl.innerHTML = replaceEmotionUrlsInHtml(replaceEmojiInHtml(comment.contentHtml), this.props.emotionUrl);
+      contentEl.innerHTML = replaceEmojiSyntax(replaceEmotionUrlsInHtml(replaceEmojiInHtml(comment.contentHtml), this.props.apiOrigin || ''), this.props.emojiPacks || []);
     }
 
     // 创建回复编辑器
@@ -199,7 +199,7 @@ export class CommentItem extends Component {
           onCancel: () => this.handleCancelReply(),
           onClearError: () => this.handleClearReplyError(),
           placeholder: this.props.replyPlaceholder,
-          emotionUrl: this.props.emotionUrl,
+          emojiPacks: this.props.emojiPacks,
           enableEmoji: this.props.enableEmoji,
           t: this.t
         });
@@ -228,7 +228,8 @@ export class CommentItem extends Component {
             adminBadge: this.props.adminBadge,
             enableCommentLike: this.props.enableCommentLike,
             replyPlaceholder: this.props.replyPlaceholder,
-            emotionUrl: this.props.emotionUrl,
+            emojiPacks: this.props.emojiPacks,
+            apiOrigin: this.props.apiOrigin,
             enableEmoji: this.props.enableEmoji,
             onReply: this.props.onReply,
             onLikeComment: this.props.onLikeComment,
@@ -278,7 +279,7 @@ export class CommentItem extends Component {
           onCancel: () => this.handleCancelReply(),
           onClearError: () => this.handleClearReplyError(),
           placeholder: this.props.replyPlaceholder,
-          emotionUrl: this.props.emotionUrl,
+          emojiPacks: this.props.emojiPacks,
           enableEmoji: this.props.enableEmoji,
           t: this.t
         });
@@ -308,6 +309,9 @@ export class CommentItem extends Component {
           currentUser: this.props.currentUser,
           enableCommentLike: this.props.enableCommentLike,
           replyPlaceholder: this.props.replyPlaceholder,
+          emojiPacks: this.props.emojiPacks,
+          apiOrigin: this.props.apiOrigin,
+          enableEmoji: this.props.enableEmoji,
           onLikeComment: this.props.onLikeComment,
         });
       });

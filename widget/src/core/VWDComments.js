@@ -8,7 +8,7 @@ import { createCommentStore } from './store.js';
 import { CommentForm } from '@/components/CommentForm.js';
 import { CommentList } from '@/components/CommentList.js';
 import { ImagePreview } from '@/components/ImagePreview.js';
-import { setApiBaseUrl, fetchEmotionData } from '@/utils/emotion.js';
+import { initEmojiPacks, getEmojiPacks, replaceEmojiSyntax, replaceEmotionUrlsInHtml } from '@/utils/emotion.js';
 import styles from '@/styles/main.css?inline';
 import { locales } from '@/locales/index.js';
 
@@ -85,8 +85,6 @@ export class VWDComments {
         enableArticleLike: typeof data.enableArticleLike === 'boolean' ? data.enableArticleLike : true,
         enableImageLightbox: typeof data.enableImageLightbox === 'boolean' ? data.enableImageLightbox : false,
         commentPlaceholder: typeof data.commentPlaceholder === 'string' ? data.commentPlaceholder : undefined,
-        widgetLanguage: typeof data.widgetLanguage === 'string' ? data.widgetLanguage : undefined,
-        emotionUrl: typeof data.emotionUrl === 'string' ? data.emotionUrl : undefined,
         enableEmoji: typeof data.enableEmoji === 'boolean' ? data.enableEmoji : true,
       };
     } catch (e) {
@@ -165,13 +163,24 @@ export class VWDComments {
       this.config.enableCommentLike = serverConfig.enableCommentLike;
       this.config.enableArticleLike = serverConfig.enableArticleLike;
       this.config.enableImageLightbox = serverConfig.enableImageLightbox;
-      this.config.emotionUrl = serverConfig.emotionUrl || (this.config.apiBaseUrl ? this.config.apiBaseUrl.replace(/\/+$/, '') + '/emotion' : '');
       this.config.enableEmoji = serverConfig.enableEmoji;
       this.config.commentPlaceholder = typeof serverConfig.commentPlaceholder === 'string' ? serverConfig.commentPlaceholder : this.config.commentPlaceholder;
 
-      setApiBaseUrl(this.config.apiBaseUrl);
+      // 初始化表情包（Waline 风格：前端配置）
+      this.config.apiOrigin = this.config.apiBaseUrl ? this.config.apiBaseUrl.replace(/\/+$/, '') : '';
+      const defaultEmoji = [
+        `${this.config.apiOrigin}/emotion/aru`,
+        `${this.config.apiOrigin}/emotion/twemoji`,
+      ];
+      this.config.emoji = this.config.emoji || defaultEmoji;
+      this.config.emojiPacks = [];
       if (this.config.enableEmoji !== false) {
-        fetchEmotionData().catch(() => {});
+        initEmojiPacks(this.config.emoji, this.config.apiOrigin)
+          .then((packs) => {
+            this.config.emojiPacks = packs;
+            this._onEmojiPacksLoaded();
+          })
+          .catch(() => {});
       }
 
       if (this.config.enableImageLightbox === true) {
@@ -341,7 +350,7 @@ export class VWDComments {
         adminEmail: this.config.adminEmail,
         onVerifyAdmin: (key) => this.api.verifyAdminKey(key),
         placeholder: this.config.commentPlaceholder,
-        emotionUrl: this.config.emotionUrl,
+        emojiPacks: this.config.emojiPacks || [],
         enableEmoji: this.config.enableEmoji,
         t: this.t
       });
@@ -385,7 +394,8 @@ export class VWDComments {
         adminBadge: this.config.adminBadge,
         enableCommentLike: this.config.enableCommentLike !== false,
         replyPlaceholder: this.config.commentPlaceholder,
-        emotionUrl: this.config.emotionUrl,
+        emojiPacks: this.config.emojiPacks || [],
+        apiOrigin: this.config.apiOrigin || '',
         enableEmoji: this.config.enableEmoji,
         onRetry: () => this.store.loadComments(),
         onReply: (commentId) => this.store.startReply(commentId),
@@ -432,7 +442,7 @@ export class VWDComments {
         formErrors: state.formErrors,
         submitting: state.submitting,
         adminEmail: this.config.adminEmail,
-        emotionUrl: this.config.emotionUrl,
+        emojiPacks: this.config.emojiPacks || [],
         enableEmoji: this.config.enableEmoji,
       });
     }
@@ -512,7 +522,7 @@ export class VWDComments {
         replyError: state.replyError,
         submitting: state.submitting,
         currentUser: state.form,
-        emotionUrl: this.config.emotionUrl,
+        emojiPacks: this.config.emojiPacks || [],
         enableEmoji: this.config.enableEmoji,
       });
     }
@@ -733,7 +743,8 @@ export class VWDComments {
   _handleImageClick(e) {
     const target = e.target;
     if (target.tagName === 'IMG' && target.closest('.vwd-comment-content')) {
-      if (target.classList.contains('vwd-emotion-img') || (target.src && target.src.indexOf('/emotion/') !== -1)) {
+      // 表情图片不触发灯箱
+      if (target.classList.contains('vwd-emotion-img')) {
         return;
       }
       e.preventDefault();
@@ -741,6 +752,20 @@ export class VWDComments {
       if (this.imagePreview) {
         this.imagePreview.open(target.src);
       }
+    }
+  }
+
+  _onEmojiPacksLoaded() {
+    // 表情包加载完成后，更新已渲染的组件
+    if (this.commentForm) {
+      this.commentForm.setProps({
+        emojiPacks: this.config.emojiPacks || [],
+      });
+    }
+    if (this.commentList) {
+      this.commentList.setProps({
+        emojiPacks: this.config.emojiPacks || [],
+      });
     }
   }
 

@@ -186,12 +186,9 @@ export async function postComment(c: Context) {
   const name = checkContent(rawName) || 'Anonymous';
   const url = rawUrl?.trim() || null;
 
-  // Auto-detect emotion URL from request origin
-  const reqUrl = new URL(c.req.url);
-  const emotionUrl = `${reqUrl.origin}/emotion`;
-
-  const contentWithEmotion = replaceEmotionSyntax(cleanedContent, emotionUrl);
-  const html = await marked.parse(contentWithEmotion, { async: true });
+  // 将旧版表情语法转为短代码，不再生成 img 标签（前端渲染）
+  const contentWithEmoji = replaceEmotionSyntax(cleanedContent);
+  const html = await marked.parse(contentWithEmoji, { async: true });
   const contentHtml = xss(html, {
     whiteList: {
       ...xssWhiteList,
@@ -286,38 +283,9 @@ export async function getPublicConfig(c: Context) {
     // Strip sensitive fields
     const { adminKey, adminKeySet, blockedIps, blockedEmails, ...publicSettings } = settings as any;
 
-    // Auto-detect emotion URL from request origin
-    const url = new URL(c.req.url);
-    const emotionUrl = `${url.origin}/emotion`;
-
-    return c.json({ ...publicSettings, ...featureSettings, emotionUrl });
+    return c.json({ ...publicSettings, ...featureSettings });
   } catch (e: any) {
     return c.json({ message: e.message || '加载评论配置失败' }, 500);
-  }
-}
-
-// ==================== 表情数据接口 ====================
-export async function getEmotions(c: Context) {
-  try {
-    const url = new URL(c.req.url);
-    const baseUrl = `${url.origin}/emotion`;
-
-    // Try to read OwO.json from public/emotion directory
-    // On Vercel, static files in /public are served at root, so /emotion/OwO.json should be accessible
-    // We'll try to fetch it, or return a minimal response
-    try {
-      const response = await fetch(`${url.origin}/emotion/OwO.json`);
-      if (response.ok) {
-        const data = await response.json();
-        return c.json({ data, baseUrl });
-      }
-    } catch {
-      // Fallback if fetch fails
-    }
-
-    return c.json({ data: {}, baseUrl });
-  } catch (e: any) {
-    return c.json({ message: e.message || '获取表情数据失败' }, 500);
   }
 }
 

@@ -4,7 +4,7 @@
 import { Component } from './Component.js';
 import { EmojiPicker } from './EmojiPicker.js';
 import { renderMarkdown } from '../utils/markdown.js';
-import { replaceEmotionSyntax } from '../utils/emotion.js';
+import { replaceEmojiSyntax } from '../utils/emotion.js';
 
 export class ReplyEditor extends Component {
   constructor(container, props = {}) {
@@ -151,7 +151,7 @@ export class ReplyEditor extends Component {
                 children: [
                   this.createElement('div', {
                     className: 'vwd-preview-content vwd-comment-content',
-                    html: renderMarkdown(replaceEmotionSyntax(this.state.content, this.props.emotionUrl || '')),
+                    html: renderMarkdown(replaceEmojiSyntax(this.state.content, this.props.emojiPacks || [])),
                   }),
                 ],
               }),
@@ -168,7 +168,7 @@ export class ReplyEditor extends Component {
     const emojiContainer = root.querySelector('.vwd-emoji-picker-container');
     if (emojiContainer && this.props.enableEmoji !== false) {
       this.emojiPicker = new EmojiPicker(emojiContainer, {
-        emotionUrl: this.props.emotionUrl || '',
+        emojiPacks: this.props.emojiPacks || [],
         onSelect: (insertText) => this.insertEmoji(insertText),
         onClose: () => { this.state.showEmojiPicker = false; },
       });
@@ -188,6 +188,11 @@ export class ReplyEditor extends Component {
       this.state.content = this.props.content;
       this.render();
       return;
+    }
+
+    // 更新表情选择器
+    if (this.emojiPicker && this.props.emojiPacks !== prevProps?.emojiPacks) {
+      this.emojiPicker.setProps({ emojiPacks: this.props.emojiPacks || [] });
     }
 
     if (JSON.stringify(this.props.currentUser) !== JSON.stringify(prevProps?.currentUser)) {
@@ -242,7 +247,7 @@ export class ReplyEditor extends Component {
   updatePreviewContent(content) {
     const previewContent = this.elements.root?.querySelector('.vwd-preview-content');
     if (previewContent) {
-      previewContent.innerHTML = renderMarkdown(replaceEmotionSyntax(content, this.props.emotionUrl || ''));
+      previewContent.innerHTML = renderMarkdown(replaceEmojiSyntax(content, this.props.emojiPacks || []));
     }
   }
 

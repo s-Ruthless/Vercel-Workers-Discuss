@@ -389,6 +389,7 @@ hexo.extend.injector.register('body_end', `
 | POST | `/api/analytics/visit` | 上报页面访问 |
 | GET | `/api/analytics/pv?post_slug=/your-page` | 获取页面 PV |
 | GET | `/api/config/comments` | 获取公开配置 |
-| GET | `/api/emotions` | 获取表情数据 |
+
+> 表情包已改为前端配置（Waline 风格），不再提供 `/api/emotions` 接口。
 
 完整 API 文档见项目根目录 `README.md`。

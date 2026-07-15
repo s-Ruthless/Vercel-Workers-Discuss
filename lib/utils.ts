@@ -83,16 +83,16 @@ export async function getCravatar(
 }
 
 /**
- * 表情语法替换
+ * 表情语法替换（旧版兼容，将 ::pkg:icon:: 转为 :pkg_icon: 短代码）
  */
-export function replaceEmotionSyntax(content: string, emotionUrl: string): string {
-  if (!content || !emotionUrl) return content;
-  const baseUrl = emotionUrl.replace(/\/+$/, '');
-  return content.replace(/::(\w+):(\w+)::/g, (match, pkg, icon) => {
+export function replaceEmotionSyntax(content: string, _emotionUrl?: string): string {
+  if (!content) return content;
+  // 将旧版 ::pkg:icon:: 语法转为新版 :pkg_icon: 短代码
+  return content.replace(/::(\w+):(\w+)::/g, (_match, pkg, icon) => {
     if (!/^[a-zA-Z]+$/.test(pkg) || !/^[a-zA-Z0-9]+$/.test(icon)) {
-      return match;
+      return _match;
     }
-    return `<img src="${baseUrl}/${pkg}/${icon}.png" alt="${icon}" title="${icon}" class="vwd-emotion-img" referrerpolicy="no-referrer" loading="eager">`;
+    return `:${pkg}_${icon}:`;
   });
 }
 

@@ -69,7 +69,8 @@ export class CommentList extends Component {
           adminBadge: this.props.adminBadge,
           enableCommentLike: this.props.enableCommentLike,
           replyPlaceholder: this.props.replyPlaceholder,
-          emotionUrl: this.props.emotionUrl,
+          emojiPacks: this.props.emojiPacks,
+          apiOrigin: this.props.apiOrigin,
           enableEmoji: this.props.enableEmoji,
           onReply: (commentId) => this.handleReply(commentId),
           onSubmitReply: (commentId) => this.handleSubmitReply(commentId),
@@ -137,7 +138,8 @@ export class CommentList extends Component {
           submitting: this.props.submitting,
           currentUser: this.props.currentUser,
           enableCommentLike: this.props.enableCommentLike,
-          emotionUrl: this.props.emotionUrl,
+          emojiPacks: this.props.emojiPacks,
+          apiOrigin: this.props.apiOrigin,
           enableEmoji: this.props.enableEmoji,
           onLikeComment: (commentId, isLike) => this.handleLikeComment(commentId, isLike)
         });

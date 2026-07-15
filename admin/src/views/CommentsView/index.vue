@@ -55,7 +55,7 @@
             </div>
           </div>
           <div class="table-cell table-cell-content">
-            <div class="cell-content-text" v-html="item.contentHtml"></div>
+            <div class="cell-content-text" v-html="renderContent(item.contentHtml)"></div>
           </div>
           <div class="table-cell table-cell-path">
             <a :href="item.postUrl ?? undefined" target="_blank" class="cell-path" :title="item.postUrl ?? undefined">
@@ -156,6 +156,7 @@ import {
   blockEmail,
 } from "../../api/admin";
 import { useSite } from "../../composables/useSite";
+import { initEmojiPacks, renderContent } from "../../utils/emoji";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -200,6 +201,10 @@ function formatDate(value: number | string) {
   const d = new Date(num);
   if (Number.isNaN(d.getTime())) return String(value);
   return d.toLocaleString();
+}
+
+function renderContentText(html: string): string {
+  return renderContent(html);
 }
 
 function formatStatus(status: string) {
@@ -355,6 +360,9 @@ async function submitEdit() {
 }
 
 onMounted(() => {
+  // 初始化表情包
+  initEmojiPacks(window.location.origin).catch(() => {});
+
   const p = route.query.p;
   let initialPage = 1;
   if (typeof p === "string") {

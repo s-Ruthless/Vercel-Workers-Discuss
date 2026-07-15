@@ -10,7 +10,7 @@ import {
   trackVisit, getPagePv,
   getLikeStatus, likePage,
   likeComment,
-  getPublicConfig, getEmotions,
+  getPublicConfig,
 } from '../src/public.js';
 import {
   adminLogin, getAdminComments, deleteComment, updateStatus,
@@ -81,7 +81,6 @@ app.post('/api/like', likePage);
 app.post('/api/analytics/visit', trackVisit);
 app.get('/api/analytics/pv', getPagePv);
 
-app.get('/api/emotions', getEmotions);
 app.get('/api/config/comments', getPublicConfig);
 
 // ==================== Admin API ====================

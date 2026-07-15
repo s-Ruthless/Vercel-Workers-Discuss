@@ -321,12 +321,9 @@ export async function updateComment(c: Context) {
   }
   const contentText = cleanedContent;
 
-  // Auto-detect emotion URL from request origin
-  const reqUrl = new URL(c.req.url);
-  const emotionUrl = `${reqUrl.origin}/emotion`;
-
-  const contentWithEmotion = replaceEmotionSyntax(cleanedContent, emotionUrl);
-  const html = await marked.parse(contentWithEmotion, { async: true });
+  // 将旧版表情语法转为短代码，不再生成 img 标签（前端渲染）
+  const contentWithEmoji = replaceEmotionSyntax(cleanedContent);
+  const html = await marked.parse(contentWithEmoji, { async: true });
   const contentHtml = xss(html, {
     whiteList: {
       ...xssWhiteList,

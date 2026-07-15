@@ -1,0 +1,14 @@
+{
+  "name": "阿鲁",
+  "prefix": "aru_",
+  "type": "png",
+  "icon": "smile",
+  "items": [
+    "angry", "bigeye", "blood", "blood2", "cheer", "clap", "confuse",
+    "crying", "cryingface", "dead", "despise", "discovertruth", "distressed",
+    "diving", "envious", "flower", "frown", "insidious", "knife", "lurking",
+    "meditation", "nomatter", "nose", "pouting", "proud", "shit", "shutup",
+    "shy", "shy2", "smile", "speechless", "spit", "surprised", "surrender",
+    "sweat", "thumb", "tongue", "unhappy"
+  ]
+}

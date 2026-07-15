@@ -1,9 +1,9 @@
 /**
- * EmojiPicker 表情选择器组件
- * 表情数据从后端 /api/emotions 接口异步获取
+ * EmojiPicker 表情选择器组件 (Waline 风格)
+ * 支持前端配置表情包，使用 :prefix_item: 短代码
  */
 import { Component } from './Component.js';
-import { fetchEmotionData, getEmotionImageUrl } from '../utils/emotion.js';
+import { getEmojiUrl, getTabIconUrl } from '../utils/emotion.js';
 
 export class EmojiPicker extends Component {
   constructor(container, props = {}) {
@@ -11,27 +11,15 @@ export class EmojiPicker extends Component {
     this.state = {
       activeCategory: 0,
       open: false,
-      owoData: {},
       loading: false,
       loaded: false,
     };
     this._outsideClickHandler = null;
   }
 
-  async _loadData() {
-    if (this.state.loaded || this.state.loading) return;
-    this.state.loading = true;
-    this.render();
-    const data = await fetchEmotionData();
-    this.state.owoData = data;
-    this.state.loaded = true;
-    this.state.loading = false;
-    this.render();
-  }
-
-  _buildGridChildren(emotionUrl) {
-    const categories = Object.keys(this.state.owoData);
-    if (categories.length === 0) {
+  _buildGridChildren() {
+    const packs = this.props.emojiPacks || [];
+    if (packs.length === 0) {
       return [
         this.createElement('div', {
           className: 'vwd-emoji-empty',
@@ -39,50 +27,73 @@ export class EmojiPicker extends Component {
         }),
       ];
     }
-    const activeKey = categories[this.state.activeCategory];
-    const activeData = this.state.owoData[activeKey];
-    if (!activeData || !activeData.container) return [];
+
+    const activePack = packs[this.state.activeCategory];
+    if (!activePack || !activePack.items) return [];
 
     const self = this;
-    const gridItems = activeData.container.map(function (item) {
-      if (activeData.type === 'image') {
-        const packageName = activeData.name;
-        const imgUrl = getEmotionImageUrl(packageName, item.icon, emotionUrl);
+    const gridItems = activePack.items.map(function (item) {
+      const title = activePack.textMap && activePack.textMap[item] ? activePack.textMap[item] : item;
+      if (activePack.type === 'text') {
+        // 文本表情：直接显示文本
         return self.createElement('div', {
-          className: 'vwd-emoji-item',
+          className: 'vwd-emoji-item vwd-emoji-item-text',
           attributes: {
-            title: item.text || item.icon,
-            onClick: function () { self.handleSelect(packageName, item.icon, 'image'); },
+            title: title,
+            onClick: function () { self.handleSelectText(item); },
           },
-          children: [
-            self.createElement('img', {
-              attributes: {
-                src: imgUrl,
-                alt: item.text || item.icon,
-                loading: 'eager',
-                referrerpolicy: 'no-referrer',
-              },
-            }),
-          ],
+          text: item,
         });
       }
+      // 图片表情
+      const imgUrl = getEmojiUrl(activePack, item);
       return self.createElement('div', {
-        className: 'vwd-emoji-item vwd-emoji-item-text',
+        className: 'vwd-emoji-item',
         attributes: {
-          title: item.text || item.icon,
-          onClick: function () { self.handleSelect(null, item.icon, 'text'); },
+          title: title,
+          onClick: function () { self.handleSelect(activePack.prefix, item); },
         },
-        text: item.icon,
+        children: [
+          self.createElement('img', {
+            attributes: {
+              src: imgUrl,
+              alt: title,
+              loading: 'lazy',
+              referrerpolicy: 'no-referrer',
+            },
+          }),
+        ],
       });
     });
 
-    const tabs = categories.map(function (cat, index) {
+    // Tab 栏：显示每个包的代表图标或名称
+    const tabs = packs.map(function (pack, index) {
+      const tabChildren = [];
+      if (pack.type === 'text') {
+        // 文本表情包：显示名称
+        tabChildren.push(self.createTextNode(pack.name || '颜'));
+      } else {
+        const iconUrl = getTabIconUrl(pack);
+        if (iconUrl) {
+          tabChildren.push(self.createElement('img', {
+            attributes: {
+              src: iconUrl,
+              alt: pack.name,
+              loading: 'lazy',
+              referrerpolicy: 'no-referrer',
+            },
+          }));
+        } else {
+          tabChildren.push(self.createTextNode(pack.name || ''));
+        }
+      }
       return self.createElement('div', {
         className: 'vwd-emoji-tab ' + (index === self.state.activeCategory ? 'vwd-emoji-tab-active' : ''),
         attributes: {
           onClick: function (e) { self.handleTabChange(index, e); },
+          title: pack.name || '',
         },
-        text: cat,
+        children: tabChildren,
       });
     });
 
@@ -99,8 +110,8 @@ export class EmojiPicker extends Component {
   }
 
   render() {
-    const emotionUrl = this.props.emotionUrl;
-    const isLoading = this.state.loading && !this.state.loaded;
+    const packs = this.props.emojiPacks || [];
+    const isLoading = this.state.loading && packs.length === 0;
 
     let panelChildren = [];
     if (isLoading) {
@@ -111,7 +122,7 @@ export class EmojiPicker extends Component {
         }),
       ];
     } else {
-      panelChildren = this._buildGridChildren(emotionUrl);
+      panelChildren = this._buildGridChildren();
     }
 
     let rootChildren = [];
@@ -154,7 +165,9 @@ export class EmojiPicker extends Component {
   }
 
   updateProps(prevProps) {
-    if (this.props.emotionUrl !== prevProps?.emotionUrl) {
+    const oldPacks = prevProps?.emojiPacks;
+    const newPacks = this.props.emojiPacks;
+    if (oldPacks !== newPacks) {
       this.render();
     }
   }
@@ -162,11 +175,7 @@ export class EmojiPicker extends Component {
   async toggle() {
     this.state.open = !this.state.open;
     if (this.state.open) {
-      if (!this.state.loaded) {
-        await this._loadData();
-      } else {
-        this.render();
-      }
+      this.render();
       this._bindOutsideClick();
     } else {
       this._unbindOutsideClick();
@@ -176,11 +185,7 @@ export class EmojiPicker extends Component {
 
   async open() {
     this.state.open = true;
-    if (!this.state.loaded) {
-      await this._loadData();
-    } else {
-      this.render();
-    }
+    this.render();
     this._bindOutsideClick();
   }
 
@@ -204,18 +209,19 @@ export class EmojiPicker extends Component {
     this.render();
   }
 
-  handleSelect(packageName, iconName, type) {
-    let insertText;
-    if (type === 'image') {
-      insertText = ' ::' + packageName + ':' + iconName + ':: ';
-    } else {
-      insertText = iconName;
-    }
-
+  handleSelect(prefix, item) {
+    const insertText = ` :${prefix}${item}: `;
     if (this.props.onSelect) {
       this.props.onSelect(insertText);
     }
+    this.close();
+  }
 
+  handleSelectText(text) {
+    const insertText = ` ${text} `;
+    if (this.props.onSelect) {
+      this.props.onSelect(insertText);
+    }
     this.close();
   }
 }
