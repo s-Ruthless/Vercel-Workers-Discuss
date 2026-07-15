@@ -135,7 +135,7 @@ onMounted(() => {
   position: absolute;
   bottom: calc(100% + 6px);
   left: 0;
-  width: 280px;
+  width: 380px;
   max-width: calc(100vw - 32px);
   max-height: 260px;
   background: var(--bg-card-solid);
@@ -172,16 +172,18 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
   gap: 2px;
-  padding: 8px;
+  padding: 10px;
   overflow-y: auto;
+  max-height: 200px;
   flex: 1;
 }
 .emoji-grid-text {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  padding: 8px;
+  padding: 10px;
   overflow-y: auto;
+  max-height: 200px;
   flex: 1;
   align-items: center;
   align-content: flex-start;
