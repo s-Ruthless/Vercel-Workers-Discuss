@@ -410,20 +410,6 @@ export async function getSiteList(c: Context) {
       }
     }
 
-    const pageRows = await queryAll<{ site_id: string }>(`SELECT DISTINCT site_id FROM page_stats`);
-    for (const row of pageRows) {
-      if (row.site_id !== undefined && row.site_id !== null) {
-        sites.add(row.site_id);
-      }
-    }
-
-    const dailyRows = await queryAll<{ site_id: string }>(`SELECT DISTINCT site_id FROM page_visit_daily`);
-    for (const row of dailyRows) {
-      if (row.site_id !== undefined && row.site_id !== null) {
-        sites.add(row.site_id);
-      }
-    }
-
     const list = Array.from(sites);
     list.sort();
 
@@ -433,216 +419,14 @@ export async function getSiteList(c: Context) {
   }
 }
 
-// ==================== 访问统计概览 ====================
-export async function getVisitOverview(c: Context) {
-  try {
-    const rawSiteId = c.req.query('siteId');
-    const siteId = rawSiteId && rawSiteId !== 'default' ? rawSiteId : null;
-
-    let statsSql = 'SELECT post_slug, post_title, post_url, pv, last_visit_at FROM page_stats';
-    const statsParams: unknown[] = [];
-
-    if (siteId) {
-      statsSql += ' WHERE (site_id = $1 OR site_id = $2 OR site_id IS NULL)';
-      statsParams.push(siteId, '');
-    }
-
-    const results = await queryAll<{
-      post_slug: string; post_title: string | null; post_url: string | null;
-      pv: number; last_visit_at: number | null;
-    }>(statsSql, statsParams);
-
-    let totalPv = 0;
-    let totalPages = 0;
-
-    for (const row of results) {
-      totalPv += row.pv || 0;
-      totalPages += 1;
-    }
-
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000);
-
-    const year = now.getUTCFullYear();
-    const month = now.getUTCMonth();
-    const day = now.getUTCDate();
-
-    const toKey = (d: Date) => {
-      const y = d.getUTCFullYear();
-      const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-      const dd = String(d.getUTCDate()).padStart(2, '0');
-      return `${y}-${m}-${dd}`;
-    };
-
-    const startDate30 = toKey(thirtyDaysAgo);
-
-    const monthStartDate = new Date(Date.UTC(year, month, 1));
-    const monthStartKey = toKey(monthStartDate);
-
-    const lastMonthStartDate = new Date(Date.UTC(year, month - 1, 1));
-    const lastMonthEndDate = new Date(monthStartDate.getTime() - 24 * 60 * 60 * 1000);
-
-    const weekStartDate = (() => {
-      const d = new Date(Date.UTC(year, month, day));
-      const weekday = d.getUTCDay();
-      const offset = (weekday + 6) % 7;
-      return new Date(d.getTime() - offset * 24 * 60 * 60 * 1000);
-    })();
-
-    const lastWeekStartDate = new Date(weekStartDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const lastWeekEndDate = new Date(weekStartDate.getTime() - 24 * 60 * 60 * 1000);
-
-    let earliestDate = startDate30;
-    if (toKey(lastMonthStartDate) < earliestDate) earliestDate = toKey(lastMonthStartDate);
-    if (toKey(lastWeekStartDate) < earliestDate) earliestDate = toKey(lastWeekStartDate);
-
-    let dailySql = 'SELECT date, count FROM page_visit_daily WHERE date >= $1';
-    const params: unknown[] = [earliestDate];
-
-    if (siteId) {
-      dailySql += ' AND (site_id = $2 OR site_id = $3 OR site_id IS NULL)';
-      params.push(siteId, '');
-    }
-
-    const dailyRows = await queryAll<{ date: string; count: number }>(dailySql, params);
-
-    const dailyMap = new Map<string, number>();
-    for (const row of dailyRows) {
-      if (!row || !row.date) continue;
-      dailyMap.set(row.date, (dailyMap.get(row.date) || 0) + (row.count || 0));
-    }
-
-    if (dailyMap.size === 0 && totalPv > 0) {
-      const fallbackDate = now.toISOString().slice(0, 10);
-      dailyMap.set(fallbackDate, totalPv);
-    }
-
-    const todayKey = toKey(now);
-    const yesterdayKey = toKey(new Date(now.getTime() - 24 * 60 * 60 * 1000));
-
-    let todayPv = dailyMap.get(todayKey) || 0;
-    let yesterdayPv = dailyMap.get(yesterdayKey) || 0;
-    let weekPv = 0;
-    let lastWeekPv = 0;
-    let monthPv = 0;
-    let lastMonthPv = 0;
-
-    {
-      let cursor = new Date(weekStartDate.getTime());
-      while (cursor.getTime() <= now.getTime()) {
-        weekPv += dailyMap.get(toKey(cursor)) || 0;
-        cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
-      }
-    }
-    {
-      let cursor = new Date(lastWeekStartDate.getTime());
-      while (cursor.getTime() <= lastWeekEndDate.getTime()) {
-        lastWeekPv += dailyMap.get(toKey(cursor)) || 0;
-        cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
-      }
-    }
-    {
-      let cursor = new Date(monthStartDate.getTime());
-      while (cursor.getTime() <= now.getTime()) {
-        monthPv += dailyMap.get(toKey(cursor)) || 0;
-        cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
-      }
-    }
-    {
-      let cursor = new Date(lastMonthStartDate.getTime());
-      while (cursor.getTime() <= lastMonthEndDate.getTime()) {
-        lastMonthPv += dailyMap.get(toKey(cursor)) || 0;
-        cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
-      }
-    }
-
-    if (todayPv > totalPv) todayPv = totalPv;
-    if (weekPv > totalPv) weekPv = totalPv;
-    if (monthPv > totalPv) monthPv = totalPv;
-
-    const last30Days: { date: string; total: number }[] = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const key = toKey(d);
-      last30Days.push({ date: key, total: dailyMap.get(key) || 0 });
-    }
-
-    return c.json({
-      totalPv, totalPages, todayPv, yesterdayPv,
-      weekPv, lastWeekPv, monthPv, lastMonthPv, last30Days,
-    });
-  } catch (e: any) {
-    return c.json({ message: e.message || '获取访问统计概览失败' }, 500);
-  }
-}
-
-// ==================== 页面访问统计 ====================
-export async function getVisitPages(c: Context) {
-  try {
-    const rawSiteId = c.req.query('siteId');
-    const siteId = rawSiteId && rawSiteId !== 'default' ? rawSiteId : null;
-
-    const rawOrder = c.req.query('order') || '';
-    const order = rawOrder.trim().toLowerCase() === 'latest' ? 'latest' : 'pv';
-
-    let sql = 'SELECT post_slug, post_title, post_url, pv, last_visit_at FROM page_stats';
-    const params: unknown[] = [];
-
-    if (siteId) {
-      sql += ' WHERE (site_id = $1 OR site_id = $2 OR site_id IS NULL)';
-      params.push(siteId, '');
-    }
-
-    const results = await queryAll<{
-      post_slug: string; post_title: string | null; post_url: string | null;
-      pv: number; last_visit_at: number | null;
-    }>(sql, params);
-
-    let items = results.map(row => ({
-      postSlug: row.post_slug,
-      postTitle: row.post_title,
-      postUrl: row.post_url,
-      pv: row.pv || 0,
-      lastVisitAt: row.last_visit_at,
-    }));
-
-    const itemsByPv = items
-      .slice()
-      .sort((a, b) => {
-        if (b.pv !== a.pv) return b.pv - a.pv;
-        return (b.lastVisitAt ?? 0) - (a.lastVisitAt ?? 0);
-      })
-      .slice(0, 20);
-
-    const itemsByLatest = items
-      .slice()
-      .sort((a, b) => {
-        const aLast = a.lastVisitAt ?? 0;
-        const bLast = b.lastVisitAt ?? 0;
-        if (bLast !== aLast) return bLast - aLast;
-        return b.pv - a.pv;
-      })
-      .slice(0, 20);
-
-    const response = order === 'latest'
-      ? { items: itemsByLatest, itemsByPv, itemsByLatest }
-      : { items: itemsByPv, itemsByPv, itemsByLatest };
-
-    return c.json(response);
-  } catch (e: any) {
-    return c.json({ message: e.message || '获取页面访问统计失败' }, 500);
-  }
-}
-
 // ==================== 点赞统计 ====================
 export async function getLikeStats(c: Context) {
   try {
     const siteId = c.req.query('siteId');
 
     let sql = `
-      SELECT l.page_slug, COALESCE(p.post_title, NULL) AS page_title, COALESCE(p.post_url, NULL) AS page_url, COUNT(*) AS likes
+      SELECT page_slug, COUNT(*) AS likes
       FROM "Likes" l
-      LEFT JOIN page_stats p ON p.post_slug = l.page_slug AND p.site_id = l.site_id
     `;
     const params: unknown[] = [];
 
@@ -651,14 +435,14 @@ export async function getLikeStats(c: Context) {
       params.push(siteId);
     }
 
-    sql += ' GROUP BY l.page_slug, l.site_id, p.post_title, p.post_url ORDER BY likes DESC LIMIT 50';
+    sql += ' GROUP BY l.page_slug, l.site_id ORDER BY likes DESC LIMIT 50';
 
-    const results = await queryAll<{ page_slug: string; page_title: string | null; page_url: string | null; likes: number }>(sql, params);
+    const results = await queryAll<{ page_slug: string; likes: number }>(sql, params);
 
     const items = results.map(row => ({
       pageSlug: row.page_slug,
-      pageTitle: row.page_title,
-      pageUrl: row.page_url,
+      pageTitle: null as string | null,
+      pageUrl: null as string | null,
       likes: row.likes,
     }));
 
@@ -1122,27 +906,17 @@ export async function exportStats(c: Context) {
   try {
     const siteId = c.req.query('siteId');
 
-    let statsQuery = 'SELECT * FROM page_stats';
-    let dailyQuery = 'SELECT * FROM page_visit_daily';
     let likesQuery = 'SELECT * FROM "Likes"';
     const params: unknown[] = [];
 
     if (siteId) {
-      statsQuery += ' WHERE site_id = $1';
-      dailyQuery += ' WHERE site_id = $1';
       likesQuery += ' WHERE site_id = $1';
       params.push(siteId);
     }
 
-    const pageStats = await queryAll<any>(statsQuery, params);
-    const dailyVisits = await queryAll<any>(dailyQuery, params);
     const likes = await queryAll<any>(likesQuery, params);
 
-    return c.json({
-      page_stats: pageStats,
-      page_visit_daily: dailyVisits,
-      likes: likes,
-    });
+    return c.json({ likes });
   } catch (e: any) {
     return c.json({ message: e.message || '导出统计数据失败' }, 500);
   }
@@ -1156,33 +930,6 @@ export async function importStats(c: Context) {
     }
 
     let count = 0;
-
-    if (Array.isArray(body.page_stats)) {
-      for (const item of body.page_stats) {
-        await execute(
-          `INSERT INTO page_stats (site_id, post_slug, post_title, post_url, pv, last_visit_at, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-           ON CONFLICT (site_id, post_slug) DO UPDATE SET
-             pv = EXCLUDED.pv, post_title = EXCLUDED.post_title, post_url = EXCLUDED.post_url,
-             last_visit_at = EXCLUDED.last_visit_at, updated_at = EXCLUDED.updated_at`,
-          [item.site_id || '', item.post_slug, item.post_title, item.post_url, item.pv || 0,
-           item.last_visit_at, item.created_at || Date.now(), item.updated_at || Date.now()]
-        );
-        count++;
-      }
-    }
-
-    if (Array.isArray(body.page_visit_daily)) {
-      for (const item of body.page_visit_daily) {
-        await execute(
-          `INSERT INTO page_visit_daily (date, site_id, domain, count, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, $6)`,
-          [item.date, item.site_id || '', item.domain, item.count || 0,
-           item.created_at || Date.now(), item.updated_at || Date.now()]
-        );
-        count++;
-      }
-    }
 
     if (Array.isArray(body.likes)) {
       for (const item of body.likes) {
@@ -1208,22 +955,13 @@ export async function exportBackup(c: Context) {
   try {
     const comments = await queryAll<any>(`SELECT * FROM "Comment" ORDER BY priority DESC, created DESC`);
     const configs = await queryAll<{ key: string; value: string }>(`SELECT * FROM "Settings"`);
-
-    let statsQuery = 'SELECT * FROM page_stats';
-    let dailyQuery = 'SELECT * FROM page_visit_daily';
-    let likesQuery = 'SELECT * FROM "Likes"';
-
-    const pageStats = await queryAll<any>(statsQuery);
-    const dailyVisits = await queryAll<any>(dailyQuery);
-    const likes = await queryAll<any>(likesQuery);
+    const likes = await queryAll<any>('SELECT * FROM "Likes"');
 
     return c.json({
       version: '1.0',
       timestamp: Date.now(),
       comments,
       settings: configs,
-      page_stats: pageStats,
-      page_visit_daily: dailyVisits,
       likes,
     });
   } catch (e: any) {
@@ -1288,30 +1026,8 @@ export async function importBackup(c: Context) {
       message += ` 配置 ${count} 条;`;
     }
 
-    // 3. Stats
+    // 3. Stats (likes only)
     let statsCount = 0;
-    if (Array.isArray(body.page_stats)) {
-      for (const item of body.page_stats) {
-        await execute(
-          `INSERT INTO page_stats (site_id, post_slug, post_title, post_url, pv, last_visit_at, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-           ON CONFLICT (site_id, post_slug) DO UPDATE SET pv = EXCLUDED.pv`,
-          [item.site_id || '', item.post_slug, item.post_title, item.post_url, item.pv || 0,
-           item.last_visit_at, item.created_at || Date.now(), item.updated_at || Date.now()]
-        );
-        statsCount++;
-      }
-    }
-    if (Array.isArray(body.page_visit_daily)) {
-      for (const item of body.page_visit_daily) {
-        await execute(
-          `INSERT INTO page_visit_daily (date, site_id, domain, count, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
-          [item.date, item.site_id || '', item.domain, item.count || 0,
-           item.created_at || Date.now(), item.updated_at || Date.now()]
-        );
-        statsCount++;
-      }
-    }
     if (Array.isArray(body.likes)) {
       for (const item of body.likes) {
         await execute(
@@ -1321,7 +1037,7 @@ export async function importBackup(c: Context) {
         statsCount++;
       }
     }
-    if (statsCount > 0) message += ` 统计数据 ${statsCount} 条;`;
+    if (statsCount > 0) message += ` 点赞数据 ${statsCount} 条;`;
 
     return c.json({ message });
   } catch (e: any) {
@@ -1492,8 +1208,6 @@ export async function triggerS3BackupHandler(c: Context) {
     // Gather backup data
     const comments = await queryAll<any>(`SELECT * FROM "Comment" ORDER BY priority DESC, created DESC`);
     const configs = await queryAll<{ key: string; value: string }>(`SELECT * FROM "Settings"`);
-    const pageStats = await queryAll<any>('SELECT * FROM page_stats');
-    const dailyVisits = await queryAll<any>('SELECT * FROM page_visit_daily');
     const likes = await queryAll<any>('SELECT * FROM "Likes"');
 
     const backupData = {
@@ -1501,8 +1215,6 @@ export async function triggerS3BackupHandler(c: Context) {
       timestamp: Date.now(),
       comments,
       settings: configs,
-      page_stats: pageStats,
-      page_visit_daily: dailyVisits,
       likes,
     };
 
@@ -1569,5 +1281,187 @@ export async function downloadS3BackupHandler(c: Context) {
     return c.body(body);
   } catch (e: any) {
     return c.json({ message: e.message || '下载备份失败' }, 500);
+  }
+}
+
+// ==================== 说说管理 ====================
+import { loadSaySettings, saveSaySettings as saveSaySettingsLib } from '../lib/saySettings.js';
+
+export async function getAdminSays(c: Context) {
+  try {
+    const page = parseInt(c.req.query('page') || '1');
+    const limit = Math.min(parseInt(c.req.query('limit') || '20'), 50);
+    const status = c.req.query('status');
+    const search = c.req.query('search');
+    const siteId = c.req.query('site_id') || c.req.query('siteId');
+    const offset = (page - 1) * limit;
+
+    let where = '1=1';
+    const params: unknown[] = [];
+    let paramIndex = 1;
+
+    if (status && status !== 'all') {
+      where += ` AND status = $${paramIndex++}`;
+      params.push(status);
+    }
+    if (search) {
+      where += ` AND content_text ILIKE $${paramIndex}`;
+      params.push(`%${search}%`);
+      paramIndex++;
+    }
+    if (siteId && siteId !== 'default') {
+      where += ` AND site_id = $${paramIndex++}`;
+      params.push(siteId);
+    }
+
+    const countRow = await queryFirst<{ count: string }>(`SELECT COUNT(*) as count FROM "Say" WHERE ${where}`, params);
+    const totalCount = parseInt(countRow?.count || '0', 10);
+
+    const results = await queryAll<any>(
+      `SELECT id, created, content_text as "contentText", content_html as "contentHtml",
+         status, likes, tags, site_id as "siteId"
+       FROM "Say" WHERE ${where}
+       ORDER BY created DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
+      [...params, limit, offset]
+    );
+
+    const data = results.map((row: any) => ({
+      ...row,
+      id: Number(row.id),
+      created: Number(row.created),
+      likes: Number(row.likes) || 0,
+      tags: row.tags ? row.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
+    }));
+
+    return c.json({
+      data,
+      pagination: { page, limit, total: Math.ceil(totalCount / limit), totalCount },
+    });
+  } catch (e: any) {
+    return c.json({ message: e.message || '获取说说列表失败' }, 500);
+  }
+}
+
+export async function createSay(c: Context) {
+  try {
+    const body = await c.req.json();
+    const content = typeof body.content === 'string' ? body.content.trim() : '';
+    const status = typeof body.status === 'string' ? body.status : 'published';
+    const tags = Array.isArray(body.tags) ? body.tags.filter((t: any) => typeof t === 'string' && t.trim()).map((t: string) => t.trim()) : [];
+    const siteId = typeof body.siteId === 'string' ? body.siteId.trim() : '';
+
+    if (!content) return c.json({ message: '内容不能为空' }, 400);
+
+    const contentWithEmoji = replaceEmotionSyntax(content);
+    const html = await marked.parse(contentWithEmoji, { async: true });
+    const contentHtml = xss(html, {
+      whiteList: {
+        ...xssWhiteList,
+        code: ['class'], span: ['class', 'style'], pre: ['class'],
+        div: ['class', 'style'],
+        img: ['src', 'alt', 'title', 'width', 'height', 'style', 'class', 'referrerpolicy', 'loading'],
+      },
+    });
+
+    const result = await query<{ id: number }>(
+      `INSERT INTO "Say" (created, content_text, content_html, status, tags, site_id)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+      [Date.now(), content, contentHtml, status, tags.join(',') || null, siteId]
+    );
+
+    const sayId = result.rows[0]?.id;
+    return c.json({ message: '发布成功', data: { id: sayId } });
+  } catch (e: any) {
+    return c.json({ message: e.message || '发布说说失败' }, 500);
+  }
+}
+
+export async function updateSay(c: Context) {
+  try {
+    const body = await c.req.json();
+    const id = typeof body.id === 'number' ? body.id : parseInt(String(body.id), 10);
+    if (!Number.isFinite(id) || id <= 0) {
+      return c.json({ message: 'Invalid id' }, 400);
+    }
+
+    const existing = await queryFirst<{ id: number }>(`SELECT id FROM "Say" WHERE id = $1`, [id]);
+    if (!existing) return c.json({ message: '说说不存在' }, 404);
+
+    const content = typeof body.content === 'string' ? body.content.trim() : '';
+    const status = typeof body.status === 'string' ? body.status : 'published';
+    const tags = Array.isArray(body.tags) ? body.tags.filter((t: any) => typeof t === 'string' && t.trim()).map((t: string) => t.trim()) : [];
+
+    if (!content) return c.json({ message: '内容不能为空' }, 400);
+
+    const contentWithEmoji = replaceEmotionSyntax(content);
+    const html = await marked.parse(contentWithEmoji, { async: true });
+    const contentHtml = xss(html, {
+      whiteList: {
+        ...xssWhiteList,
+        code: ['class'], span: ['class', 'style'], pre: ['class'],
+        div: ['class', 'style'],
+        img: ['src', 'alt', 'title', 'width', 'height', 'style', 'class', 'referrerpolicy', 'loading'],
+      },
+    });
+
+    const success = await execute(
+      `UPDATE "Say" SET content_text = $1, content_html = $2, status = $3, tags = $4 WHERE id = $5`,
+      [content, contentHtml, status, tags.join(',') || null, id]
+    );
+
+    if (!success) return c.json({ message: '更新失败' }, 500);
+    return c.json({ message: '更新成功' });
+  } catch (e: any) {
+    return c.json({ message: e.message || '更新说说失败' }, 500);
+  }
+}
+
+export async function deleteSay(c: Context) {
+  try {
+    const id = c.req.query('id');
+    if (!id) return c.json({ message: '缺少 id 参数' }, 400);
+
+    const success = await execute(`DELETE FROM "Say" WHERE id = $1`, [id]);
+    if (!success) return c.json({ message: '删除失败' }, 500);
+    return c.json({ message: '删除成功' });
+  } catch (e: any) {
+    return c.json({ message: e.message || '删除说说失败' }, 500);
+  }
+}
+
+export async function updateSayStatus(c: Context) {
+  try {
+    const id = c.req.query('id');
+    const status = c.req.query('status');
+    if (!id || !status) return c.json({ message: '缺少 id 或 status 参数' }, 400);
+
+    const success = await execute(`UPDATE "Say" SET status = $1 WHERE id = $2`, [status, id]);
+    if (!success) return c.json({ message: '更新失败' }, 500);
+    return c.json({ message: '状态更新成功' });
+  } catch (e: any) {
+    return c.json({ message: e.message || '更新状态失败' }, 500);
+  }
+}
+
+export async function getSaySettingsHandler(c: Context) {
+  try {
+    const settings = await loadSaySettings();
+    return c.json(settings);
+  } catch (e: any) {
+    return c.json({ message: e.message || '加载说说配置失败' }, 500);
+  }
+}
+
+export async function saveSaySettingsHandler(c: Context) {
+  try {
+    const body = await c.req.json();
+    await saveSaySettingsLib({
+      sayEnabled: typeof body.sayEnabled === 'boolean' ? body.sayEnabled : undefined,
+      sayAllowComments: typeof body.sayAllowComments === 'boolean' ? body.sayAllowComments : undefined,
+      sayPageSize: typeof body.sayPageSize === 'number' ? body.sayPageSize : undefined,
+    });
+    return c.json({ message: '保存成功' });
+  } catch (e: any) {
+    return c.json({ message: e.message || '保存失败' }, 500);
   }
 }

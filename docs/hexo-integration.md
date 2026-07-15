@@ -256,17 +256,59 @@ hexo.extend.injector.register('body_end', `
 
 ---
 
-## PV 浏览量统计
+## 说说功能
 
-VWD 支持自动统计页面访问量。在页面中任意位置添加 `id="vwd-page-pv"` 的元素，Widget 会自动填充数字：
+VWD 支持说说（动态/短博文）功能。博主可以在后台 `/admin/says` 发布说说，然后在博客页面展示。
+
+> 说说组件与评论组件使用同一个类 `VWDComments`，只需加上 `mode: 'says'` 开关即可。
+
+### 在页面中显示说说
 
 ```html
-<div>
-  本文已被阅读 <span id="vwd-page-pv">0</span> 次
-</div>
+<div id="vwd-says" style="max-width: 800px; margin: 2rem auto;"></div>
+<script src="https://vercel-workers-discuss.vercel.app/vwd.js"></script>
+<script>
+  new VWDComments({
+    el: '#vwd-says',
+    apiBaseUrl: 'https://vercel-workers-discuss.vercel.app',
+    mode: 'says'
+  }).mount();
+</script>
 ```
 
-> Widget 初始化时会自动调用 `/api/analytics/visit` 上报访问，并将 `/api/analytics/pv` 返回的数据填入该元素。
+### 通过 Hexo 注入器接入
+
+在博客根目录创建 `scripts/vwd-says.js`：
+
+```js
+'use strict';
+
+hexo.extend.injector.register('body_end', `
+<div id="vwd-says" style="max-width: 800px; margin: 2rem auto;"></div>
+<script src="https://vercel-workers-discuss.vercel.app/vwd.js"></script>
+<script>
+  new VWDComments({
+    el: '#vwd-says',
+    apiBaseUrl: 'https://vercel-workers-discuss.vercel.app',
+    mode: 'says'
+  }).mount();
+</script>
+`, 'page');  // 在 page 类型页面注入
+```
+
+### 说说配置项
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+| --- | --- | --- | --- | --- |
+| `el` | `string \| HTMLElement` | 是 | — | 挂载元素选择器或 DOM 元素 |
+| `apiBaseUrl` | `string` | 是 | — | VWD 评论系统 API 地址 |
+| `mode` | `'says'` | 是 | — | 设为 `'says'` 开启说说模式 |
+| `siteId` | `string` | 否 | `default` | 站点 ID |
+| `pageSize` | `number` | 否 | `10` | 每页显示说说数（也可从后台设置） |
+| `theme` | `'light' \| 'dark'` | 否 | `light` | 主题 |
+| `primaryColor` | `string` | 否 | `#2563eb` | 主题色 |
+
+> 说说的开关、每页数量等也可在后台 `/admin/settings` 中配置，前端会自动读取服务器配置。
 
 ---
 
@@ -386,8 +428,9 @@ hexo.extend.injector.register('body_end', `
 | POST | `/api/comments/like` | 评论点赞 |
 | GET | `/api/like?post_slug=/your-page` | 获取文章点赞状态 |
 | POST | `/api/like` | 文章点赞 |
-| POST | `/api/analytics/visit` | 上报页面访问 |
-| GET | `/api/analytics/pv?post_slug=/your-page` | 获取页面 PV |
+| GET | `/api/says` | 获取说说列表 |
+| GET | `/api/says/:id` | 获取单条说说 |
+| POST | `/api/says/like` | 说说点赞 |
 | GET | `/api/config/comments` | 获取公开配置 |
 
 > 表情包已改为前端配置（Waline 风格），不再提供 `/api/emotions` 接口。

@@ -40,10 +40,10 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '数据看板' },
       },
       {
-        path: 'analytics',
-        name: 'analytics',
-        component: () => import('../views/AnalyticsVisitView/index.vue'),
-        meta: { title: '访问统计' },
+        path: 'says',
+        name: 'says',
+        component: () => import('../views/SaysView/index.vue'),
+        meta: { title: '说说管理' },
       },
       {
         path: 'settings',

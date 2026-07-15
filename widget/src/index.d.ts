@@ -88,6 +88,12 @@ export interface VWDCommentsConfig {
    * Enable/Disable emoji picker
    */
   enableEmoji?: boolean;
+
+  /**
+   * Widget mode: 'comments' (default) or 'says'
+   * When set to 'says', renders the says (moments) feed instead of comments
+   */
+  mode?: 'comments' | 'says';
 }
 
 export class VWDComments {

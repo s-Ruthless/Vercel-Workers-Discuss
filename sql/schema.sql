@@ -36,36 +36,6 @@ CREATE TABLE IF NOT EXISTS "Settings" (
   value TEXT NOT NULL
 );
 
--- Page stats table
-CREATE TABLE IF NOT EXISTS "page_stats" (
-  id SERIAL PRIMARY KEY,
-  site_id TEXT NOT NULL DEFAULT '',
-  post_slug TEXT NOT NULL,
-  post_title TEXT,
-  post_url TEXT,
-  pv INTEGER NOT NULL DEFAULT 0,
-  last_visit_at BIGINT,
-  created_at BIGINT NOT NULL,
-  updated_at BIGINT NOT NULL,
-  UNIQUE(site_id, post_slug)
-);
-
-CREATE INDEX IF NOT EXISTS idx_page_stats_site_id ON page_stats(site_id);
-
--- Daily visit stats
-CREATE TABLE IF NOT EXISTS "page_visit_daily" (
-  id SERIAL PRIMARY KEY,
-  date TEXT NOT NULL,
-  domain TEXT,
-  count INTEGER NOT NULL DEFAULT 0,
-  created_at BIGINT NOT NULL,
-  updated_at BIGINT NOT NULL,
-  site_id TEXT NOT NULL DEFAULT ''
-);
-
-CREATE INDEX IF NOT EXISTS idx_page_visit_daily_site_id ON page_visit_daily(site_id);
-CREATE INDEX IF NOT EXISTS idx_page_visit_daily_date ON page_visit_daily(date);
-
 -- Likes table
 CREATE TABLE IF NOT EXISTS "Likes" (
   id SERIAL PRIMARY KEY,
@@ -78,3 +48,19 @@ CREATE TABLE IF NOT EXISTS "Likes" (
 
 CREATE INDEX IF NOT EXISTS idx_likes_site_id ON "Likes"(site_id);
 CREATE INDEX IF NOT EXISTS idx_likes_page_slug ON "Likes"(page_slug);
+
+-- Say (Moments) table
+CREATE TABLE IF NOT EXISTS "Say" (
+  id SERIAL PRIMARY KEY,
+  created BIGINT NOT NULL,
+  content_text TEXT NOT NULL,
+  content_html TEXT NOT NULL,
+  status TEXT DEFAULT 'published',
+  likes INTEGER DEFAULT 0,
+  tags TEXT,
+  site_id TEXT DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_say_created ON "Say"(created DESC);
+CREATE INDEX IF NOT EXISTS idx_say_status ON "Say"(status);
+CREATE INDEX IF NOT EXISTS idx_say_site_id ON "Say"(site_id);

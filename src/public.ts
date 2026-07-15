@@ -12,6 +12,7 @@ import {
 } from '../lib/utils.js';
 import { loadCommentSettings, saveCommentSettings, addToBlockedList } from '../lib/commentSettings.js';
 import { loadFeatureSettings, saveFeatureSettings } from '../lib/featureSettings.js';
+import { loadSaySettings } from '../lib/saySettings.js';
 import {
   loadEmailNotificationSettings, saveEmailNotificationSettings,
   sendCommentReplyNotification, sendCommentNotification, getAdminNotifyEmail,
@@ -279,76 +280,15 @@ export async function getPublicConfig(c: Context) {
   try {
     const settings = await loadCommentSettings();
     const featureSettings = await loadFeatureSettings();
+    const saySettings = await loadSaySettings();
 
     // Strip sensitive fields
     const { adminKey, adminKeySet, blockedIps, blockedEmails, ...publicSettings } = settings as any;
 
-    return c.json({ ...publicSettings, ...featureSettings });
+    return c.json({ ...publicSettings, ...featureSettings, ...saySettings });
   } catch (e: any) {
     return c.json({ message: e.message || '加载评论配置失败' }, 500);
   }
-}
-
-// ==================== 访问统计 ====================
-export async function trackVisit(c: Context) {
-  const body = await c.req.json().catch(() => ({}));
-  const rawPostSlug = typeof body.postSlug === 'string' ? body.postSlug.trim() : '';
-  const postSlug = decodePostSlug(rawPostSlug);
-  const rawPostTitle = typeof body.postTitle === 'string' ? body.postTitle.trim() : '';
-  const rawPostUrl = typeof body.postUrl === 'string' ? body.postUrl.trim() : '';
-  const rawSiteId = typeof body.siteId === 'string' ? body.siteId.trim() : '';
-
-  if (!postSlug) return c.json({ message: 'postSlug is required' }, 400);
-
-  const nowTs = Date.now();
-  const today = new Date().toISOString().slice(0, 10);
-  let domain: string | null = null;
-  try { if (rawPostUrl) domain = new URL(rawPostUrl).hostname.toLowerCase(); } catch {}
-
-  await execute(
-    `INSERT INTO page_stats (site_id, post_slug, post_title, post_url, pv, last_visit_at, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, 1, $5, $5, $5)
-     ON CONFLICT (site_id, post_slug) DO UPDATE SET
-       pv = page_stats.pv + 1, last_visit_at = $5, updated_at = $5,
-       post_title = EXCLUDED.post_title, post_url = EXCLUDED.post_url`,
-    [rawSiteId, postSlug, rawPostTitle || null, rawPostUrl || null, nowTs]
-  );
-
-  // Update daily
-  let dailyQuery = `SELECT id, count FROM page_visit_daily WHERE date = $1 AND site_id = $2`;
-  const params: unknown[] = [today, rawSiteId];
-  if (domain) { dailyQuery += ` AND domain = $3`; params.push(domain); }
-  else { dailyQuery += ` AND domain IS NULL`; }
-
-  const daily = await queryFirst<{ id: number; count: number }>(dailyQuery, params);
-  if (!daily) {
-    await execute(
-      `INSERT INTO page_visit_daily (date, site_id, domain, count, created_at, updated_at) VALUES ($1, $2, $3, 1, $4, $4)`,
-      [today, rawSiteId, domain, nowTs]
-    );
-  } else {
-    await execute(`UPDATE page_visit_daily SET count = $1, updated_at = $2 WHERE id = $3`, [daily.count + 1, nowTs, daily.id]);
-  }
-
-  return c.json({ success: true });
-}
-
-export async function getPagePv(c: Context) {
-  const rawPostSlug = c.req.query('post_slug') || '';
-  const postSlug = decodePostSlug(rawPostSlug);
-  const rawSiteId = c.req.query('siteId') || '';
-  const siteId = rawSiteId && rawSiteId !== 'default' ? rawSiteId : '';
-
-  if (!postSlug) return c.json({ message: 'post_slug is required' }, 400);
-
-  let row: { pv: number } | null = null;
-  if (siteId) {
-    row = await queryFirst<{ pv: number }>(`SELECT pv FROM page_stats WHERE post_slug = $1 AND site_id = $2`, [postSlug, siteId]);
-  } else {
-    row = await queryFirst<{ pv: number }>(`SELECT pv FROM page_stats WHERE post_slug = $1 AND (site_id = $2 OR site_id IS NULL)`, [postSlug, '']);
-  }
-
-  return c.json({ pv: row?.pv || 0, postSlug });
 }
 
 // ==================== 文章点赞 ====================
@@ -388,14 +328,6 @@ export async function likePage(c: Context) {
     await execute(`INSERT INTO "Likes" (page_slug, user_id, created_at, site_id) VALUES ($1, $2, $3, $4)`, [postSlug, userId, now, siteId]);
   } else {
     alreadyLiked = true;
-  }
-
-  // Ensure page_stats exists
-  const statsRow = await queryFirst<{ id: number }>(`SELECT id FROM page_stats WHERE post_slug = $1 AND site_id = $2`, [postSlug, siteId]);
-  if (!statsRow) {
-    await execute(`INSERT INTO page_stats (post_slug, post_title, post_url, pv, last_visit_at, created_at, updated_at, site_id) VALUES ($1, $2, $3, 0, $4, $4, $4, $5)`, [postSlug, rawPostTitle || null, rawPostUrl || null, now, siteId]);
-  } else if (rawPostTitle || rawPostUrl) {
-    await execute(`UPDATE page_stats SET post_title = COALESCE($1, post_title), post_url = COALESCE($2, post_url), updated_at = $3 WHERE id = $4`, [rawPostTitle || null, rawPostUrl || null, now, statsRow.id]);
   }
 
   const totalRow = await queryFirst<{ count: string }>(`SELECT COUNT(*) as count FROM "Likes" WHERE page_slug = $1 AND site_id = $2`, [postSlug, siteId]);

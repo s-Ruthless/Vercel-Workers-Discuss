@@ -84,35 +84,6 @@ export type CommentStatsResponse = {
   }[];
 };
 
-export type VisitOverviewResponse = {
-  totalPv: number;
-  totalPages: number;
-  todayPv: number;
-  yesterdayPv?: number;
-  weekPv: number;
-  lastWeekPv?: number;
-  monthPv: number;
-  lastMonthPv?: number;
-  last30Days?: {
-    date: string;
-    total: number;
-  }[];
-};
-
-export type VisitPageItem = {
-  postSlug: string;
-  postTitle: string | null;
-  postUrl: string | null;
-  pv: number;
-  lastVisitAt: number | null;
-};
-
-export type VisitPagesResponse = {
-  items: VisitPageItem[];
-  itemsByPv?: VisitPageItem[];
-  itemsByLatest?: VisitPageItem[];
-};
-
 export type SiteListResponse = {
   sites: string[];
 };
@@ -370,28 +341,82 @@ export function fetchSiteList(): Promise<SiteListResponse> {
   return get<SiteListResponse>('/api/admin/stats/sites');
 }
 
-/* --- Analytics --- */
+/* --- Says (Moments) --- */
 
-export function fetchVisitOverview(siteId?: string): Promise<VisitOverviewResponse> {
+export type SayItem = {
+  id: number;
+  created: number;
+  contentText: string;
+  contentHtml: string;
+  status: string;
+  likes: number;
+  tags: string[];
+  siteId?: string;
+};
+
+export type SayListResponse = {
+  data: SayItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalCount: number;
+  };
+};
+
+export type SaySettingsResponse = {
+  sayEnabled: boolean;
+  sayAllowComments: boolean;
+  sayPageSize: number;
+};
+
+export function fetchSays(page: number, siteId?: string): Promise<SayListResponse> {
   const params = new URLSearchParams();
+  params.set('page', String(page));
   if (siteId && siteId !== 'default') {
     params.set('siteId', siteId);
   }
-  const query = params.toString();
-  return get<VisitOverviewResponse>(query ? `/api/admin/analytics/overview?${query}` : '/api/admin/analytics/overview');
+  return get<SayListResponse>(`/api/admin/says/list?${params.toString()}`);
 }
 
-export function fetchVisitPages(siteId?: string, order?: 'pv' | 'latest'): Promise<VisitPagesResponse> {
-  const params = new URLSearchParams();
-  if (siteId && siteId !== 'default') {
-    params.set('siteId', siteId);
-  }
-  if (order) {
-    params.set('order', order);
-  }
-  const query = params.toString();
-  return get<VisitPagesResponse>(query ? `/api/admin/analytics/pages?${query}` : '/api/admin/analytics/pages');
+export function createSay(data: {
+  content: string;
+  status?: string;
+  tags?: string[];
+}): Promise<{ message: string; data: { id: number } }> {
+  return post<{ message: string; data: { id: number } }>('/api/admin/says/create', data);
 }
+
+export function updateSay(data: {
+  id: number;
+  content: string;
+  status?: string;
+  tags?: string[];
+}): Promise<{ message: string }> {
+  return put<{ message: string }>('/api/admin/says/update', data);
+}
+
+export function deleteSay(id: number): Promise<{ message: string }> {
+  return del<{ message: string }>(`/api/admin/says/delete?id=${id}`);
+}
+
+export function updateSayStatus(id: number, status: string): Promise<{ message: string }> {
+  return put<{ message: string }>(`/api/admin/says/status?id=${id}&status=${encodeURIComponent(status)}`);
+}
+
+export function fetchSaySettings(): Promise<SaySettingsResponse> {
+  return get<SaySettingsResponse>('/api/admin/settings/says');
+}
+
+export function saveSaySettings(data: {
+  sayEnabled?: boolean;
+  sayAllowComments?: boolean;
+  sayPageSize?: number;
+}): Promise<{ message: string }> {
+  return put<{ message: string }>('/api/admin/settings/says', data);
+}
+
+/* --- Likes Stats --- */
 
 export function fetchLikeStats(siteId?: string): Promise<LikeStatsResponse> {
   const params = new URLSearchParams();

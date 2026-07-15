@@ -73,9 +73,9 @@
             <PhSquaresFour class="menu-item-icon" :size="18" />
             <span>{{ t("menu.stats") }}</span>
           </li>
-          <li class="menu-item" :class="{ active: isRouteActive('analytics') }" @click="goAnalytics">
-            <PhChartBar class="menu-item-icon" :size="18" />
-            <span>{{ t("menu.analytics") }}</span>
+          <li class="menu-item" :class="{ active: isRouteActive('says') }" @click="goSays">
+            <PhPenNib class="menu-item-icon" :size="18" />
+            <span>{{ t("menu.says") }}</span>
           </li>
           <li class="menu-item" :class="{ active: isRouteActive('settings') }" @click="goSettings">
             <PhGear class="menu-item-icon" :size="18" />
@@ -256,7 +256,7 @@ function closeActions() { isActionsOpen.value = false; }
 
 function goComments() { router.push({ name: "comments" }); closeSider(); }
 function goStats() { router.push({ name: "stats" }); closeSider(); }
-function goAnalytics() { router.push({ name: "analytics" }); closeSider(); }
+function goSays() { router.push({ name: "says" }); closeSider(); }
 function goData() { router.push({ name: "data" }); closeSider(); }
 function goSettings() { router.push({ name: "settings" }); closeSider(); }
 

@@ -7,15 +7,19 @@ import { adminAuth } from './auth.js';
 import { ensureSchema } from './db.js';
 import {
   getComments, postComment, verifyAdminKey,
-  trackVisit, getPagePv,
   getLikeStatus, likePage,
   likeComment,
   getPublicConfig,
 } from '../src/public.js';
 import {
+  getSays, getSayById, likeSay,
+} from '../src/say.js';
+import {
   adminLogin, getAdminComments, deleteComment, updateStatus,
   updateComment, getStats, getVisitOverview, getVisitPages,
   getSiteList, getLikeStats, listLikes,
+  getAdminSays, createSay, updateSay, deleteSay, updateSayStatus,
+  getSaySettingsHandler, saveSaySettingsHandler,
   getCommentSettings, saveCommentSettings,
   getAdminEmail, setAdminEmail,
   getEmailNotifySettings, saveEmailNotifySettings,
@@ -78,10 +82,12 @@ app.post('/api/verify-admin', verifyAdminKey);
 app.get('/api/like', getLikeStatus);
 app.post('/api/like', likePage);
 
-app.post('/api/analytics/visit', trackVisit);
-app.get('/api/analytics/pv', getPagePv);
-
 app.get('/api/config/comments', getPublicConfig);
+
+// ==================== Says (Moments) Public API ====================
+app.get('/api/says', getSays);
+app.get('/api/says/:id', getSayById);
+app.post('/api/says/like', likeSay);
 
 // ==================== Admin API ====================
 // Setup (no auth required, only works once)
@@ -109,11 +115,18 @@ app.post('/api/admin/import/stats', adminAuth, importStats);
 app.get('/api/admin/export/backup', adminAuth, exportBackup);
 app.post('/api/admin/import/backup', adminAuth, importBackup);
 
-// Stats & Analytics
+// Stats
 app.get('/api/admin/stats/comments', adminAuth, getStats);
 app.get('/api/admin/stats/sites', adminAuth, getSiteList);
-app.get('/api/admin/analytics/overview', adminAuth, getVisitOverview);
-app.get('/api/admin/analytics/pages', adminAuth, getVisitPages);
+
+// Says management
+app.get('/api/admin/says/list', adminAuth, getAdminSays);
+app.post('/api/admin/says/create', adminAuth, createSay);
+app.put('/api/admin/says/update', adminAuth, updateSay);
+app.delete('/api/admin/says/delete', adminAuth, deleteSay);
+app.put('/api/admin/says/status', adminAuth, updateSayStatus);
+app.get('/api/admin/settings/says', adminAuth, getSaySettingsHandler);
+app.put('/api/admin/settings/says', adminAuth, saveSaySettingsHandler);
 
 // Likes management
 app.get('/api/admin/likes/list', adminAuth, listLikes);

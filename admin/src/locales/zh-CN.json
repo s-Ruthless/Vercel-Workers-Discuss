@@ -2,7 +2,7 @@
   "menu": {
     "comments": "评论管理",
     "stats": "数据看板",
-    "analytics": "访问统计",
+    "says": "说说管理",
     "settings": "网站设置",
     "data": "数据管理"
   },
@@ -52,34 +52,36 @@
     },
     "loadError": "加载统计数据失败"
   },
-  "analytics": {
-    "title": "访问统计",
-    "overview": "整体概览",
-    "totalPv": "全站总访问量",
-    "todayPv": "今日访问量",
-    "weekPv": "本周访问量",
-    "monthPv": "本月访问量",
-    "totalPages": "有访问记录的页面数",
-    "trend": "访问趋势",
-    "pageDetail": "页面访问明细",
-    "likeRank": "点赞页面排行榜",
-    "last7Days": "最近 7 天",
-    "last30Days": "最近 30 天",
-    "sort": {
-      "pv": "按 PV 排序",
-      "latest": "最新访问"
+  "says": {
+    "title": "说说管理",
+    "createBtn": "发布说说",
+    "editTitle": "编辑说说",
+    "createTitle": "发布新说说",
+    "content": "内容（支持 Markdown）",
+    "contentPlaceholder": "写下你想说的话...",
+    "status": "状态",
+    "tags": "标签",
+    "tagsHint": "多个标签用逗号分隔",
+    "statusPublished": "已发布",
+    "statusDraft": "草稿",
+    "statusHidden": "隐藏",
+    "publish": "发布",
+    "saveDraft": "存为草稿",
+    "cancel": "取消",
+    "save": "保存",
+    "saving": "保存中...",
+    "submitting": "发布中...",
+    "empty": "暂无说说",
+    "confirmDelete": "确认删除这条说说吗？",
+    "delete": "删除",
+    "edit": "编辑",
+    "actions": {
+      "publish": "发布",
+      "draft": "草稿",
+      "hide": "隐藏"
     },
-    "table": {
-      "title": "页面标题",
-      "pv": "访问量",
-      "time": "最后访问时间",
-      "url": "页面地址",
-      "rank": "排名",
-      "like": "点赞数"
-    },
-    "noData": "暂无访问数据",
-    "noLikeData": "暂无点赞数据",
-    "loadError": "加载访问统计数据失败"
+    "likes": "点赞",
+    "time": "时间"
   },
   "data": {
     "title": "数据管理",
@@ -106,14 +108,14 @@
         "import": "导入配置"
       },
       "stats": {
-        "title": "访问统计",
-        "desc": "管理文章访问量、点赞数及每日访问趋势。",
+        "title": "点赞数据",
+        "desc": "管理点赞记录数据。",
         "export": "导出统计",
         "import": "导入统计"
       },
       "backup": {
         "title": "全量备份",
-        "desc": "一键备份或恢复系统所有数据（评论 + 配置 + 统计）。",
+        "desc": "一键备份或恢复系统所有数据（评论 + 配置 + 点赞）。",
         "export": "全量导出",
         "import": "全量恢复"
       },
@@ -268,8 +270,8 @@
       "placeholderHint": "自定义评论输入框的提示文字，支持换行。留空则使用默认值。",
       "emoji": "开启表情功能",
       "emojiHint": "开启后，评论框和回复框中会显示表情按钮，用户可以插入表情图片。",
-"emojiPaths": "表情包路径",
-"emojiPathsHint": "每行一个路径，指向包含 info.json 的目录。留空则使用内置阿鲁和 Twemoji 表情包。更换表情包会导致旧评论中的表情无法渲染，建议追加新路径而非替换旧路径。",
+      "emojiPaths": "表情包路径",
+      "emojiPathsHint": "每行一个路径，指向包含 info.json 的目录。留空则使用内置阿鲁和 Twemoji 表情包。更换表情包会导致旧评论中的表情无法渲染，建议追加新路径而非替换旧路径。",
       "save": "保存",
       "saving": "保存中..."
     },

@@ -1,7 +1,7 @@
 /**
  * VWD Comments Widget 入口文件
  *
- * 使用方法：
+ * 评论组件：
  * ```html
  * <div id="comments"></div>
  * <script src="vwd.js"></script>
@@ -9,6 +9,18 @@
  *   new VWDComments({
  *     el: '#comments',
  *     apiBaseUrl: 'https://api.example.com'
+ *   }).mount();
+ * </script>
+ * ```
+ *
+ * 说说组件（同一个类，加 mode 开关）：
+ * ```html
+ * <div id="vwd-says"></div>
+ * <script>
+ *   new VWDComments({
+ *     el: '#vwd-says',
+ *     apiBaseUrl: 'https://api.example.com',
+ *     mode: 'says'
  *   }).mount();
  * </script>
  * ```

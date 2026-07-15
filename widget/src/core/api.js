@@ -110,27 +110,6 @@ export function createApiClient(config) {
   }
 
   /**
-   * 上报页面访问
-   */
-  async function trackVisit() {
-    try {
-      const body = {
-        postSlug: config.postUrl || config.postSlug,
-        postTitle: config.postTitle,
-        postUrl: config.postUrl
-      };
-      if (config.siteId) {
-        body.siteId = config.siteId;
-      }
-      await fetch(`${baseUrl}/api/analytics/visit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-    } catch (e) {}
-  }
-
-  /**
    * 获取文章点赞状态
    */
   async function getLikeStatus() {
@@ -208,23 +187,46 @@ export function createApiClient(config) {
   }
 
   /**
-   * 获取页面 PV
+   * 获取说说列表
    */
-  async function getPagePv() {
+  async function fetchSays(page = 1, limit = 10) {
     const params = new URLSearchParams({
-      post_slug: config.postUrl || config.postSlug
+      page: page.toString(),
+      limit: limit.toString(),
     });
 
     if (config.siteId) {
-      params.set('siteId', config.siteId);
+      params.set('site_id', config.siteId);
     }
 
-    const response = await fetch(`${baseUrl}/api/analytics/pv?${params}`);
-
+    const response = await fetch(`${baseUrl}/api/says?${params}`);
     if (!response.ok) {
-      return { pv: 0, postSlug: config.postSlug };
+      throw new Error(`获取说说失败：${response.status} ${response.statusText}`);
     }
+    return response.json();
+  }
 
+  /**
+   * 说说点赞
+   */
+  async function likeSay(id) {
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-VWD-Like-User': getLikeUserId()
+    };
+    const response = await fetch(`${baseUrl}/api/says/like`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ id, siteId: config.siteId })
+    });
+    if (!response.ok) {
+      let msg = response.statusText;
+      try {
+        const json = await response.json();
+        if (json.message) msg = json.message;
+      } catch (e) {}
+      throw new Error(msg);
+    }
     return response.json();
   }
 
@@ -232,10 +234,10 @@ export function createApiClient(config) {
     fetchComments,
     submitComment,
     verifyAdminKey,
-    trackVisit,
     getLikeStatus,
     likePage,
     likeComment,
-    getPagePv
+    fetchSays,
+    likeSay
   };
 }

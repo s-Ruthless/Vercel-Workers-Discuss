@@ -7,6 +7,7 @@ import { createApiClient } from './api.js';
 import { createCommentStore } from './store.js';
 import { CommentForm } from '@/components/CommentForm.js';
 import { CommentList } from '@/components/CommentList.js';
+import { SayList } from '@/components/SayList.js';
 import { ImagePreview } from '@/components/ImagePreview.js';
 import { loadEmojiPacks, replaceEmojiSyntax, replaceEmotionUrlsInHtml } from '@/utils/emotion.js';
 import styles from '@/styles/main.css?inline';
@@ -40,7 +41,6 @@ export class VWDComments {
     this.likeState = { count: 0, liked: false, loading: false };
     this._likeButtonEl = null;
     this._likeCountEl = null;
-    this._pvElement = null;
     this._mounted = false;
 
     this.localeData = locales['zh-CN'];
@@ -183,6 +183,24 @@ export class VWDComments {
       const api = createApiClient(this.config);
       this.api = api;
 
+      // Says mode: render says feed instead of comments
+      if (this.config.mode === 'says') {
+        if (serverConfig.sayEnabled === false) {
+          if (this.mountPoint) {
+            this.mountPoint.innerHTML = '<div class="vwd-say-empty">说说功能未开启</div>';
+          }
+          return;
+        }
+        if (serverConfig.sayPageSize && !this.config.pageSize) {
+          this.config.pageSize = serverConfig.sayPageSize;
+        }
+        this._sayState = { says: [], loading: true, error: null, currentPage: 1, totalPages: 1 };
+        this._sayList = null;
+        this._renderSays();
+        this._loadSays();
+        return;
+      }
+
       if (this.hostElement && this.mountPoint) {
         this.store = createCommentStore(
           this.config,
@@ -197,14 +215,6 @@ export class VWDComments {
 
         this._render();
         this.store.loadComments();
-      }
-
-      if (this.api && typeof this.api.trackVisit === 'function') {
-        this.api.trackVisit();
-      }
-
-      if (this.api && typeof this.api.getPagePv === 'function') {
-        this._fetchAndFillPv();
       }
 
       if (this.api && typeof this.api.getLikeStatus === 'function') {
@@ -732,7 +742,7 @@ export class VWDComments {
 
   _handleImageClick(e) {
     const target = e.target;
-    if (target.tagName === 'IMG' && target.closest('.vwd-comment-content')) {
+    if (target.tagName === 'IMG' && (target.closest('.vwd-comment-content') || target.closest('.vwd-say-content'))) {
       // 表情图片不触发灯箱
       if (target.classList.contains('vwd-emotion-img')) {
         return;
@@ -763,34 +773,85 @@ export class VWDComments {
     return { ...this.config };
   }
 
-  async _fetchAndFillPv() {
+  // ==================== Says Mode ====================
+
+  _renderSays() {
+    if (!this.mountPoint) return;
+    this.mountPoint.innerHTML = '';
+    this.mountPoint.className = 'vwd-says-container';
+
+    const headerEl = document.createElement('div');
+    headerEl.className = 'vwd-says-header';
+    headerEl.innerHTML = `<h3 class="vwd-says-title">说说</h3>`;
+    this.mountPoint.appendChild(headerEl);
+
+    const listContainer = document.createElement('div');
+    this.mountPoint.appendChild(listContainer);
+
+    this._sayList = new SayList(listContainer, {
+      says: this._sayState.says,
+      loading: this._sayState.loading,
+      error: this._sayState.error,
+      currentPage: this._sayState.currentPage,
+      totalPages: this._sayState.totalPages,
+      apiOrigin: this.config.apiOrigin || '',
+      enableComments: this.config.enableComments !== false,
+      emojiPacks: this.config.emojiPacks || [],
+      onLike: (id) => this._handleSayLike(id),
+      onPrevPage: () => this._goSayPage(this._sayState.currentPage - 1),
+      onNextPage: () => this._goSayPage(this._sayState.currentPage + 1),
+      onGoToPage: (page) => this._goSayPage(page),
+      t: (key) => {
+        const map = { loading: '加载中...', sayEmpty: '暂无说说' };
+        return map[key] || key;
+      },
+    });
+    this._sayList.render();
+  }
+
+  async _loadSays(page = 1) {
+    this._sayState.loading = true;
+    this._sayState.error = null;
+    this._updateSayList();
+
     try {
-      const container = typeof document !== 'undefined'
-        ? document.querySelector('#vwd-page-pv')
-        : null;
-
-      if (!container) return;
-
-      this._pvElement = container;
-      const result = await this.api.getPagePv();
-      const pv = result && typeof result.pv === 'number' ? result.pv : 0;
-      this._updatePvDisplay(pv);
-    } catch (e) {}
-  }
-
-  _updatePvDisplay(pv) {
-    if (!this._pvElement) return;
-    this._pvElement.textContent = this._formatPvNumber(pv);
-    this._pvElement.setAttribute('data-vwd-pv', String(pv));
-  }
-
-  _formatPvNumber(num) {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      const response = await this.api.fetchSays(page, this.config.pageSize || 10);
+      this._sayState.says = response.data || [];
+      this._sayState.currentPage = response.pagination.page;
+      this._sayState.totalPages = response.pagination.total;
+      this._sayState.loading = false;
+    } catch (e) {
+      this._sayState.error = e instanceof Error ? e.message : '加载说说失败';
+      this._sayState.loading = false;
     }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-    }
-    return String(num);
+    this._updateSayList();
   }
+
+  _updateSayList() {
+    if (!this._sayList) return;
+    this._sayList.setProps({
+      says: this._sayState.says,
+      loading: this._sayState.loading,
+      error: this._sayState.error,
+      currentPage: this._sayState.currentPage,
+      totalPages: this._sayState.totalPages,
+    });
+  }
+
+  _goSayPage(page) {
+    if (page >= 1 && page <= this._sayState.totalPages) {
+      this._loadSays(page);
+    }
+  }
+
+  async _handleSayLike(id) {
+    try {
+      const result = await this.api.likeSay(id);
+      return result;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async _fetchAndFillPv() {}
 }
