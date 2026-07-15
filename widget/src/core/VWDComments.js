@@ -8,7 +8,7 @@ import { createCommentStore } from './store.js';
 import { CommentForm } from '@/components/CommentForm.js';
 import { CommentList } from '@/components/CommentList.js';
 import { ImagePreview } from '@/components/ImagePreview.js';
-import { initEmojiPacks, getEmojiPacks, replaceEmojiSyntax, replaceEmotionUrlsInHtml } from '@/utils/emotion.js';
+import { loadEmojiPacks, replaceEmojiSyntax, replaceEmotionUrlsInHtml } from '@/utils/emotion.js';
 import styles from '@/styles/main.css?inline';
 import { locales } from '@/locales/index.js';
 
@@ -176,7 +176,7 @@ export class VWDComments {
       this.config.emoji = serverConfig.emojiPaths && serverConfig.emojiPaths.length > 0 ? serverConfig.emojiPaths : defaultEmoji;
       this.config.emojiPacks = [];
       if (this.config.enableEmoji !== false) {
-        initEmojiPacks(this.config.emoji, this.config.apiOrigin)
+        loadEmojiPacks(this.config.emoji, this.config.apiOrigin)
           .then((packs) => {
             this.config.emojiPacks = packs;
             this._onEmojiPacksLoaded();
