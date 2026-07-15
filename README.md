@@ -35,7 +35,7 @@
 ## 项目结构
 
 ```
-cwd-vercel/
+vwd/
 ├── api/                  # Vercel Serverless Functions（Hono 框架）
 │   ├── [...route].ts     #   路由入口（Catch-all 路由）
 │   └── health.ts         #   独立健康检查端点
