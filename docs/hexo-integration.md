@@ -258,11 +258,11 @@ hexo.extend.injector.register('body_end', `
 
 ## 说说功能
 
-VWD 支持说说（动态/短博文）功能。博主可以在后台 `/admin/says` 发布说说，然后在博客页面展示。
+VWD 支持说说（动态/短博文）功能。博主可以在后台 `/admin/says` 发布说说，然后创建独立页面展示说说列表。
 
-> 说说组件与评论组件使用同一个类 `VWDComments`，只需加上 `mode: 'says'` 开关即可。
+### 在独立页面展示说说
 
-### 在页面中显示说说
+创建一个 Hexo 页面（如 `hexo new page says`），在页面中引入 `VWDComments` 并设置 `mode: 'says'`：
 
 ```html
 <div id="vwd-says" style="max-width: 800px; margin: 2rem auto;"></div>
@@ -302,7 +302,7 @@ hexo.extend.injector.register('body_end', `
 | --- | --- | --- | --- | --- |
 | `el` | `string \| HTMLElement` | 是 | — | 挂载元素选择器或 DOM 元素 |
 | `apiBaseUrl` | `string` | 是 | — | VWD 评论系统 API 地址 |
-| `mode` | `'says'` | 是 | — | 设为 `'says'` 开启说说模式 |
+| `mode` | `'says'` | 是 | — | 设为 `'says'` 开启说说渲染功能，页面展示说说列表 |
 | `siteId` | `string` | 否 | `default` | 站点 ID |
 | `pageSize` | `number` | 否 | `10` | 每页显示说说数（也可从后台设置） |
 | `theme` | `'light' \| 'dark'` | 否 | `light` | 主题 |
