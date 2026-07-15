@@ -118,19 +118,8 @@ export class VWDComments {
       const serverConfig = await this._loadServerConfig();
       if (!this._mounted) return;
 
-      // 设置语言（前端配置，auto 自动检测浏览器语言）
-      let lang = this.config.lang || 'auto';
-      if (lang === 'auto' && typeof navigator !== 'undefined') {
-        const browserLang = navigator.language || navigator.userLanguage;
-        if (browserLang.toLowerCase().startsWith('en')) {
-          lang = 'en-US';
-        } else {
-          lang = 'zh-CN';
-        }
-      }
-      if (locales[lang]) {
-        this.localeData = locales[lang];
-      }
+      // 设置语言（仅支持中文）
+      this.localeData = locales['zh-CN'];
 
       // 检查域名限制
       if (serverConfig.allowedDomains && serverConfig.allowedDomains.length > 0 && typeof window !== 'undefined') {

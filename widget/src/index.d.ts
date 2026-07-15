@@ -42,10 +42,10 @@ export interface VWDCommentsConfig {
   pageSize?: number;
 
   /**
-   * Widget language
-   * @default 'auto'
+   * Widget language (only zh-CN is supported)
+   * @default 'zh-CN'
    */
-  lang?: 'zh-CN' | 'en-US' | 'auto' | string;
+  lang?: 'zh-CN';
 
   /**
    * Custom CSS URL to load
