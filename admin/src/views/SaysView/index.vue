@@ -28,7 +28,7 @@
         </div>
         <div v-for="item in filteredSays" :key="item.id" class="table-row">
           <div class="table-cell table-cell-content">
-            <div class="cell-content-text" v-html="item.contentHtml"></div>
+            <div class="cell-content-text" v-html="renderContent(item.contentHtml)"></div>
             <span v-if="item.likes" class="cell-likes-number">
               <PhThumbsUp :size="13" />
               {{ item.likes }}
@@ -92,8 +92,11 @@
         <div class="modal-body">
           <div class="modal-section">
             <div class="modal-section-title">📝 内容</div>
-            <div class="form-group">
-              <textarea v-model="modalContent" class="form-input form-textarea" rows="8" :placeholder="t('says.contentPlaceholder')"></textarea>
+            <div class="form-group form-group-content">
+              <div class="textarea-wrapper">
+                <textarea ref="modalTextareaRef" v-model="modalContent" class="form-input form-textarea" rows="8" :placeholder="t('says.contentPlaceholder')" @click="closeEmojiPanel"></textarea>
+                <EmojiPicker @insert="handleEmojiInsert" />
+              </div>
             </div>
           </div>
           <div class="modal-row">
@@ -133,8 +136,9 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { fetchSays, createSay, updateSay, deleteSay, updateSayStatus, type SayItem } from "../../api/admin";
 import { useSite } from "../../composables/useSite";
-import { initEmojiPacks } from "../../utils/emoji";
+import { initEmojiPacks, renderContent } from "../../utils/emoji";
 import { fetchFeatureSettings } from "../../api/admin";
+import EmojiPicker from "../../components/EmojiPicker.vue";
 
 const { t } = useI18n();
 const { currentSiteId } = useSite();
@@ -153,6 +157,7 @@ const submitting = ref(false);
 const modalVisible = ref(false);
 const editingId = ref<number | null>(null);
 const modalContent = ref("");
+const modalTextareaRef = ref<HTMLTextAreaElement | null>(null);
 const modalTags = ref("");
 const modalStatus = ref("published");
 
@@ -250,6 +255,27 @@ function closeModal() {
   if (submitting.value) return;
   modalVisible.value = false;
 }
+
+function handleEmojiInsert(text: string) {
+  const textarea = modalTextareaRef.value;
+  if (!textarea) {
+    modalContent.value += text;
+    return;
+  }
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const before = modalContent.value.substring(0, start);
+  const after = modalContent.value.substring(end);
+  modalContent.value = before + text + after;
+  // Move cursor after inserted text
+  setTimeout(() => {
+    textarea.focus();
+    const pos = start + text.length;
+    textarea.setSelectionRange(pos, pos);
+  }, 0);
+}
+
+function closeEmojiPanel() {}
 
 async function handleSubmit() {
   if (!modalContent.value.trim()) { showToast("内容不能为空", "error"); return; }
@@ -358,9 +384,10 @@ watch(currentSiteId, () => { page.value = 1; loadSays(1); });
 .modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
 .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
 .modal-section {
-  display: flex; flex-direction: column; gap: 8px;
-  padding: 16px; background: var(--bg-hover); border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
 }
 .modal-section-half { flex: 1; }
 .modal-row { display: flex; gap: 16px; }
@@ -369,6 +396,12 @@ watch(currentSiteId, () => { page.value = 1; loadSays(1); });
   margin-bottom: 2px;
 }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group-content { gap: 4px; }
+.textarea-wrapper { position: relative; }
+.textarea-wrapper > .emoji-picker-wrapper {
+  position: absolute;
+  bottom: 8px; right: 8px;
+}
 .form-input {
   width: 100%; padding: 10px 14px; font-size: 14px; line-height: 1.5; color: var(--text-primary);
   background: var(--bg-input); border: 1px solid var(--border-input); border-radius: var(--radius-sm);

@@ -45,6 +45,10 @@
                 type="button"
               />
             </div>
+            <div class="accent-custom">
+              <label class="accent-custom-label">自定义</label>
+              <input type="color" :value="accentColor" @input="setAccent(($event.target as HTMLInputElement).value)" class="accent-color-input" />
+            </div>
             <button class="accent-reset" @click="selectAccent('#007aff')" type="button">重置默认</button>
           </div>
           <button class="layout-button" @click="handleLogout">
@@ -382,6 +386,32 @@ function closeVersionModal() { versionModalVisible.value = false; }
   border-color: var(--text-primary);
   box-shadow: 0 0 0 2px var(--bg-card-solid), 0 0 0 4px var(--text-primary);
 }
+.accent-custom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  margin-bottom: 8px;
+  border-top: 1px solid var(--border-color);
+}
+.accent-custom-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.accent-color-input {
+  width: 32px;
+  height: 28px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: transparent;
+  padding: 2px;
+}
+.accent-color-input::-webkit-color-swatch-wrapper { padding: 0; }
+.accent-color-input::-webkit-color-swatch { border: none; border-radius: 4px; }
+.accent-color-input::-moz-color-swatch { border: none; border-radius: 4px; }
+
 .accent-reset {
   width: 100%;
   padding: 6px 10px;
