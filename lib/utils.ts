@@ -83,17 +83,25 @@ export async function getCravatar(
 }
 
 /**
- * 表情语法替换（旧版兼容，将 ::pkg:icon:: 转为 :pkg_icon: 短代码）
+ * 表情语法替换
+ * ::pkg:icon:: → <img> 标签（兼容旧版 vwd.js）
+ * :prefix_item: → 保留为文本（新版 vwd.js 前端渲染）
  */
-export function replaceEmotionSyntax(content: string, _emotionUrl?: string): string {
+export function replaceEmotionSyntax(content: string, emotionUrl?: string): string {
   if (!content) return content;
-  // 将旧版 ::pkg:icon:: 语法转为新版 :pkg_icon: 短代码
-  return content.replace(/::(\w+):(\w+)::/g, (_match, pkg, icon) => {
+  // ::pkg:icon:: → <img> 标签（使用服务器 URL，兼容旧版 vwd.js）
+  const baseUrl = (emotionUrl || '').replace(/\/+$/, '');
+  let result = content.replace(/::(\w+):(\w+)::/g, (match, pkg, icon) => {
     if (!/^[a-zA-Z]+$/.test(pkg) || !/^[a-zA-Z0-9]+$/.test(icon)) {
-      return _match;
+      return match;
     }
-    return `:${pkg}_${icon}:`;
+    if (baseUrl) {
+      return `<img src="${baseUrl}/${pkg}/${icon}.png" alt="${icon}" title="${icon}" class="vwd-emotion-img" referrerpolicy="no-referrer" loading="lazy">`;
+    }
+    return match;
   });
+  // :prefix_item: → 保留为文本（新版前端用 replaceEmojiSyntax 渲染）
+  return result;
 }
 
 /**

@@ -10,7 +10,7 @@ import {
   trackVisit, getPagePv,
   getLikeStatus, likePage,
   likeComment,
-  getPublicConfig,
+  getPublicConfig, getEmotions,
 } from '../src/public.js';
 import {
   adminLogin, getAdminComments, deleteComment, updateStatus,
@@ -82,6 +82,7 @@ app.post('/api/analytics/visit', trackVisit);
 app.get('/api/analytics/pv', getPagePv);
 
 app.get('/api/config/comments', getPublicConfig);
+app.get('/api/emotions', getEmotions);
 
 // ==================== Admin API ====================
 // Setup (no auth required, only works once)

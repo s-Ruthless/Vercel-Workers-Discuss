@@ -11,7 +11,6 @@ const EMOTION_DEST = path.resolve(ROOT, 'public', 'emotion');
 
 const EXCLUDE_FILES = new Set([
   'OwO.min.js',
-  'OwO.json',
   'generate-owo.cjs',
   'meta.json',
 ]);
@@ -38,6 +37,34 @@ function copyDir(src, dest, excludeFiles = new Set(), excludeDirs = new Set()) {
   }
 }
 
+function generateOwoJson(emotionDir, outputPath) {
+  const result = {};
+
+  // 颜文字
+  const emoticonsPath = path.join(emotionDir, 'emoticons.json');
+  if (fs.existsSync(emoticonsPath)) {
+    const emoticons = JSON.parse(fs.readFileSync(emoticonsPath, 'utf-8'));
+    result['颜文字'] = { type: 'text', container: emoticons.container || emoticons };
+  }
+
+  // 图片表情包
+  const entries = fs.readdirSync(emotionDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const pkgDir = path.join(emotionDir, entry.name);
+    const metaPath = path.join(pkgDir, 'meta.json');
+    if (!fs.existsSync(metaPath)) continue;
+
+    const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
+    const items = meta.items || {};
+    const container = Object.entries(items).map(([icon, text]) => ({ icon, text }));
+    result[meta.displayName || entry.name] = { type: 'image', name: entry.name, container };
+  }
+
+  fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf-8');
+  console.log('[emotion] OwO.json generated');
+}
+
 function run() {
   console.log('=== VWD Vercel Build ===');
 
@@ -48,6 +75,8 @@ function run() {
       fs.rmSync(EMOTION_DEST, { recursive: true });
     }
     copyDir(EMOTION_SRC, EMOTION_DEST, EXCLUDE_FILES, EXCLUDE_DIRS);
+    // Generate OwO.json (for backward compatibility with old vwd.js)
+    generateOwoJson(EMOTION_SRC, path.join(EMOTION_DEST, 'OwO.json'));
     console.log('[emotion] Done');
   } else {
     console.warn('[emotion] emotion directory not found, skipping');
