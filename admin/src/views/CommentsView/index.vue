@@ -157,6 +157,7 @@ import {
 } from "../../api/admin";
 import { useSite } from "../../composables/useSite";
 import { initEmojiPacks, renderContent } from "../../utils/emoji";
+import { fetchFeatureSettings } from "../../api/admin";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -360,8 +361,14 @@ async function submitEdit() {
 }
 
 onMounted(() => {
-  // 初始化表情包
-  initEmojiPacks(window.location.origin).catch(() => {});
+  // 初始化表情包（加载用户配置的 emojiPaths）
+  fetchFeatureSettings()
+    .then((res) => {
+      initEmojiPacks(window.location.origin, res.emojiPaths).catch(() => {});
+    })
+    .catch(() => {
+      initEmojiPacks(window.location.origin).catch(() => {});
+    });
 
   const p = route.query.p;
   let initialPage = 1;

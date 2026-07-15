@@ -20,8 +20,9 @@ let _loadingPromise: Promise<EmojiPack[]> | null = null;
 /**
  * 初始化表情包
  * @param apiOrigin - API 源地址
+ * @param emojiPaths - 用户配置的表情包路径数组（可选）
  */
-export async function initEmojiPacks(apiOrigin: string): Promise<EmojiPack[]> {
+export async function initEmojiPacks(apiOrigin: string, emojiPaths?: string[]): Promise<EmojiPack[]> {
   if (_loaded) return _packs;
   if (_loadingPromise) return _loadingPromise;
 
@@ -34,7 +35,30 @@ export async function initEmojiPacks(apiOrigin: string): Promise<EmojiPack[]> {
   _loadingPromise = (async () => {
     const packs: EmojiPack[] = [];
 
-    for (const url of defaultEmoji) {
+    // 加载颜文字（文本表情）
+    try {
+      const res = await fetch(`${origin}/emotion/emoticons.json`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.container)) {
+          packs.push({
+            name: '颜文字',
+            type: 'text',
+            prefix: '',
+            icon: '',
+            items: data.container.map((i: any) => i.icon),
+            folder: '',
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load emoticons:', e);
+    }
+
+    // 用户配置的表情包路径优先，否则使用默认
+    const emojiUrls = (emojiPaths && emojiPaths.length > 0) ? emojiPaths : defaultEmoji;
+
+    for (const url of emojiUrls) {
       try {
         const folder = url.replace(/\/+$/, '');
         const res = await fetch(`${folder}/info.json`);
@@ -43,7 +67,7 @@ export async function initEmojiPacks(apiOrigin: string): Promise<EmojiPack[]> {
           packs.push({
             ...info,
             folder,
-            remote: false,
+            remote: true,
           });
         }
       } catch (e) {
@@ -87,7 +111,8 @@ export function replaceEmojiSyntax(html: string): string {
 
     const folder = (pack.folder || '').replace(/\/+$/, '');
     const ext = pack.type || 'png';
-    const url = `${folder}/${item}.${ext}`;
+    const pf = pack.prefix || '';
+    const url = `${folder}/${pf}${item}.${ext}`;
 
     return `<img src="${url}" alt="${packKey}_${item}" class="vwd-emotion-img" referrerpolicy="no-referrer" loading="lazy" style="display:inline-block;vertical-align:middle;height:1.5em;width:auto;margin:0 2px;">`;
   });

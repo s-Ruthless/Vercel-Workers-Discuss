@@ -63,7 +63,7 @@ export async function getCravatar(
   name?: string | null | undefined,
   prefix?: string
 ): Promise<string> {
-  const avatarPrefix = prefix || 'https://gravatar.com/avatar';
+  const avatarPrefix = prefix || 'https://weavatar.com/avatar';
   const DEFAULT_HASH = '00000000000000000000000000000000';
 
   const pickIdentifier = (value: string | null | undefined) => {
