@@ -11,11 +11,19 @@ function copyDtsPlugin() {
     name: 'copy-dts',
     closeBundle() {
       const src = resolve(__dirname, 'src/index.d.ts');
+      const distDir = resolve(__dirname, 'dist');
       const dests = [
-        resolve(__dirname, 'dist/index.d.ts'),
-        resolve(__dirname, 'dist/vwd.es.d.ts'),
-        resolve(__dirname, 'dist/vwd.umd.d.ts')
+        resolve(distDir, 'index.d.ts'),
+        resolve(distDir, 'vwd.es.d.ts'),
+        resolve(distDir, 'vwd.umd.d.ts')
       ];
+
+      // Ensure dist directory exists before copying
+      try {
+        mkdirSync(distDir, { recursive: true });
+      } catch (e) {
+        // Directory may already exist, ignore
+      }
 
       dests.forEach(dest => {
         try {
@@ -68,7 +76,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
-      '@shared': resolve(__dirname, '../shared'),
+      '@shared': resolve(__dirname, '../scripts'),
     },
   },
   build: {
