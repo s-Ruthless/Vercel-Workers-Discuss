@@ -5,7 +5,8 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/admin", "destination": "/admin/" },
-    { "source": "/admin/(.*)", "destination": "/admin/index.html" }
+    { "source": "/admin/(.*)", "destination": "/admin/index.html" },
+    { "source": "/(.*)", "destination": "/404.html" }
   ],
   "headers": [
     {
