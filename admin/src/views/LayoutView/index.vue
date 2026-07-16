@@ -167,7 +167,7 @@
 import { ref, onMounted, provide, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { logoutAdmin, fetchAdminDisplaySettings, fetchSiteList, fetchManagedSites, type ManagedSite } from "../../api/admin";
+import { logoutAdmin, fetchAdminDisplaySettings, fetchManagedSites, type ManagedSite } from "../../api/admin";
 import { useTheme } from "../../composables/useTheme";
 import { useAccentColor, ACCENT_PRESETS } from "../../composables/useAccentColor";
 import { useSite } from "../../composables/useSite";
@@ -228,17 +228,9 @@ function getSiteLabel(value: string) {
 
 async function loadSites() {
   try {
-    const [managedRes, autoRes] = await Promise.all([
-      fetchManagedSites().catch(() => ({ sites: [] as ManagedSite[] })),
-      fetchSiteList().catch(() => ({ sites: [] as string[] })),
-    ]);
+    const managedRes = await fetchManagedSites().catch(() => ({ sites: [] as ManagedSite[] }));
     managedSites.value = managedRes.sites || [];
-    const managedSiteIds = new Set(managedSites.value.map(s => s.siteId));
-    const autoOnly = (autoRes.sites || []).filter(s => s && s !== "" && !managedSiteIds.has(s));
-    siteOptions.value = [
-      ...managedSites.value.map(s => ({ label: s.name, value: s.siteId })),
-      ...autoOnly.map(s => ({ label: s, value: s })),
-    ];
+    siteOptions.value = managedSites.value.map(s => ({ label: s.name, value: s.siteId }));
   } catch {
     siteOptions.value = [];
     managedSites.value = [];

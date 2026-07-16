@@ -18,9 +18,10 @@
           <div class="table-cell table-cell-url">{{ t("sites.table.url") }}</div>
           <div class="table-cell table-cell-actions">{{ t("sites.table.actions") }}</div>
         </div>
-        <div v-for="item in sites" :key="item.id" class="table-row">
+        <div v-for="item in allSites" :key="item.id" class="table-row">
           <div class="table-cell table-cell-name">
             <span class="cell-name">{{ item.name }}</span>
+            <span v-if="item.isDefault" class="cell-default-tag">默认</span>
           </div>
           <div class="table-cell table-cell-siteid">
             <span class="cell-siteid" @click="copySiteId(item.siteId)" :title="t('sites.copySiteId')">
@@ -33,13 +34,11 @@
           </div>
           <div class="table-cell table-cell-actions">
             <div class="table-actions">
-              <button class="table-action" @click="openEditModal(item)">{{ t("sites.edit") }}</button>
-              <button class="table-action table-action-danger" @click="handleDelete(item)">{{ t("sites.delete") }}</button>
+              <button v-if="!item.isDefault" class="table-action" @click="openEditModal(item)">{{ t("sites.edit") }}</button>
+              <button v-if="!item.isDefault" class="table-action table-action-danger" @click="handleDelete(item)">{{ t("sites.delete") }}</button>
+              <span v-if="item.isDefault" class="cell-default-hint">系统内置</span>
             </div>
           </div>
-        </div>
-        <div v-if="sites.length === 0" class="table-empty">
-          {{ t("sites.empty") }}
         </div>
       </div>
     </div>
@@ -83,7 +82,7 @@
 
 <script setup lang="ts">
 import "../../styles/markdown.css";
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted, inject, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   fetchManagedSites,
@@ -99,6 +98,16 @@ const reloadSites = inject<() => void>("reloadSites", () => {});
 const loading = ref(false);
 const error = ref("");
 const sites = ref<ManagedSite[]>([]);
+
+const defaultSite = {
+  id: "__default__",
+  name: "默认站点",
+  url: "",
+  siteId: "default",
+  isDefault: true as const,
+};
+
+const allSites = computed(() => [defaultSite, ...sites.value.map(s => ({ ...s, isDefault: false as const }))]);
 
 const toastMessage = ref("");
 const toastType = ref<"success" | "error">("success");
@@ -222,6 +231,12 @@ onMounted(() => {
 }
 .cell-url:hover { text-decoration: underline; opacity: 0.85; }
 .cell-url-empty { color: var(--text-tertiary); }
+.cell-default-tag {
+  display: inline-block; margin-left: 6px; padding: 1px 6px;
+  font-size: 11px; font-weight: 600; color: var(--color-success);
+  background-color: rgba(52, 199, 89, 0.12); border-radius: var(--radius-pill);
+}
+.cell-default-hint { font-size: 12px; color: var(--text-tertiary); }
 
 /* Modal */
 .modal-overlay {
