@@ -11,14 +11,6 @@
       </button>
       <div class="layout-title">{{ layoutTitle }}</div>
       <div class="layout-actions-wrapper">
-        <div class="layout-domain-filter layout-domain-filter-header">
-          <select v-model="currentSiteId" class="layout-domain-select">
-            <option :value="defaultSiteId">{{ getSiteLabel(defaultSiteId) }}</option>
-            <option v-for="item in siteOptions" :key="item.value" :value="item.value">
-              {{ getSiteLabel(item.value) }}
-            </option>
-          </select>
-        </div>
         <div class="layout-actions">
           <a class="layout-button" href="https://github.com/s-Ruthless/Vercel-Workers-Discuss" target="_blank">
             Github
@@ -217,11 +209,11 @@ function closeAccentOnOutside(e: MouseEvent) {
 
 type SiteOption = { label: string; value: string };
 const siteOptions = ref<SiteOption[]>([]);
-const defaultSiteId = "default";
+const defaultSiteId = "blog";
 const managedSites = ref<ManagedSite[]>([]);
 
 function getSiteLabel(value: string) {
-  if (!value || value === "default") return t("layout.defaultSite");
+  if (!value || value === "blog") return t("layout.defaultSite");
   const managed = managedSites.value.find(s => s.siteId === value);
   return managed ? managed.name : value;
 }

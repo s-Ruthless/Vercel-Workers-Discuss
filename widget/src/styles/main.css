@@ -859,6 +859,27 @@ cursor: default;
   background: rgba(0, 0, 0, 0.1);
 }
 
+.vwd-site-warning {
+  margin-top: 16px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #9a6700;
+  background: #fff8c5;
+  border: 1px solid #d4a72c;
+  border-radius: var(--vwd-radius, 6px);
+  line-height: 1.5;
+  transition: box-shadow 0.3s;
+}
+
+.vwd-site-warning-flash {
+  animation: vwd-warning-flash 0.6s ease;
+}
+
+@keyframes vwd-warning-flash {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 167, 44, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(212, 167, 44, 0.4); }
+}
+
 .vwd-success-inline {
   display: flex;
   align-items: center;

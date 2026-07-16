@@ -151,7 +151,7 @@ const { emojiReady, ensureEmojiLoaded } = useEmojiReady();
 const managedSites = inject<import('vue').Ref<ManagedSite[]>>("managedSites", ref([]));
 
 function getSiteName(siteId?: string): string {
-  if (!siteId || siteId === 'default' || siteId === '') return '默认站点';
+  if (!siteId || siteId === 'blog' || siteId === '') return '默认站点';
   const site = managedSites.value.find(s => s.siteId === siteId);
   return site ? site.name : siteId;
 }
@@ -299,8 +299,7 @@ async function handleSubmit() {
       await updateSay({ id: editingId.value, content: modalContent.value, status: modalStatus.value, tags });
       showToast("更新成功");
     } else {
-      const siteId = currentSiteId.value !== 'default' ? currentSiteId.value : '';
-      await createSay({ content: modalContent.value, status: modalStatus.value, tags, siteId });
+      await createSay({ content: modalContent.value, status: modalStatus.value, tags, siteId: currentSiteId.value });
       showToast("发布成功");
     }
     modalVisible.value = false;

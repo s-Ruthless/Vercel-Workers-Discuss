@@ -87,6 +87,7 @@ export class VWDComments {
         commentPlaceholder: typeof data.commentPlaceholder === 'string' ? data.commentPlaceholder : undefined,
         enableEmoji: typeof data.enableEmoji === 'boolean' ? data.enableEmoji : true,
         emojiPaths: Array.isArray(data.emojiPaths) ? data.emojiPaths : undefined,
+        managedSiteIds: Array.isArray(data.managedSiteIds) ? data.managedSiteIds : [],
       };
     } catch (e) {
       return {};
@@ -155,6 +156,7 @@ export class VWDComments {
       this.config.enableImageLightbox = serverConfig.enableImageLightbox;
       this.config.enableEmoji = serverConfig.enableEmoji;
       this.config.commentPlaceholder = typeof serverConfig.commentPlaceholder === 'string' ? serverConfig.commentPlaceholder : this.config.commentPlaceholder;
+      this.config.managedSiteIds = serverConfig.managedSiteIds || [];
 
       // 初始化表情包（从后台配置读取，Waline 风格）
       this.config.apiOrigin = this.config.apiBaseUrl ? this.config.apiBaseUrl.replace(/\/+$/, '') : '';
@@ -176,6 +178,14 @@ export class VWDComments {
         if (this.mountPoint && !this.imagePreview) {
           this.imagePreview = new ImagePreview(this.mountPoint);
           this.mountPoint.addEventListener('click', (e) => this._handleImageClick(e));
+        }
+      }
+
+      // Check if configured siteId is registered in backend
+      this._siteWarning = null;
+      if (this.config.siteId && this.config.managedSiteIds && this.config.managedSiteIds.length > 0) {
+        if (!this.config.managedSiteIds.includes(this.config.siteId)) {
+          this._siteWarning = `当前站点 ID「${this.config.siteId}」未在后台站点管理中注册，评论可能无法被管理。`;
         }
       }
 
@@ -420,6 +430,26 @@ export class VWDComments {
       });
       this.commentList.render();
     }
+
+    // Site warning notice
+    this._renderSiteWarning();
+  }
+
+  _renderSiteWarning() {
+    if (!this.mountPoint) return;
+    const existing = this.mountPoint.querySelector('.vwd-site-warning');
+    if (this._siteWarning) {
+      if (!existing) {
+        const warningEl = document.createElement('div');
+        warningEl.className = 'vwd-site-warning';
+        warningEl.innerHTML = `<span>⚠️ ${this._siteWarning}</span>`;
+        this.mountPoint.appendChild(warningEl);
+      } else {
+        existing.querySelector('span').textContent = `⚠️ ${this._siteWarning}`;
+      }
+    } else if (existing) {
+      existing.remove();
+    }
   }
 
   _onStateChange(state, prevState) {
@@ -533,6 +563,13 @@ export class VWDComments {
   }
 
   async _handleSubmit() {
+    if (this._siteWarning) {
+      const existing = this.mountPoint?.querySelector('.vwd-site-warning');
+      if (existing) {
+        existing.classList.add('vwd-site-warning-flash');
+        setTimeout(() => existing.classList.remove('vwd-site-warning-flash'), 600);
+      }
+    }
     const success = await this.store.submitNewComment();
     if (success) {
       if (this.commentForm) {

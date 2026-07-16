@@ -178,12 +178,12 @@ const { emojiReady, ensureEmojiLoaded } = useEmojiReady();
 const managedSites = inject<import('vue').Ref<ManagedSite[]>>("managedSites", ref([]));
 
 function getSiteName(siteId?: string): string {
-  if (!siteId || siteId === 'default' || siteId === '') return getSiteLabel('default');
+  if (!siteId || siteId === 'blog' || siteId === '') return getSiteLabel('blog');
   const site = managedSites.value.find(s => s.siteId === siteId);
   return site ? site.name : siteId;
 }
 function getSiteLabel(value: string) {
-  if (!value || value === 'default') return '默认站点';
+  if (!value || value === 'blog') return '默认站点';
   const site = managedSites.value.find(s => s.siteId === value);
   return site ? site.name : value;
 }

@@ -4,7 +4,7 @@
 import { Context } from 'hono';
 import { marked } from 'marked';
 import { createRequire } from 'module';
-import { queryAll, queryFirst, execute, query } from './db.js';
+import { queryAll, queryFirst, execute, query, getSetting } from './db.js';
 import { kvGet, kvSet, kvDelete } from './kv.js';
 import {
   getCravatar, decodePostSlug, getAllSlugFormats, getClientIp,
@@ -282,10 +282,22 @@ export async function getPublicConfig(c: Context) {
     const featureSettings = await loadFeatureSettings();
     const saySettings = await loadSaySettings();
 
+    // Read managed site IDs for frontend validation
+    let managedSiteIds: string[] = [];
+    try {
+      const raw = await getSetting('managed_sites');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          managedSiteIds = parsed.map((s: any) => s.siteId).filter(Boolean);
+        }
+      }
+    } catch {}
+
     // Strip sensitive fields
     const { adminKey, adminKeySet, blockedIps, blockedEmails, ...publicSettings } = settings as any;
 
-    return c.json({ ...publicSettings, ...featureSettings, ...saySettings });
+    return c.json({ ...publicSettings, ...featureSettings, ...saySettings, managedSiteIds });
   } catch (e: any) {
     return c.json({ message: e.message || '加载评论配置失败' }, 500);
   }

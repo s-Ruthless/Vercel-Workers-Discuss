@@ -184,7 +184,7 @@ export function logoutAdmin(): void {
 export function fetchComments(page: number, siteId?: string): Promise<CommentListResponse> {
   const params = new URLSearchParams();
   params.set('page', String(page));
-  if (siteId && siteId !== 'default') {
+  if (siteId) {
     params.set('siteId', siteId);
   }
   return get<CommentListResponse>(`/api/admin/comments/list?${params.toString()}`);
@@ -342,7 +342,7 @@ export function sendTelegramTestMessage(): Promise<{ message: string }> {
 
 export function fetchCommentStats(siteId?: string): Promise<CommentStatsResponse> {
   const params = new URLSearchParams();
-  if (siteId && siteId !== 'default') {
+  if (siteId) {
     params.set('siteId', siteId);
   }
   const query = params.toString();
@@ -424,7 +424,7 @@ export type SaySettingsResponse = {
 export function fetchSays(page: number, siteId?: string): Promise<SayListResponse> {
   const params = new URLSearchParams();
   params.set('page', String(page));
-  if (siteId && siteId !== 'default') {
+  if (siteId) {
     params.set('siteId', siteId);
   }
   return get<SayListResponse>(`/api/admin/says/list?${params.toString()}`);
@@ -472,7 +472,7 @@ export function saveSaySettings(data: {
 
 export function fetchLikeStats(siteId?: string): Promise<LikeStatsResponse> {
   const params = new URLSearchParams();
-  if (siteId && siteId !== 'default') {
+  if (siteId) {
     params.set('siteId', siteId);
   }
   const query = params.toString();
@@ -499,7 +499,7 @@ export function importConfig(data: any[]): Promise<{ message: string }> {
 
 export function exportStats(siteId?: string): Promise<any> {
   const params = new URLSearchParams();
-  if (siteId && siteId !== 'default') {
+  if (siteId) {
     params.set('siteId', siteId);
   }
   const query = params.toString();

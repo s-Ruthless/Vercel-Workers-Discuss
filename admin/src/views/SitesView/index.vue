@@ -35,7 +35,7 @@
           <div class="table-cell table-cell-actions">
             <div class="table-actions">
               <button class="table-action" @click="openEditModal(item)">{{ t("sites.edit") }}</button>
-              <button v-if="!item.isDefault" class="table-action table-action-danger" @click="handleDelete(item)">{{ t("sites.delete") }}</button>
+              <button class="table-action table-action-danger" @click="handleDelete(item)">{{ t("sites.delete") }}</button>
             </div>
           </div>
         </div>

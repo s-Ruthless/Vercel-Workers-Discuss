@@ -140,9 +140,12 @@ export async function getAdminComments(c: Context) {
     params.push(`%${search}%`);
     paramIndex++;
   }
-  if (siteId && siteId !== 'default') {
+  if (siteId && siteId !== 'blog') {
     where += ` AND site_id = $${paramIndex++}`;
     params.push(siteId);
+  } else if (siteId === 'blog') {
+    where += ` AND (site_id = $${paramIndex++} OR site_id IS NULL OR site_id = '')`;
+    params.push('blog');
   }
 
   const countRow = await queryFirst<{ count: string }>(`SELECT COUNT(*) as count FROM "Comment" WHERE ${where}`, params);
@@ -345,7 +348,7 @@ export async function updateComment(c: Context) {
 // ==================== 获取评论统计 ====================
 export async function getStats(c: Context) {
   const rawSiteId = c.req.query('siteId');
-  const siteId = rawSiteId && rawSiteId !== 'default' ? rawSiteId : null;
+  const siteId = rawSiteId || 'blog';
 
   const results = await queryAll<{ created: number; status: string; site_id: string | null; likes: number }>(
     `SELECT created, status, site_id, likes FROM "Comment"`
@@ -360,7 +363,7 @@ export async function getStats(c: Context) {
   const thirtyDaysAgo = now - 29 * 24 * 60 * 60 * 1000;
 
   for (const row of results) {
-    const domainKey = row.site_id?.trim() || 'default';
+    const domainKey = row.site_id?.trim() || 'blog';
     let counts = domainMap.get(domainKey);
     if (!counts) { counts = { total: 0, approved: 0, pending: 0, rejected: 0 }; domainMap.set(domainKey, counts); }
     counts.total++;
@@ -369,9 +372,9 @@ export async function getStats(c: Context) {
     else if (row.status === 'rejected') counts.rejected++;
   }
 
-  const rowsForSummary = siteId
-    ? results.filter(r => (r.site_id?.trim() || 'default') === siteId)
-    : results;
+  const rowsForSummary = siteId === 'blog'
+    ? results.filter(r => !r.site_id?.trim() || r.site_id.trim() === 'blog' || r.site_id.trim() === '')
+    : results.filter(r => r.site_id?.trim() === siteId);
 
   for (const row of rowsForSummary) {
     summary.total++;
@@ -401,9 +404,12 @@ export async function getStats(c: Context) {
   let sayWhere = `1=1`;
   const sayParams: unknown[] = [];
   let sayParamIndex = 1;
-  if (siteId) {
+  if (siteId && siteId !== 'blog') {
     sayWhere = `site_id = $${sayParamIndex++}`;
     sayParams.push(siteId);
+  } else if (siteId === 'blog') {
+    sayWhere = `(site_id = $${sayParamIndex++} OR site_id IS NULL OR site_id = '')`;
+    sayParams.push('blog');
   }
 
   const sayResults = await queryAll<{ created: number; status: string; likes: number }>(
@@ -1347,13 +1353,13 @@ async function getManagedSitesList(): Promise<ManagedSite[]> {
       sites = [];
     }
   }
-  // Auto-create default site if missing
-  if (!sites.some(s => s.id === DEFAULT_SITE_ID)) {
+  // Auto-create default site only on first setup (settings key never set)
+  if (!raw) {
     sites.unshift({
       id: DEFAULT_SITE_ID,
       name: '默认站点',
       url: '',
-      siteId: 'default',
+      siteId: 'blog',
       isDefault: true,
     });
     await saveManagedSitesList(sites);
@@ -1383,7 +1389,7 @@ export async function createManagedSite(c: Context) {
 
     if (!name) return c.json({ message: '站点名称不能为空' }, 400);
     if (!siteId) return c.json({ message: '站点 ID 不能为空' }, 400);
-    if (siteId === 'default') return c.json({ message: '站点 ID "default" 为系统保留，请使用其他 ID' }, 400);
+    if (siteId === 'blog') return c.json({ message: '站点 ID "blog" 为系统保留，请使用其他 ID' }, 400);
 
     const sites = await getManagedSitesList();
     if (sites.some(s => s.siteId === siteId)) {
@@ -1440,9 +1446,7 @@ export async function deleteManagedSite(c: Context) {
   try {
     const id = c.req.query('id');
     if (!id) return c.json({ message: '缺少 id 参数' }, 400);
-    if (id === DEFAULT_SITE_ID) return c.json({ message: '默认站点不可删除' }, 400);
-
-    const sites = await getManagedSitesList();
+  const sites = await getManagedSitesList();
     const filtered = sites.filter(s => s.id !== id);
     if (filtered.length === sites.length) {
       return c.json({ message: '站点不存在' }, 404);
@@ -1480,9 +1484,12 @@ export async function getAdminSays(c: Context) {
       params.push(`%${search}%`);
       paramIndex++;
     }
-    if (siteId && siteId !== 'default') {
+    if (siteId && siteId !== 'blog') {
       where += ` AND site_id = $${paramIndex++}`;
       params.push(siteId);
+    } else if (siteId === 'blog') {
+      where += ` AND (site_id = $${paramIndex++} OR site_id IS NULL OR site_id = '')`;
+      params.push('blog');
     }
 
     const countRow = await queryFirst<{ count: string }>(`SELECT COUNT(*) as count FROM "Say" WHERE ${where}`, params);

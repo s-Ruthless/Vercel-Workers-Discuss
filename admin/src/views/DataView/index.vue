@@ -112,7 +112,7 @@
         <div class="form-group">
           <label class="form-label">{{ t("data.siteIdModal.selectLabel") }}</label>
           <select v-model="selectedSiteId" class="form-select" style="width: 100%">
-            <option value="default">{{ t("layout.defaultSite") }}</option>
+            <option value="blog">{{ t("layout.defaultSite") }}</option>
             <option v-for="item in siteOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
           </select>
         </div>
@@ -194,8 +194,8 @@ async function loadSiteOptions() {
     const res = await fetchSiteList();
     const sites = Array.isArray(res.sites) ? res.sites : [];
     const unique = Array.from(new Set(sites));
-    siteOptions.value = unique.filter((s) => s && s !== "default").map((s) => ({ label: s, value: s }));
-    selectedSiteId.value = currentSiteId.value || "default";
+    siteOptions.value = unique.filter((s) => s && s !== "blog").map((s) => ({ label: s, value: s }));
+    selectedSiteId.value = currentSiteId.value || "blog";
   } catch { siteOptions.value = []; }
 }
 
@@ -311,14 +311,14 @@ async function processImportComments(json: any) {
   const comments = Array.isArray(json) ? json : [json];
   addLog(t("data.messages.parsedCommentsCount", { count: comments.length }));
   pendingJson.value = comments;
-  selectedSiteId.value = currentSiteId.value || "default";
+  selectedSiteId.value = currentSiteId.value || "blog";
   customSiteId.value = "";
   showSiteIdModal.value = true;
 }
 
 async function executeImportComments(comments: any[], siteId?: string) {
   try {
-    const commentsWithSiteId = comments.map((item) => ({ ...item, site_id: siteId || currentSiteId.value || "default" }));
+    const commentsWithSiteId = comments.map((item) => ({ ...item, site_id: siteId || currentSiteId.value || "blog" }));
     const res = await importComments(commentsWithSiteId);
     addLog(t("data.messages.importCommentsDone", { message: res.message }));
     showToast(t("data.messages.importCommentsSuccess"));
@@ -327,7 +327,7 @@ async function executeImportComments(comments: any[], siteId?: string) {
 }
 
 async function confirmSiteId() {
-  const siteId = customSiteId.value.trim() || selectedSiteId.value || "default";
+  const siteId = customSiteId.value.trim() || selectedSiteId.value || "blog";
   addLog(t("data.messages.siteIdSelected", { siteId }));
   showSiteIdModal.value = false;
   await executeImportComments(pendingJson.value, siteId);

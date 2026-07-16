@@ -227,7 +227,7 @@ hexo.extend.injector.register('body_end', `
 | `el` | `string \| HTMLElement` | 是 | — | 挂载元素选择器或 DOM 元素 |
 | `apiBaseUrl` | `string` | 是 | — | VWD 评论系统 API 地址 |
 | `mode` | `'says'` | 否 | — | 设为 `'says'` 开启说说渲染功能，页面展示说说列表 |
-| `siteId` | `string` | 否 | `default` | 站点 ID，用于多站点隔离 |
+| `siteId` | `string` | 否 | `blog` | 站点 ID，用于多站点隔离 |
 | `postSlug` | `string` | 否 | `window.location.pathname` | 文章唯一标识 |
 | `postTitle` | `string` | 否 | `document.title` | 文章标题（用于通知邮件） |
 | `postUrl` | `string` | 否 | `window.location.origin + window.location.pathname` | 文章 URL（用于通知邮件） |
@@ -304,7 +304,7 @@ hexo.extend.injector.register('body_end', `
 | `el` | `string \| HTMLElement` | 是 | — | 挂载元素选择器或 DOM 元素 |
 | `apiBaseUrl` | `string` | 是 | — | VWD 评论系统 API 地址 |
 | `mode` | `'says'` | 是 | — | 设为 `'says'` 开启说说渲染功能，页面展示说说列表 |
-| `siteId` | `string` | 否 | `default` | 站点 ID |
+| `siteId` | `string` | 否 | `blog` | 站点 ID |
 | `pageSize` | `number` | 否 | `10` | 每页显示说说数（也可从后台设置） |
 | `theme` | `'light' \| 'dark'` | 否 | `light` | 主题 |
 | `primaryColor` | `string` | 否 | `#0969da` | 主题色 |
