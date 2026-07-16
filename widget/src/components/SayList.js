@@ -54,6 +54,7 @@ export class SayList {
         say,
         apiOrigin: this.props.apiOrigin,
         enableComments: this.props.enableComments,
+        emojiPacks: this.props.emojiPacks || [],
         liked: false,
         onLike: this.props.onLike,
         t: this.props.t,

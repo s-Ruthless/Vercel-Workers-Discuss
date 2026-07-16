@@ -1,7 +1,7 @@
 /**
  * 单条说说组件
  */
-import { replaceEmotionUrlsInHtml } from '../utils/emotion.js';
+import { replaceEmotionUrlsInHtml, replaceEmojiSyntax } from '../utils/emotion.js';
 
 export class SayItem {
   constructor(container, props) {
@@ -17,10 +17,10 @@ export class SayItem {
 
   render() {
     if (!this.container) return;
-    const { say, apiOrigin, enableComments, t } = this.props;
+    const { say, apiOrigin, enableComments, emojiPacks, t } = this.props;
 
     const html = say.contentHtml
-      ? replaceEmotionUrlsInHtml(say.contentHtml, apiOrigin || '')
+      ? replaceEmojiSyntax(replaceEmotionUrlsInHtml(say.contentHtml, apiOrigin || ''), emojiPacks || [])
       : '';
 
     const tagsHtml = say.tags && say.tags.length > 0
