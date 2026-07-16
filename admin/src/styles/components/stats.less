@@ -30,6 +30,10 @@
 
 /* —– Stats Grid (macOS Widget Style) —– */
 .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.stats-grid-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.stats-grid-5 .stats-item { padding: 12px 14px; }
+.stats-grid-5 .stats-value { font-size: 26px; }
+.stats-grid-5 .stats-label { font-size: 12px; margin-bottom: 4px; }
 .stats-item {
   padding: 16px 18px; border-radius: var(--radius-md);
   background-color: var(--bg-card-solid);
@@ -79,7 +83,7 @@
 .chart { width: 100%; height: 260px; }
 
 @media (max-width: 768px) {
-  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats-grid, .stats-grid-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .domain-stats-layout { flex-direction: column; }
   .domain-pie-wrapper { width: 100%; }
 }

@@ -70,6 +70,7 @@ export type CommentStatsResponse = {
     approved: number;
     pending: number;
     rejected: number;
+    totalLikes: number;
   };
   domains: {
     domain: string;

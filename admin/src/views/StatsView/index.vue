@@ -8,12 +8,12 @@
     </div>
     <div class="card">
       <div class="card-title-row">
-        <h3 class="card-title">{{ t("stats.overview") }}</h3>
+        <h3 class="card-title">评论概览</h3>
       </div>
       <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
       <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
       <div v-else>
-        <div class="stats-grid">
+        <div class="stats-grid stats-grid-5">
           <div class="stats-item">
             <div class="stats-label">{{ t("stats.total") }}</div>
             <div class="stats-value">{{ statsSummary.total }}</div>
@@ -30,6 +30,10 @@
             <div class="stats-label">{{ t("stats.rejected") }}</div>
             <div class="stats-value stats-value-rejected">{{ statsSummary.rejected }}</div>
           </div>
+          <div class="stats-item">
+            <div class="stats-label">总点赞</div>
+            <div class="stats-value">{{ statsSummary.totalLikes }}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -40,7 +44,7 @@
       <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
       <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
       <div v-else>
-        <div class="stats-grid">
+        <div class="stats-grid stats-grid-5">
           <div class="stats-item">
             <div class="stats-label">说说总数</div>
             <div class="stats-value">{{ saySummary.total }}</div>
@@ -82,37 +86,6 @@
         <div ref="chartEl" class="chart"></div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title-row">
-        <h3 class="card-title">{{ t("stats.bySite") }}</h3>
-      </div>
-      <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
-      <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
-      <div v-else-if="domainStats.length === 0" class="page-hint">{{ t("stats.noData") }}</div>
-      <div v-else class="domain-stats-layout">
-        <div class="domain-table-wrapper">
-          <div class="domain-table">
-            <div class="domain-table-header">
-              <div class="domain-cell domain-cell-domain">{{ t("stats.table.domain") }}</div>
-              <div class="domain-cell">{{ t("stats.table.total") }}</div>
-              <div class="domain-cell">{{ t("stats.table.approved") }}</div>
-              <div class="domain-cell">{{ t("stats.table.pending") }}</div>
-              <div class="domain-cell">{{ t("stats.table.rejected") }}</div>
-            </div>
-            <div v-for="item in domainStats" :key="item.domain" class="domain-table-row">
-              <div class="domain-cell domain-cell-domain">{{ item.domain }}</div>
-              <div class="domain-cell">{{ item.total }}</div>
-              <div class="domain-cell">{{ item.approved }}</div>
-              <div class="domain-cell">{{ item.pending }}</div>
-              <div class="domain-cell">{{ item.rejected }}</div>
-            </div>
-          </div>
-        </div>
-        <div class="domain-pie-wrapper">
-          <div ref="domainPieEl" class="domain-pie-chart"></div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -125,13 +98,10 @@ import { useSite } from "../../composables/useSite";
 
 const { t } = useI18n();
 
-type DomainStat = { domain: string; total: number; approved: number; pending: number; rejected: number; };
-
 const statsLoading = ref(false);
 const statsError = ref("");
-const statsSummary = ref({ total: 0, approved: 0, pending: 0, rejected: 0 });
+const statsSummary = ref({ total: 0, approved: 0, pending: 0, rejected: 0, totalLikes: 0 });
 const saySummary = ref({ total: 0, published: 0, draft: 0, hidden: 0, totalLikes: 0 });
-const domainStats = ref<DomainStat[]>([]);
 const last7Days = ref<{ date: string; total: number }[]>([]);
 const sayLast7Days = ref<{ date: string; total: number }[]>([]);
 const chartRange = ref<"7" | "30">("7");
@@ -143,9 +113,7 @@ const toastType = ref<"success" | "error">("success");
 const toastVisible = ref(false);
 
 const chartEl = ref<HTMLDivElement | null>(null);
-const domainPieEl = ref<HTMLDivElement | null>(null);
 let chartInstance: echarts.ECharts | null = null;
-let domainPieChartInstance: echarts.ECharts | null = null;
 
 function loadChartRangeFromStorage() {
   try {
@@ -168,9 +136,8 @@ async function loadStats() {
   statsError.value = "";
   try {
     const res = await fetchCommentStats(currentSiteId.value);
-    statsSummary.value = { total: res.summary.total, approved: res.summary.approved, pending: res.summary.pending, rejected: res.summary.rejected };
+    statsSummary.value = { total: res.summary.total, approved: res.summary.approved, pending: res.summary.pending, rejected: res.summary.rejected, totalLikes: res.summary.totalLikes || 0 };
     saySummary.value = res.saySummary || { total: 0, published: 0, draft: 0, hidden: 0, totalLikes: 0 };
-    domainStats.value = res.domains;
     last7Days.value = Array.isArray(res.last7Days) ? res.last7Days : [];
     sayLast7Days.value = Array.isArray(res.sayLast7Days) ? res.sayLast7Days : [];
   } catch (e: any) {
@@ -179,7 +146,7 @@ async function loadStats() {
   } finally {
     statsLoading.value = false;
     await nextTick();
-    if (!statsError.value) { renderChart(); renderDomainPieChart(); }
+    if (!statsError.value) { renderChart(); }
   }
 }
 
@@ -208,35 +175,15 @@ function renderChart() {
   });
 }
 
-function renderDomainPieChart() {
-  const el = domainPieEl.value;
-  if (!el) return;
-  if (!domainPieChartInstance) domainPieChartInstance = echarts.init(el);
-  else if (domainPieChartInstance.getDom() !== el) {
-    domainPieChartInstance.dispose();
-    domainPieChartInstance = echarts.init(el);
-  }
-  if (!domainStats.value.length) { domainPieChartInstance.clear(); return; }
-  const source = domainStats.value.slice().sort((a, b) => b.total - a.total);
-  const data = source.map((item) => ({ name: item.domain || "未知", value: item.total }));
-  domainPieChartInstance.setOption({
-    tooltip: { trigger: "item", formatter: "{b}: {c} ({d}%)" },
-    legend: { orient: "vertical", left: "left" },
-    series: [{ type: "pie", radius: ["40%", "70%"], center: ["60%", "50%"], avoidLabelOverlap: false, data }],
-  });
-}
-
 function changeChartRange(range: "7" | "30") {
   if (chartRange.value === range) return;
   chartRange.value = range;
   saveChartRangeToStorage(range);
   renderChart();
-  renderDomainPieChart();
 }
 
 function handleResize() {
   if (chartInstance) chartInstance.resize();
-  if (domainPieChartInstance) domainPieChartInstance.resize();
 }
 
 onMounted(() => {
@@ -250,7 +197,6 @@ watch(currentSiteId, () => { loadStats(); });
 onBeforeUnmount(() => {
   window.removeEventListener("resize", handleResize);
   if (chartInstance) { chartInstance.dispose(); chartInstance = null; }
-  if (domainPieChartInstance) { domainPieChartInstance.dispose(); domainPieChartInstance = null; }
 });
 </script>
 

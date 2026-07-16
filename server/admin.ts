@@ -347,11 +347,11 @@ export async function getStats(c: Context) {
   const rawSiteId = c.req.query('siteId');
   const siteId = rawSiteId && rawSiteId !== 'default' ? rawSiteId : null;
 
-  const results = await queryAll<{ created: number; status: string; site_id: string | null }>(
-    `SELECT created, status, site_id FROM "Comment"`
+  const results = await queryAll<{ created: number; status: string; site_id: string | null; likes: number }>(
+    `SELECT created, status, site_id, likes FROM "Comment"`
   );
 
-  const summary = { total: 0, approved: 0, pending: 0, rejected: 0 };
+  const summary = { total: 0, approved: 0, pending: 0, rejected: 0, totalLikes: 0 };
   const domainMap = new Map<string, typeof summary>();
   const dailyMap = new Map<string, number>();
 
@@ -374,6 +374,7 @@ export async function getStats(c: Context) {
 
   for (const row of rowsForSummary) {
     summary.total++;
+    summary.totalLikes += Number(row.likes) || 0;
     if (row.status === 'approved') summary.approved++;
     else if (row.status === 'pending') summary.pending++;
     else if (row.status === 'rejected') summary.rejected++;
