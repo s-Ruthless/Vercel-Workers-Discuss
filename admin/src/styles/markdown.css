@@ -39,4 +39,4 @@
 .cell-content-text th { background: var(--vwd-bg-secondary, #f6f8fa); }
 .cell-content-text img, .cell-content-text video, .cell-content-text iframe { max-width: 100%; height: auto; max-height: 200px; }
 .cell-content-text .tk-owo-emotion { display: inline-block; vertical-align: bottom; max-width: 40px; }
-.cell-content-text .vwd-emotion-img { display: inline-block; vertical-align: middle; width: auto; max-height: 2em; max-width: 60px; margin: 0 2px; border-radius: 4px; }
+.cell-content-text .vwd-emotion-img { display: inline-block; vertical-align: middle; width: auto; max-height: 3em; max-width: 60px; margin: 0 2px; border-radius: 4px; }

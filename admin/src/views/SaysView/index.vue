@@ -28,7 +28,7 @@
         </div>
         <div v-for="item in filteredSays" :key="item.id" class="table-row">
           <div class="table-cell table-cell-content">
-            <div class="cell-content-text" v-html="renderContent(item.contentHtml)"></div>
+            <div class="cell-content-text" v-html="emojiReady ? renderContent(item.contentHtml) : item.contentHtml"></div>
             <span v-if="item.likes" class="cell-likes-number">
               <PhThumbsUp :size="13" />
               {{ item.likes }}
@@ -136,12 +136,13 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { fetchSays, createSay, updateSay, deleteSay, updateSayStatus, type SayItem } from "../../api/admin";
 import { useSite } from "../../composables/useSite";
-import { initEmojiPacks, renderContent } from "../../utils/emoji";
-import { fetchFeatureSettings } from "../../api/admin";
+import { renderContent } from "../../utils/emoji";
+import { useEmojiReady } from "../../composables/useEmoji";
 import EmojiPicker from "../../components/EmojiPicker.vue";
 
 const { t } = useI18n();
 const { currentSiteId } = useSite();
+const { emojiReady, ensureEmojiLoaded } = useEmojiReady();
 
 const loading = ref(false);
 const error = ref("");
@@ -286,7 +287,8 @@ async function handleSubmit() {
       await updateSay({ id: editingId.value, content: modalContent.value, status: modalStatus.value, tags });
       showToast("更新成功");
     } else {
-      await createSay({ content: modalContent.value, status: modalStatus.value, tags });
+      const siteId = currentSiteId.value !== 'default' ? currentSiteId.value : '';
+      await createSay({ content: modalContent.value, status: modalStatus.value, tags, siteId });
       showToast("发布成功");
     }
     modalVisible.value = false;
@@ -310,13 +312,7 @@ async function handleDelete(id: number) {
 }
 
 onMounted(() => {
-  fetchFeatureSettings()
-    .then((res) => {
-      initEmojiPacks(window.location.origin, res.emojiPaths).catch(() => {});
-    })
-    .catch(() => {
-      initEmojiPacks(window.location.origin).catch(() => {});
-    });
+  ensureEmojiLoaded();
   loadSays(1);
 });
 
@@ -344,7 +340,7 @@ watch(currentSiteId, () => { page.value = 1; loadSays(1); });
 .cell-content-text :deep(p) { margin: 0 0 8px; }
 .cell-content-text :deep(p:last-child) { margin-bottom: 0; }
 .cell-content-text :deep(img) { max-width: 100%; height: auto; border-radius: 8px; }
-.cell-content-text :deep(.vwd-emotion-img) { display: inline-block; vertical-align: middle; width: auto; max-height: 2em; max-width: 60px; margin: 0 2px; border-radius: 4px; }
+.cell-content-text :deep(.vwd-emotion-img) { display: inline-block; vertical-align: middle; width: auto; max-height: 3em; max-width: 60px; margin: 0 2px; border-radius: 4px; }
 .cell-content-text :deep(pre) { padding: 12px; overflow-x: auto; background: var(--bg-secondary); border-radius: 6px; font-size: 0.9em; }
 .cell-content-text :deep(code) { font-family: ui-monospace, monospace; background: var(--bg-secondary); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.9em; }
 .cell-content-text :deep(pre code) { padding: 0; background: transparent; }

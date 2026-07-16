@@ -4,7 +4,8 @@
     "stats": "数据看板",
     "says": "说说管理",
     "settings": "网站设置",
-    "data": "数据管理"
+    "data": "数据管理",
+    "sites": "站点管理"
   },
   "layout": {
     "toggleMenu": "切换菜单",
@@ -327,5 +328,43 @@
     "saveSuccess": "保存成功",
     "saveFailed": "保存失败",
     "loading": "加载中..."
+  },
+  "sites": {
+    "title": "站点管理",
+    "createBtn": "新增站点",
+    "editTitle": "编辑站点",
+    "createTitle": "新增站点",
+    "edit": "编辑",
+    "delete": "删除",
+    "cancel": "取消",
+    "save": "保存",
+    "submitting": "保存中...",
+    "empty": "暂无站点，请新增站点",
+    "copySiteId": "点击复制站点 ID",
+    "copied": "已复制",
+    "confirmDelete": "确认删除站点「{name}」吗？",
+    "createSuccess": "创建成功",
+    "updateSuccess": "更新成功",
+    "deleteSuccess": "删除成功",
+    "operationFailed": "操作失败",
+    "table": {
+      "name": "站点名称",
+      "siteId": "站点 ID",
+      "url": "网址",
+      "actions": "操作"
+    },
+    "field": {
+      "name": "站点名称",
+      "namePlaceholder": "例如：我的博客",
+      "siteId": "站点 ID",
+      "siteIdPlaceholder": "例如：blog",
+      "siteIdHint": "此 ID 需要与前端 Widget 配置中的 siteId 一致，用于区分不同站点的评论和说说。",
+      "url": "网址",
+      "urlPlaceholder": "例如：https://example.com"
+    },
+    "validation": {
+      "nameRequired": "站点名称不能为空",
+      "siteIdRequired": "站点 ID 不能为空"
+    }
   }
 }

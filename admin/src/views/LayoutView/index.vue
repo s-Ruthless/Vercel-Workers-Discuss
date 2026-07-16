@@ -108,6 +108,10 @@
             <PhDatabase class="menu-item-icon" :size="18" />
             <span>{{ t("menu.data") }}</span>
           </li>
+          <li class="menu-item" :class="{ active: isRouteActive('sites') }" @click="goSites">
+            <PhGlobe class="menu-item-icon" :size="18" />
+            <span>{{ t("menu.sites") }}</span>
+          </li>
         </ul>
         <div class="layout-sider-footer" @click="openVersionModal">
           <div class="layout-sider-footer-line">
@@ -163,7 +167,7 @@
 import { ref, onMounted, provide, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { logoutAdmin, fetchAdminDisplaySettings, fetchSiteList } from "../../api/admin";
+import { logoutAdmin, fetchAdminDisplaySettings, fetchSiteList, fetchManagedSites, type ManagedSite } from "../../api/admin";
 import { useTheme } from "../../composables/useTheme";
 import { useAccentColor, ACCENT_PRESETS } from "../../composables/useAccentColor";
 import { useSite } from "../../composables/useSite";
@@ -214,22 +218,30 @@ function closeAccentOnOutside(e: MouseEvent) {
 type SiteOption = { label: string; value: string };
 const siteOptions = ref<SiteOption[]>([]);
 const defaultSiteId = "default";
+const managedSites = ref<ManagedSite[]>([]);
 
 function getSiteLabel(value: string) {
   if (!value || value === "default") return t("layout.defaultSite");
-  return value;
+  const managed = managedSites.value.find(s => s.siteId === value);
+  return managed ? managed.name : value;
 }
 
 async function loadSites() {
   try {
-    const res = await fetchSiteList();
-    const sites = Array.isArray(res.sites) ? res.sites : [];
-    const unique = Array.from(new Set(sites));
-    siteOptions.value = unique
-      .filter((s) => s !== "")
-      .map((s) => ({ label: s, value: s }));
+    const [managedRes, autoRes] = await Promise.all([
+      fetchManagedSites().catch(() => ({ sites: [] as ManagedSite[] })),
+      fetchSiteList().catch(() => ({ sites: [] as string[] })),
+    ]);
+    managedSites.value = managedRes.sites || [];
+    const managedSiteIds = new Set(managedSites.value.map(s => s.siteId));
+    const autoOnly = (autoRes.sites || []).filter(s => s && s !== "" && !managedSiteIds.has(s));
+    siteOptions.value = [
+      ...managedSites.value.map(s => ({ label: s.name, value: s.siteId })),
+      ...autoOnly.map(s => ({ label: s, value: s })),
+    ];
   } catch {
     siteOptions.value = [];
+    managedSites.value = [];
   }
 }
 
@@ -276,6 +288,7 @@ async function loadDisplaySettings() {
 }
 
 provide("updateSiteTitle", updateTitle);
+provide("reloadSites", loadSites);
 
 onMounted(() => {
   initAccent();
@@ -299,6 +312,7 @@ function goStats() { router.push({ name: "stats" }); closeSider(); }
 function goSays() { router.push({ name: "says" }); closeSider(); }
 function goData() { router.push({ name: "data" }); closeSider(); }
 function goSettings() { router.push({ name: "settings" }); closeSider(); }
+function goSites() { router.push({ name: "sites" }); closeSider(); }
 
 function openGithub() { window.open("https://github.com/s-Ruthless/Vercel-Workers-Discuss", "_blank"); closeActions(); }
 

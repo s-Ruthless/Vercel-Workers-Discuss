@@ -352,7 +352,8 @@ export async function getStats(c: Context) {
   );
 
   const summary = { total: 0, approved: 0, pending: 0, rejected: 0, totalLikes: 0 };
-  const domainMap = new Map<string, typeof summary>();
+  type DomainCounts = { total: number; approved: number; pending: number; rejected: number };
+  const domainMap = new Map<string, DomainCounts>();
   const dailyMap = new Map<string, number>();
 
   const now = Date.now();
@@ -1319,6 +1320,119 @@ export async function downloadS3BackupHandler(c: Context) {
     return c.body(body);
   } catch (e: any) {
     return c.json({ message: e.message || '下载备份失败' }, 500);
+  }
+}
+
+// ==================== 站点管理 ====================
+const MANAGED_SITES_KEY = 'managed_sites';
+
+type ManagedSite = {
+  id: string;
+  name: string;
+  url: string;
+  siteId: string;
+};
+
+async function getManagedSitesList(): Promise<ManagedSite[]> {
+  const raw = await getSetting(MANAGED_SITES_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveManagedSitesList(sites: ManagedSite[]): Promise<void> {
+  await setSetting(MANAGED_SITES_KEY, JSON.stringify(sites));
+}
+
+export async function getManagedSites(c: Context) {
+  try {
+    const sites = await getManagedSitesList();
+    return c.json({ sites });
+  } catch (e: any) {
+    return c.json({ message: e.message || '获取站点列表失败' }, 500);
+  }
+}
+
+export async function createManagedSite(c: Context) {
+  try {
+    const body = await c.req.json();
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
+    const url = typeof body.url === 'string' ? body.url.trim() : '';
+    const siteId = typeof body.siteId === 'string' ? body.siteId.trim() : '';
+
+    if (!name) return c.json({ message: '站点名称不能为空' }, 400);
+    if (!siteId) return c.json({ message: '站点 ID 不能为空' }, 400);
+
+    const sites = await getManagedSitesList();
+    if (sites.some(s => s.siteId === siteId)) {
+      return c.json({ message: '站点 ID 已存在，请使用其他 ID' }, 400);
+    }
+
+    const newSite: ManagedSite = {
+      id: crypto.randomUUID(),
+      name,
+      url,
+      siteId,
+    };
+    sites.push(newSite);
+    await saveManagedSitesList(sites);
+
+    return c.json({ message: '创建成功', data: newSite });
+  } catch (e: any) {
+    return c.json({ message: e.message || '创建站点失败' }, 500);
+  }
+}
+
+export async function updateManagedSite(c: Context) {
+  try {
+    const body = await c.req.json();
+    const id = typeof body.id === 'string' ? body.id.trim() : '';
+    if (!id) return c.json({ message: '缺少站点 ID' }, 400);
+
+    const sites = await getManagedSitesList();
+    const idx = sites.findIndex(s => s.id === id);
+    if (idx === -1) return c.json({ message: '站点不存在' }, 404);
+
+    const name = typeof body.name === 'string' ? body.name.trim() : sites[idx].name;
+    const url = typeof body.url === 'string' ? body.url.trim() : sites[idx].url;
+    const siteId = typeof body.siteId === 'string' ? body.siteId.trim() : sites[idx].siteId;
+
+    if (!name) return c.json({ message: '站点名称不能为空' }, 400);
+    if (!siteId) return c.json({ message: '站点 ID 不能为空' }, 400);
+
+    // Check siteId uniqueness (excluding current)
+    if (sites.some((s, i) => i !== idx && s.siteId === siteId)) {
+      return c.json({ message: '站点 ID 已存在，请使用其他 ID' }, 400);
+    }
+
+    sites[idx] = { ...sites[idx], name, url, siteId };
+    await saveManagedSitesList(sites);
+
+    return c.json({ message: '更新成功' });
+  } catch (e: any) {
+    return c.json({ message: e.message || '更新站点失败' }, 500);
+  }
+}
+
+export async function deleteManagedSite(c: Context) {
+  try {
+    const id = c.req.query('id');
+    if (!id) return c.json({ message: '缺少 id 参数' }, 400);
+
+    const sites = await getManagedSitesList();
+    const filtered = sites.filter(s => s.id !== id);
+    if (filtered.length === sites.length) {
+      return c.json({ message: '站点不存在' }, 404);
+    }
+    await saveManagedSitesList(filtered);
+
+    return c.json({ message: '删除成功' });
+  } catch (e: any) {
+    return c.json({ message: e.message || '删除站点失败' }, 500);
   }
 }
 

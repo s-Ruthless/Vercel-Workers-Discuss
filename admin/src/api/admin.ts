@@ -353,6 +353,44 @@ export function fetchSiteList(): Promise<SiteListResponse> {
   return get<SiteListResponse>('/api/admin/stats/sites');
 }
 
+/* --- Sites Management --- */
+
+export type ManagedSite = {
+  id: string;
+  name: string;
+  url: string;
+  siteId: string;
+};
+
+export type ManagedSitesResponse = {
+  sites: ManagedSite[];
+};
+
+export function fetchManagedSites(): Promise<ManagedSitesResponse> {
+  return get<ManagedSitesResponse>('/api/admin/sites');
+}
+
+export function createManagedSiteApi(data: {
+  name: string;
+  url: string;
+  siteId: string;
+}): Promise<{ message: string; data: ManagedSite }> {
+  return post<{ message: string; data: ManagedSite }>('/api/admin/sites', data);
+}
+
+export function updateManagedSiteApi(data: {
+  id: string;
+  name: string;
+  url: string;
+  siteId: string;
+}): Promise<{ message: string }> {
+  return put<{ message: string }>('/api/admin/sites', data);
+}
+
+export function deleteManagedSiteApi(id: string): Promise<{ message: string }> {
+  return del<{ message: string }>(`/api/admin/sites?id=${encodeURIComponent(id)}`);
+}
+
 /* --- Says (Moments) --- */
 
 export type SayItem = {
@@ -395,6 +433,7 @@ export function createSay(data: {
   content: string;
   status?: string;
   tags?: string[];
+  siteId?: string;
 }): Promise<{ message: string; data: { id: number } }> {
   return post<{ message: string; data: { id: number } }>('/api/admin/says/create', data);
 }

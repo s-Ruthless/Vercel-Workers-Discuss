@@ -55,7 +55,7 @@
             </div>
           </div>
           <div class="table-cell table-cell-content">
-            <div class="cell-content-text" v-html="renderContent(item.contentHtml)"></div>
+            <div class="cell-content-text" v-html="emojiReady ? renderContent(item.contentHtml) : item.contentHtml"></div>
           </div>
           <div class="table-cell table-cell-path">
             <a :href="item.postUrl ?? undefined" target="_blank" class="cell-path" :title="item.postUrl ?? undefined">
@@ -156,8 +156,8 @@ import {
   blockEmail,
 } from "../../api/admin";
 import { useSite } from "../../composables/useSite";
-import { initEmojiPacks, renderContent } from "../../utils/emoji";
-import { fetchFeatureSettings } from "../../api/admin";
+import { renderContent } from "../../utils/emoji";
+import { useEmojiReady } from "../../composables/useEmoji";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -169,6 +169,7 @@ const loading = ref(false);
 const error = ref("");
 const statusFilter = ref("");
 const { currentSiteId } = useSite();
+const { emojiReady, ensureEmojiLoaded } = useEmojiReady();
 const jumpPageInput = ref("");
 const editVisible = ref(false);
 const editSaving = ref(false);
@@ -361,15 +362,7 @@ async function submitEdit() {
 }
 
 onMounted(() => {
-  // 初始化表情包（加载用户配置的 emojiPaths）
-  fetchFeatureSettings()
-    .then((res) => {
-      initEmojiPacks(window.location.origin, res.emojiPaths).catch(() => {});
-    })
-    .catch(() => {
-      initEmojiPacks(window.location.origin).catch(() => {});
-    });
-
+  ensureEmojiLoaded();
   const p = route.query.p;
   let initialPage = 1;
   if (typeof p === "string") {

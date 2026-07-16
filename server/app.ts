@@ -16,8 +16,9 @@ import {
 } from './say.js';
 import {
   adminLogin, getAdminComments, deleteComment, updateStatus,
-  updateComment, getStats, getVisitOverview, getVisitPages,
+  updateComment, getStats,
   getSiteList, getLikeStats, listLikes,
+  getManagedSites, createManagedSite, updateManagedSite, deleteManagedSite,
   getAdminSays, createSay, updateSay, deleteSay, updateSayStatus,
   getSaySettingsHandler, saveSaySettingsHandler,
   getCommentSettings, saveCommentSettings,
@@ -118,6 +119,12 @@ app.post('/api/admin/import/backup', adminAuth, importBackup);
 // Stats
 app.get('/api/admin/stats/comments', adminAuth, getStats);
 app.get('/api/admin/stats/sites', adminAuth, getSiteList);
+
+// Sites management
+app.get('/api/admin/sites', adminAuth, getManagedSites);
+app.post('/api/admin/sites', adminAuth, createManagedSite);
+app.put('/api/admin/sites', adminAuth, updateManagedSite);
+app.delete('/api/admin/sites', adminAuth, deleteManagedSite);
 
 // Says management
 app.get('/api/admin/says/list', adminAuth, getAdminSays);

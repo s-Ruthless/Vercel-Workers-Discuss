@@ -57,7 +57,7 @@ export async function getSays(c: Context) {
 
 // ==================== 获取单条说说 ====================
 export async function getSayById(c: Context) {
-  const id = parseInt(c.req.param('id'));
+  const id = parseInt(c.req.param('id') || '');
   if (!Number.isFinite(id) || id <= 0) {
     return c.json({ message: 'Invalid id' }, 400);
   }
