@@ -102,7 +102,7 @@ async function handleSubmit() {
   try {
     await setupAdmin(name.value.trim(), password.value);
     setSetupStatus(true);
-    router.push({ name: "comments" });
+    router.push({ name: "stats" });
   } catch (e: any) {
     error.value = e.message || "设置失败";
   } finally {
