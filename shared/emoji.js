@@ -3,25 +3,14 @@
  * 不依赖任何框架，纯 JS 实现
  */
 
-export const EmojiPack = {
-  name: '',
-  prefix: '',
-  type: '',
-  icon: '',
-  folder: '',
-  items: [],
-  remote: false,
-};
-
 let _packs = [];
 let _loaded = false;
 let _loadingPromise = null;
 
 /**
- * 重置表情包缓存，允许重新加载
+ * 标记需要重新加载（不清空已有数据，避免渲染中断）
  */
 export function reloadEmojiPacks() {
-  _packs = [];
   _loaded = false;
   _loadingPromise = null;
 }
