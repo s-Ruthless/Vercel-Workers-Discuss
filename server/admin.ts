@@ -1428,6 +1428,11 @@ export async function updateManagedSite(c: Context) {
     if (!name) return c.json({ message: '站点名称不能为空' }, 400);
     if (!siteId) return c.json({ message: '站点 ID 不能为空' }, 400);
 
+    // Prevent changing the default site's siteId
+    if (sites[idx].isDefault && siteId !== sites[idx].siteId) {
+      return c.json({ message: '默认站点的 ID 不可修改' }, 400);
+    }
+
     // Check siteId uniqueness (excluding current)
     if (sites.some((s, i) => i !== idx && s.siteId === siteId)) {
       return c.json({ message: '站点 ID 已存在，请使用其他 ID' }, 400);

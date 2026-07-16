@@ -11,6 +11,27 @@
       </button>
       <div class="layout-title">{{ layoutTitle }}</div>
       <div class="layout-actions-wrapper">
+        <div v-if="allSiteOptions.length > 0" class="site-switcher">
+          <button class="layout-button site-switcher-btn" @click="toggleSiteDropdown" type="button">
+            <PhGlobe :size="15" />
+            <span class="site-switcher-label">{{ currentSiteLabel }}</span>
+            <PhCaretDown :size="12" weight="bold" />
+          </button>
+          <div v-if="isSiteDropdownOpen" class="site-switcher-dropdown">
+            <div
+              v-for="site in allSiteOptions"
+              :key="site.value"
+              class="site-switcher-item"
+              :class="{ active: site.value === currentSiteId }"
+              @click="selectSite(site.value)"
+            >
+              <PhCheck v-if="site.value === currentSiteId" :size="14" weight="bold" class="site-switcher-check" />
+              <span v-else class="site-switcher-check-placeholder"></span>
+              <span class="site-switcher-item-name">{{ site.label }}</span>
+              <span v-if="site.isDefault" class="site-switcher-tag">默认</span>
+            </div>
+          </div>
+        </div>
         <div class="layout-actions">
           <a class="layout-button" href="https://github.com/s-Ruthless/Vercel-Workers-Discuss" target="_blank">
             Github
@@ -56,6 +77,21 @@
           <PhDotsThreeVertical :size="20" bold />
         </button>
         <div v-if="isActionsOpen" class="layout-actions-dropdown">
+          <template v-if="allSiteOptions.length > 0">
+            <div class="layout-actions-section-label">站点</div>
+            <button
+              v-for="site in allSiteOptions"
+              :key="site.value"
+              class="layout-actions-item"
+              :class="{ 'layout-actions-item-active': site.value === currentSiteId }"
+              type="button"
+              @click="selectSite(site.value); closeActions();"
+            >
+              {{ site.label }}
+              <span v-if="site.isDefault" class="layout-actions-item-tag">默认</span>
+            </button>
+            <div class="layout-actions-divider"></div>
+          </template>
           <button class="layout-actions-item" type="button" @click="openGithub">
             Github
           </button>
@@ -71,14 +107,6 @@
     </header>
     <div class="layout-body">
       <nav class="layout-sider" :class="{ 'layout-sider-mobile-open': isMobileSiderOpen }">
-        <div class="layout-sider-domain-filter">
-          <select v-model="currentSiteId" class="layout-domain-select">
-            <option :value="defaultSiteId">{{ getSiteLabel(defaultSiteId) }}</option>
-            <option v-for="item in siteOptions" :key="item.value" :value="item.value">
-              {{ getSiteLabel(item.value) }}
-            </option>
-          </select>
-        </div>
         <ul class="menu">
           <li class="menu-item" :class="{ active: isRouteActive('comments') }" @click="goComments">
             <PhChatCircleDots class="menu-item-icon" :size="18" />
@@ -200,31 +228,48 @@ function toggleAccent() { isAccentOpen.value = !isAccentOpen.value; }
 function closeAccent() { isAccentOpen.value = false; }
 function selectAccent(color: string) { setAccent(color); closeAccent(); }
 
-function closeAccentOnOutside(e: MouseEvent) {
+function closeDropdownsOnOutside(e: MouseEvent) {
   const el = e.target as HTMLElement;
   if (!el.closest(".accent-dropdown") && !el.closest("[title=\"主题色\"]")) {
     isAccentOpen.value = false;
   }
+  if (!el.closest(".site-switcher-dropdown") && !el.closest(".site-switcher-btn")) {
+    isSiteDropdownOpen.value = false;
+  }
 }
 
-type SiteOption = { label: string; value: string };
-const siteOptions = ref<SiteOption[]>([]);
 const defaultSiteId = "blog";
 const managedSites = ref<ManagedSite[]>([]);
+const isSiteDropdownOpen = ref(false);
 
-function getSiteLabel(value: string) {
-  if (!value || value === "blog") return t("layout.defaultSite");
-  const managed = managedSites.value.find(s => s.siteId === value);
-  return managed ? managed.name : value;
+const allSiteOptions = computed(() => {
+  return managedSites.value.map(s => ({
+    label: s.name || s.siteId,
+    value: s.siteId,
+    isDefault: s.isDefault || s.siteId === 'blog',
+  }));
+});
+
+const currentSiteLabel = computed(() => {
+  const site = managedSites.value.find(s => s.siteId === currentSiteId.value);
+  return site ? site.name : currentSiteId.value || defaultSiteId;
+});
+
+function toggleSiteDropdown() {
+  isSiteDropdownOpen.value = !isSiteDropdownOpen.value;
+  isAccentOpen.value = false;
+}
+
+function selectSite(value: string) {
+  currentSiteId.value = value;
+  isSiteDropdownOpen.value = false;
 }
 
 async function loadSites() {
   try {
     const managedRes = await fetchManagedSites().catch(() => ({ sites: [] as ManagedSite[] }));
     managedSites.value = managedRes.sites || [];
-    siteOptions.value = managedSites.value.map(s => ({ label: s.name, value: s.siteId }));
   } catch {
-    siteOptions.value = [];
     managedSites.value = [];
   }
 }
@@ -275,12 +320,18 @@ provide("updateSiteTitle", updateTitle);
 provide("reloadSites", loadSites);
 provide("managedSites", managedSites);
 
+watch(managedSites, (sites) => {
+  if (sites.length > 0 && !sites.some(s => s.siteId === currentSiteId.value)) {
+    currentSiteId.value = sites[0].siteId;
+  }
+});
+
 onMounted(() => {
   initAccent();
   loadSites();
   loadVersion();
   loadDisplaySettings();
-  document.addEventListener("click", closeAccentOnOutside);
+  document.addEventListener("click", closeDropdownsOnOutside);
 });
 
 function isRouteActive(name: string) {
@@ -346,6 +397,74 @@ function closeVersionModal() { versionModalVisible.value = false; }
 }
 .modal-btn:hover { background-color: var(--primary-hover); }
 .modal-btn:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+
+/* Site switcher */
+.site-switcher {
+  position: relative;
+}
+.site-switcher-btn {
+  gap: 5px;
+}
+.site-switcher-label {
+  max-width: 120px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.site-switcher-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover);
+  padding: 6px;
+  z-index: 1000;
+  min-width: 180px;
+  animation: modal-scale-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.site-switcher-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+.site-switcher-item:hover {
+  background: var(--bg-hover);
+}
+.site-switcher-item.active {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+.site-switcher-check {
+  flex: 0 0 14px;
+}
+.site-switcher-check-placeholder {
+  flex: 0 0 14px;
+}
+.site-switcher-item-name {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.site-switcher-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-success);
+  background-color: rgba(52, 199, 89, 0.12);
+  border-radius: var(--radius-pill);
+}
 
 /* Accent color dropdown */
 .accent-dropdown {

@@ -131,7 +131,7 @@ export async function ensureSchema(): Promise<void> {
       status TEXT DEFAULT 'approved',
       priority INTEGER DEFAULT 0,
       likes INTEGER DEFAULT 0,
-      site_id TEXT DEFAULT ''
+      site_id TEXT DEFAULT 'blog'
     )`);
 
     await db.query('CREATE INDEX IF NOT EXISTS idx_comment_post_slug ON "Comment"(post_slug)');
@@ -147,7 +147,7 @@ export async function ensureSchema(): Promise<void> {
 
     await db.query(`CREATE TABLE IF NOT EXISTS "Likes" (
       id SERIAL PRIMARY KEY,
-      site_id TEXT NOT NULL DEFAULT '',
+      site_id TEXT NOT NULL DEFAULT 'blog',
       page_slug TEXT NOT NULL,
       user_id TEXT NOT NULL,
       created_at BIGINT NOT NULL,
@@ -164,11 +164,20 @@ export async function ensureSchema(): Promise<void> {
       status TEXT DEFAULT 'published',
       likes INTEGER DEFAULT 0,
       tags TEXT,
-      site_id TEXT DEFAULT ''
+      site_id TEXT DEFAULT 'blog'
     )`);
     await db.query('CREATE INDEX IF NOT EXISTS idx_say_created ON "Say"(created DESC)');
     await db.query('CREATE INDEX IF NOT EXISTS idx_say_status ON "Say"(status)');
     await db.query('CREATE INDEX IF NOT EXISTS idx_say_site_id ON "Say"(site_id)');
+
+    // Update default site_id for existing tables (migrate from '' to 'blog')
+    try { await db.query(`ALTER TABLE "Comment" ALTER COLUMN site_id SET DEFAULT 'blog'`); } catch {}
+    try { await db.query(`ALTER TABLE "Likes" ALTER COLUMN site_id SET DEFAULT 'blog'`); } catch {}
+    try { await db.query(`ALTER TABLE "Say" ALTER COLUMN site_id SET DEFAULT 'blog'`); } catch {}
+    // Migrate existing empty site_id values to 'blog'
+    try { await db.query(`UPDATE "Comment" SET site_id = 'blog' WHERE site_id = ''`); } catch {}
+    try { await db.query(`UPDATE "Likes" SET site_id = 'blog' WHERE site_id = ''`); } catch {}
+    try { await db.query(`UPDATE "Say" SET site_id = 'blog' WHERE site_id = ''`); } catch {}
 
     console.log('[DB] Schema ensured');
   } catch (e) {

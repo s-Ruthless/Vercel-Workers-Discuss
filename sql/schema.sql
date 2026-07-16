@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "Comment" (
   status TEXT DEFAULT 'approved',
   priority INTEGER DEFAULT 0,
   likes INTEGER DEFAULT 0,
-  site_id TEXT DEFAULT ''
+  site_id TEXT DEFAULT 'blog'
 );
 
 CREATE INDEX IF NOT EXISTS idx_comment_post_slug ON "Comment"(post_slug);
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS "Settings" (
 -- Likes table
 CREATE TABLE IF NOT EXISTS "Likes" (
   id SERIAL PRIMARY KEY,
-  site_id TEXT NOT NULL DEFAULT '',
+  site_id TEXT NOT NULL DEFAULT 'blog',
   page_slug TEXT NOT NULL,
   user_id TEXT NOT NULL,
   created_at BIGINT NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "Say" (
   status TEXT DEFAULT 'published',
   likes INTEGER DEFAULT 0,
   tags TEXT,
-  site_id TEXT DEFAULT ''
+  site_id TEXT DEFAULT 'blog'
 );
 
 CREATE INDEX IF NOT EXISTS idx_say_created ON "Say"(created DESC);

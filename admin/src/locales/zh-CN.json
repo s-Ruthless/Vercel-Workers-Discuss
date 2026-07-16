@@ -359,6 +359,7 @@
       "siteId": "站点 ID",
       "siteIdPlaceholder": "例如：blog",
       "siteIdHint": "此 ID 需要与前端 Widget 配置中的 siteId 一致，用于区分不同站点的评论和说说。",
+      "siteIdLocked": "默认站点的 ID 为系统保留，不可修改。",
       "url": "网址",
       "urlPlaceholder": "例如：https://example.com"
     },

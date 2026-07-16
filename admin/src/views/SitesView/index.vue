@@ -62,8 +62,8 @@
           </div>
           <div class="form-group">
             <label class="form-label">{{ t("sites.field.siteId") }} *</label>
-            <input v-model="modalSiteId" class="form-input" :placeholder="t('sites.field.siteIdPlaceholder')" :disabled="!!editingId" />
-            <span class="form-hint">{{ t("sites.field.siteIdHint") }}</span>
+            <input v-model="modalSiteId" class="form-input" :placeholder="t('sites.field.siteIdPlaceholder')" :disabled="editingIsDefault" />
+            <span class="form-hint">{{ editingIsDefault ? t('sites.field.siteIdLocked') : t('sites.field.siteIdHint') }}</span>
           </div>
           <div class="form-group">
             <label class="form-label">{{ t("sites.field.url") }}</label>
@@ -95,7 +95,7 @@ import {
 } from "../../api/admin";
 
 const { t } = useI18n();
-const reloadSites = inject<() => void>("reloadSites", () => {});
+const reloadSites = inject<() => Promise<void>>("reloadSites", async () => {});
 
 const loading = ref(false);
 const error = ref("");
@@ -108,6 +108,7 @@ const submitting = ref(false);
 
 const modalVisible = ref(false);
 const editingId = ref<string | null>(null);
+const editingIsDefault = ref(false);
 const modalName = ref("");
 const modalSiteId = ref("");
 const modalUrl = ref("");
@@ -138,6 +139,7 @@ function copySiteId(siteId: string) {
 
 function openCreateModal() {
   editingId.value = null;
+  editingIsDefault.value = false;
   modalName.value = "";
   modalSiteId.value = "";
   modalUrl.value = "";
@@ -146,6 +148,7 @@ function openCreateModal() {
 
 function openEditModal(item: ManagedSite) {
   editingId.value = item.id;
+  editingIsDefault.value = !!item.isDefault;
   modalName.value = item.name;
   modalSiteId.value = item.siteId;
   modalUrl.value = item.url;
@@ -176,7 +179,7 @@ async function handleSubmit() {
     }
     modalVisible.value = false;
     await loadSites();
-    reloadSites();
+    await reloadSites();
   } catch (e: any) {
     showToast(e.message || t("sites.operationFailed"), "error");
   } finally {
@@ -190,7 +193,7 @@ async function handleDelete(item: ManagedSite) {
     await deleteManagedSiteApi(item.id);
     showToast(t("sites.deleteSuccess"));
     await loadSites();
-    reloadSites();
+    await reloadSites();
   } catch (e: any) {
     showToast(e.message || t("sites.operationFailed"), "error");
   }
