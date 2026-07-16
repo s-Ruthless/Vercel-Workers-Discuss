@@ -72,10 +72,9 @@ export class VWDSays {
         : '';
 
       // Load emoji packs (optional, for rendering emoji in says)
-      const defaultEmoji = [
-        `${this.config.apiOrigin}/emotion/aru`,
-        `${this.config.apiOrigin}/emotion/twemoji`,
-      ];
+    const defaultEmoji = [
+      `${this.config.apiOrigin}/emotion/alus`,
+    ];
       this.config.emoji = defaultEmoji;
       this.config.emojiPacks = [];
       loadEmojiPacks(this.config.emoji, this.config.apiOrigin)

@@ -37,8 +37,7 @@ export async function initEmojiPacks(apiOrigin: string, emojiPaths?: string[]): 
 
   const origin = (apiOrigin || '').replace(/\/+$/, '');
   const defaultEmoji = [
-    `${origin}/emotion/aru`,
-    `${origin}/emotion/twemoji`,
+    `${origin}/emotion/alus`,
   ];
 
   _loadingPromise = (async () => {

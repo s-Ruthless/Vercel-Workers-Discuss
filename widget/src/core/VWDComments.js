@@ -159,8 +159,7 @@ export class VWDComments {
       // 初始化表情包（从后台配置读取，Waline 风格）
       this.config.apiOrigin = this.config.apiBaseUrl ? this.config.apiBaseUrl.replace(/\/+$/, '') : '';
       const defaultEmoji = [
-        `${this.config.apiOrigin}/emotion/aru`,
-        `${this.config.apiOrigin}/emotion/twemoji`,
+        `${this.config.apiOrigin}/emotion/alus`,
       ];
       this.config.emoji = serverConfig.emojiPaths && serverConfig.emojiPaths.length > 0 ? serverConfig.emojiPaths : defaultEmoji;
       this.config.emojiPacks = [];
