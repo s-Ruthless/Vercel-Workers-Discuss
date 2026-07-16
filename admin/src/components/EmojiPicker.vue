@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { getEmojiPacks, reloadEmojiPacks, initEmojiPacks, type EmojiPack } from "../utils/emoji";
+import { getEmojiPacks, reloadEmojiPacks, initEmojiPacks, getEmojiUrl, type EmojiPack } from "../utils/emoji";
 import { fetchFeatureSettings } from "../api/admin";
 
 const props = defineProps<{
@@ -79,12 +79,6 @@ async function togglePanel() {
     packs.value = getEmojiPacks();
   }
   panelVisible.value = !panelVisible.value;
-}
-
-function getEmojiUrl(pack: EmojiPack, item: string): string {
-  const folder = (pack.folder || "").replace(/\/+$/, "");
-  const ext = pack.type || "png";
-  return `${folder}/${item}.${ext}`;
 }
 
 function insertText(text: string) {
