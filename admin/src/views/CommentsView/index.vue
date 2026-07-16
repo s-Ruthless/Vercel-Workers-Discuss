@@ -24,6 +24,7 @@
           <div class="table-cell table-cell-author">{{ t("comments.table.author") }}</div>
           <div class="table-cell table-cell-content">{{ t("comments.table.content") }}</div>
           <div class="table-cell table-cell-path">{{ t("comments.table.path") }}</div>
+          <div class="table-cell table-cell-site">站点</div>
           <div class="table-cell table-cell-status">{{ t("comments.table.status") }}</div>
           <div class="table-cell table-cell-actions">{{ t("comments.table.actions") }}</div>
         </div>
@@ -61,6 +62,9 @@
             <a :href="item.postUrl ?? undefined" target="_blank" class="cell-path" :title="item.postUrl ?? undefined">
               {{ item.postUrl || item.postSlug }}
             </a>
+          </div>
+          <div class="table-cell table-cell-site">
+            <span class="cell-site-name">{{ getSiteName(item.siteId) }}</span>
           </div>
           <div class="table-cell table-cell-status">
             <div class="cell-status-wrapper">
@@ -142,7 +146,7 @@
 
 <script setup lang="ts">
 import "../../styles/markdown.css";
-import { onMounted, ref, computed, watch } from "vue";
+import { onMounted, ref, computed, watch, inject } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import ModalEdit from "./components/ModalEdit.vue";
@@ -158,6 +162,7 @@ import {
 import { useSite } from "../../composables/useSite";
 import { renderContent } from "../../utils/emoji";
 import { useEmojiReady } from "../../composables/useEmoji";
+import type { ManagedSite } from "../../api/admin";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -170,6 +175,18 @@ const error = ref("");
 const statusFilter = ref("");
 const { currentSiteId } = useSite();
 const { emojiReady, ensureEmojiLoaded } = useEmojiReady();
+const managedSites = inject<import('vue').Ref<ManagedSite[]>>("managedSites", ref([]));
+
+function getSiteName(siteId?: string): string {
+  if (!siteId || siteId === 'default' || siteId === '') return getSiteLabel('default');
+  const site = managedSites.value.find(s => s.siteId === siteId);
+  return site ? site.name : siteId;
+}
+function getSiteLabel(value: string) {
+  if (!value || value === 'default') return '默认站点';
+  const site = managedSites.value.find(s => s.siteId === value);
+  return site ? site.name : value;
+}
 const jumpPageInput = ref("");
 const editVisible = ref(false);
 const editSaving = ref(false);
@@ -380,4 +397,6 @@ watch(currentSiteId, () => {
 
 <style scoped lang="less">
 @import "../../styles/components/comments.less";
+.table-cell-site { width: 100px; flex-shrink: 0; }
+.cell-site-name { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>

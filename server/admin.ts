@@ -1331,17 +1331,34 @@ type ManagedSite = {
   name: string;
   url: string;
   siteId: string;
+  isDefault?: boolean;
 };
+
+const DEFAULT_SITE_ID = '__default_site__';
 
 async function getManagedSitesList(): Promise<ManagedSite[]> {
   const raw = await getSetting(MANAGED_SITES_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
+  let sites: ManagedSite[] = [];
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      sites = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      sites = [];
+    }
   }
+  // Auto-create default site if missing
+  if (!sites.some(s => s.id === DEFAULT_SITE_ID)) {
+    sites.unshift({
+      id: DEFAULT_SITE_ID,
+      name: '默认站点',
+      url: '',
+      siteId: 'default',
+      isDefault: true,
+    });
+    await saveManagedSitesList(sites);
+  }
+  return sites;
 }
 
 async function saveManagedSitesList(sites: ManagedSite[]): Promise<void> {
@@ -1366,6 +1383,7 @@ export async function createManagedSite(c: Context) {
 
     if (!name) return c.json({ message: '站点名称不能为空' }, 400);
     if (!siteId) return c.json({ message: '站点 ID 不能为空' }, 400);
+    if (siteId === 'default') return c.json({ message: '站点 ID "default" 为系统保留，请使用其他 ID' }, 400);
 
     const sites = await getManagedSitesList();
     if (sites.some(s => s.siteId === siteId)) {
@@ -1422,6 +1440,7 @@ export async function deleteManagedSite(c: Context) {
   try {
     const id = c.req.query('id');
     if (!id) return c.json({ message: '缺少 id 参数' }, 400);
+    if (id === DEFAULT_SITE_ID) return c.json({ message: '默认站点不可删除' }, 400);
 
     const sites = await getManagedSitesList();
     const filtered = sites.filter(s => s.id !== id);

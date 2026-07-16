@@ -360,6 +360,7 @@ export type ManagedSite = {
   name: string;
   url: string;
   siteId: string;
+  isDefault?: boolean;
 };
 
 export type ManagedSitesResponse = {

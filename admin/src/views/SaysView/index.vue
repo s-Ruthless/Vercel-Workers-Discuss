@@ -22,6 +22,7 @@
         <div class="table-header">
           <div class="table-cell table-cell-content">内容</div>
           <div class="table-cell table-cell-tags">标签</div>
+          <div class="table-cell table-cell-site">站点</div>
           <div class="table-cell table-cell-time">时间</div>
           <div class="table-cell table-cell-status">状态</div>
           <div class="table-cell table-cell-actions">操作</div>
@@ -38,6 +39,9 @@
             <div class="cell-tags-wrapper" v-if="item.tags && item.tags.length">
               <span v-for="tag in item.tags" :key="tag" class="cell-tag">{{ tag }}</span>
             </div>
+          </div>
+          <div class="table-cell table-cell-site">
+            <span class="cell-site-name">{{ getSiteName(item.siteId) }}</span>
           </div>
           <div class="table-cell table-cell-time">
             <span class="cell-time-text">{{ formatDate(item.created) }}</span>
@@ -132,17 +136,25 @@
 
 <script setup lang="ts">
 import "../../styles/markdown.css";
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, inject } from "vue";
 import { useI18n } from "vue-i18n";
 import { fetchSays, createSay, updateSay, deleteSay, updateSayStatus, type SayItem } from "../../api/admin";
 import { useSite } from "../../composables/useSite";
 import { renderContent } from "../../utils/emoji";
 import { useEmojiReady } from "../../composables/useEmoji";
 import EmojiPicker from "../../components/EmojiPicker.vue";
+import type { ManagedSite } from "../../api/admin";
 
 const { t } = useI18n();
 const { currentSiteId } = useSite();
 const { emojiReady, ensureEmojiLoaded } = useEmojiReady();
+const managedSites = inject<import('vue').Ref<ManagedSite[]>>("managedSites", ref([]));
+
+function getSiteName(siteId?: string): string {
+  if (!siteId || siteId === 'default' || siteId === '') return '默认站点';
+  const site = managedSites.value.find(s => s.siteId === siteId);
+  return site ? site.name : siteId;
+}
 
 const loading = ref(false);
 const error = ref("");
@@ -325,6 +337,8 @@ watch(currentSiteId, () => { page.value = 1; loadSays(1); });
 /* Says-specific column widths */
 .table-cell-content { flex-direction: column; flex: 1; align-items: flex-start !important; justify-content: center; min-width: 200px; }
 .table-cell-tags { width: 150px; flex-shrink: 0; }
+.table-cell-site { width: 100px; flex-shrink: 0; }
+.cell-site-name { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .table-cell-time { width: 140px; flex-shrink: 0; }
 .table-cell-status { width: 90px; flex-shrink: 0; }
 .table-cell-actions { width: 230px; flex-shrink: 0; }

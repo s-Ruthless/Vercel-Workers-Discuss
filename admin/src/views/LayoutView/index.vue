@@ -281,6 +281,7 @@ async function loadDisplaySettings() {
 
 provide("updateSiteTitle", updateTitle);
 provide("reloadSites", loadSites);
+provide("managedSites", managedSites);
 
 onMounted(() => {
   initAccent();
