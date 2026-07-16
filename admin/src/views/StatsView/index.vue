@@ -67,27 +67,39 @@
       </div>
     </div>
 
-    <!-- Comment Trend Chart -->
-    <div class="card">
-      <div class="card-title-row">
-        <h3 class="card-title">{{ t("stats.trend") }}</h3>
-        <div class="chart-tabs">
-          <button class="chart-tab" :class="{ 'chart-tab-active': chartRange === '7' }" type="button" @click="changeChartRange('7')">
-            {{ t("stats.last7Days") }}
-          </button>
-          <button class="chart-tab" :class="{ 'chart-tab-active': chartRange === '30' }" type="button" @click="changeChartRange('30')">
-            {{ t("stats.last30Days") }}
-          </button>
+    <!-- Comment Trend + Say Trend (side by side) -->
+    <div class="stats-trend-row">
+      <div class="card stats-trend-card">
+        <div class="card-title-row">
+          <h3 class="card-title">{{ t("stats.trend") }}</h3>
+          <div class="chart-tabs">
+            <button class="chart-tab" :class="{ 'chart-tab-active': chartRange === '7' }" type="button" @click="changeChartRange('7')">
+              {{ t("stats.last7Days") }}
+            </button>
+            <button class="chart-tab" :class="{ 'chart-tab-active': chartRange === '30' }" type="button" @click="changeChartRange('30')">
+              {{ t("stats.last30Days") }}
+            </button>
+          </div>
+        </div>
+        <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
+        <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
+        <div class="chart-wrapper">
+          <div ref="chartEl" class="chart"></div>
         </div>
       </div>
-      <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
-      <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
-      <div class="chart-wrapper">
-        <div ref="chartEl" class="chart"></div>
+      <div class="card stats-trend-card">
+        <div class="card-title-row">
+          <h3 class="card-title">说说趋势</h3>
+        </div>
+        <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
+        <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
+        <div class="chart-wrapper">
+          <div ref="sayTrendEl" class="chart"></div>
+        </div>
       </div>
     </div>
 
-    <!-- Status Distribution + Say Trend -->
+    <!-- Status Distribution (linked to overview) -->
     <div class="stats-charts-row">
       <div class="card stats-chart-card">
         <div class="card-title-row">
@@ -109,48 +121,6 @@
           <div ref="sayPieEl" class="chart chart-small"></div>
         </div>
       </div>
-      <div class="card stats-chart-card">
-        <div class="card-title-row">
-          <h3 class="card-title">说说趋势</h3>
-        </div>
-        <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
-        <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
-        <div class="chart-wrapper">
-          <div ref="sayTrendEl" class="chart chart-small"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Site Distribution -->
-    <div class="card" v-if="domains.length > 0">
-      <div class="card-title-row">
-        <h3 class="card-title">{{ t("stats.bySite") }}</h3>
-      </div>
-      <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
-      <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
-      <div class="domain-stats-layout">
-        <div class="domain-bar-wrapper">
-          <div ref="siteBarEl" class="chart"></div>
-        </div>
-        <div class="domain-table-wrapper">
-          <div class="domain-table">
-            <div class="domain-table-header">
-              <div class="domain-cell domain-cell-domain">{{ t("stats.table.domain") }}</div>
-              <div class="domain-cell">{{ t("stats.table.total") }}</div>
-              <div class="domain-cell">{{ t("stats.table.approved") }}</div>
-              <div class="domain-cell">{{ t("stats.table.pending") }}</div>
-              <div class="domain-cell">{{ t("stats.table.rejected") }}</div>
-            </div>
-            <div v-for="item in domains" :key="item.domain" class="domain-table-row">
-              <div class="domain-cell domain-cell-domain">{{ item.domain }}</div>
-              <div class="domain-cell">{{ item.total }}</div>
-              <div class="domain-cell domain-cell-approved">{{ item.approved }}</div>
-              <div class="domain-cell domain-cell-pending">{{ item.pending }}</div>
-              <div class="domain-cell domain-cell-rejected">{{ item.rejected }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -159,7 +129,7 @@
 import { onMounted, onBeforeUnmount, ref, nextTick, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import * as echarts from "echarts";
-import { fetchCommentStats, type CommentStatsResponse } from "../../api/admin";
+import { fetchCommentStats } from "../../api/admin";
 import { useSite } from "../../composables/useSite";
 
 const { t } = useI18n();
@@ -170,7 +140,6 @@ const statsSummary = ref({ total: 0, approved: 0, pending: 0, rejected: 0, total
 const saySummary = ref({ total: 0, published: 0, draft: 0, hidden: 0, totalLikes: 0 });
 const last7Days = ref<{ date: string; total: number }[]>([]);
 const sayLast7Days = ref<{ date: string; total: number }[]>([]);
-const domains = ref<CommentStatsResponse["domains"]>([]);
 const chartRange = ref<"7" | "30">("7");
 const chartRangeStorageKey = "vwd-stats-chart-range";
 const { currentSiteId } = useSite();
@@ -184,16 +153,14 @@ const chartEl = ref<HTMLDivElement | null>(null);
 const commentPieEl = ref<HTMLDivElement | null>(null);
 const sayPieEl = ref<HTMLDivElement | null>(null);
 const sayTrendEl = ref<HTMLDivElement | null>(null);
-const siteBarEl = ref<HTMLDivElement | null>(null);
 
 // Chart instances
 let chartInstance: echarts.ECharts | null = null;
 let commentPieInstance: echarts.ECharts | null = null;
 let sayPieInstance: echarts.ECharts | null = null;
 let sayTrendInstance: echarts.ECharts | null = null;
-let siteBarInstance: echarts.ECharts | null = null;
 
-const allChartInstances = () => [chartInstance, commentPieInstance, sayPieInstance, sayTrendInstance, siteBarInstance];
+const allChartInstances = () => [chartInstance, commentPieInstance, sayPieInstance, sayTrendInstance];
 
 function loadChartRangeFromStorage() {
   try {
@@ -220,7 +187,6 @@ async function loadStats() {
     saySummary.value = res.saySummary || { total: 0, published: 0, draft: 0, hidden: 0, totalLikes: 0 };
     last7Days.value = Array.isArray(res.last7Days) ? res.last7Days : [];
     sayLast7Days.value = Array.isArray(res.sayLast7Days) ? res.sayLast7Days : [];
-    domains.value = Array.isArray(res.domains) ? res.domains : [];
   } catch (e: any) {
     statsError.value = e.message || "加载统计数据失败";
     showToast(statsError.value, "error");
@@ -255,6 +221,33 @@ function renderCommentTrendChart() {
       lineStyle: { width: 2, color: "#0ea5e9" },
       symbol: "circle", symbolSize: 4,
       itemStyle: { color: "#0ea5e9" },
+    }],
+  });
+}
+
+function renderSayTrendChart() {
+  const el = sayTrendEl.value;
+  if (!el) return;
+  if (!sayTrendInstance) sayTrendInstance = echarts.init(el);
+  const source = sayLast7Days.value;
+  const seriesData = chartRange.value === "7" ? source.slice(-7) : source;
+  const dates = seriesData.map((item) => item.date.slice(5));
+  const values = seriesData.map((item) => item.total);
+  sayTrendInstance.setOption({
+    tooltip: { trigger: "axis" },
+    grid: { left: 36, right: 16, top: 24, bottom: 32 },
+    xAxis: { type: "category", data: dates, boundaryGap: true, axisTick: { alignWithLabel: true } },
+    yAxis: { type: "value", minInterval: 1 },
+    series: [{
+      type: "bar", data: values,
+      barMaxWidth: 24,
+      itemStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: "rgba(175, 82, 222, 0.85)" },
+          { offset: 1, color: "rgba(175, 82, 222, 0.25)" },
+        ]),
+        borderRadius: [4, 4, 0, 0],
+      },
     }],
   });
 }
@@ -305,63 +298,11 @@ function renderSayPieChart() {
   });
 }
 
-function renderSayTrendChart() {
-  const el = sayTrendEl.value;
-  if (!el) return;
-  if (!sayTrendInstance) sayTrendInstance = echarts.init(el);
-  const source = sayLast7Days.value;
-  const seriesData = chartRange.value === "7" ? source.slice(-7) : source;
-  const dates = seriesData.map((item) => item.date.slice(5));
-  const values = seriesData.map((item) => item.total);
-  sayTrendInstance.setOption({
-    tooltip: { trigger: "axis" },
-    grid: { left: 36, right: 16, top: 24, bottom: 32 },
-    xAxis: { type: "category", data: dates, boundaryGap: false, axisTick: { alignWithLabel: true } },
-    yAxis: { type: "value", minInterval: 1 },
-    series: [{
-      type: "bar", data: values,
-      barMaxWidth: 24,
-      itemStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: "rgba(175, 82, 222, 0.85)" },
-          { offset: 1, color: "rgba(175, 82, 222, 0.25)" },
-        ]),
-        borderRadius: [4, 4, 0, 0],
-      },
-    }],
-  });
-}
-
-function renderSiteBarChart() {
-  const el = siteBarEl.value;
-  if (!el) return;
-  if (!siteBarInstance) siteBarInstance = echarts.init(el);
-  const data = domains.value.slice(0, 10);
-  const names = data.map(d => d.domain);
-  const totals = data.map(d => d.total);
-  const approved = data.map(d => d.approved);
-  const pending = data.map(d => d.pending);
-  const rejected = data.map(d => d.rejected);
-  siteBarInstance.setOption({
-    tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-    legend: { bottom: 0, icon: "circle", textStyle: { fontSize: 12 } },
-    grid: { left: 40, right: 16, top: 24, bottom: 48 },
-    xAxis: { type: "category", data: names, axisLabel: { fontSize: 11, rotate: names.length > 5 ? 20 : 0 } },
-    yAxis: { type: "value", minInterval: 1 },
-    series: [
-      { name: "已通过", type: "bar", stack: "total", data: approved, itemStyle: { color: "#34c759" }, barMaxWidth: 40 },
-      { name: "待审核", type: "bar", stack: "total", data: pending, itemStyle: { color: "#ff9500" }, barMaxWidth: 40 },
-      { name: "已拒绝", type: "bar", stack: "total", data: rejected, itemStyle: { color: "#ff3b30" }, barMaxWidth: 40 },
-    ],
-  });
-}
-
 function renderAllCharts() {
   renderCommentTrendChart();
+  renderSayTrendChart();
   renderCommentPieChart();
   renderSayPieChart();
-  renderSayTrendChart();
-  if (domains.value.length > 0) renderSiteBarChart();
 }
 
 function changeChartRange(range: "7" | "30") {
@@ -391,7 +332,6 @@ onBeforeUnmount(() => {
   commentPieInstance = null;
   sayPieInstance = null;
   sayTrendInstance = null;
-  siteBarInstance = null;
 });
 </script>
 

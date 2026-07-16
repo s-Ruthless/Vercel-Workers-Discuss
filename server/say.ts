@@ -116,5 +116,13 @@ export async function likeSay(c: Context) {
   );
   const totalLikes = parseInt(totalRow?.count || '0', 10);
 
+  // Sync the likes count back to the Say table so the admin panel can see it
+  if (!alreadyLiked) {
+    await execute(
+      `UPDATE "Say" SET likes = $1 WHERE id = $2`,
+      [totalLikes, id]
+    );
+  }
+
   return c.json({ liked: true, alreadyLiked, totalLikes });
 }

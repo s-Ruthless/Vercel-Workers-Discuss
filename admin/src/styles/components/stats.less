@@ -65,52 +65,31 @@
 }
 .stats-overview-card { min-width: 0; }
 
-/* —– Charts Row (three charts side by side) —– */
+/* —– Trend Row (comment trend + say trend side by side) —– */
+.stats-trend-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.stats-trend-card { min-width: 0; }
+
+/* —– Charts Row (status pies) —– */
 .stats-charts-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 .stats-chart-card { min-width: 0; }
 
-/* —– Domain Stats Layout —– */
-.domain-stats-layout { display: flex; align-items: stretch; gap: 16px; }
-.domain-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; flex: 1; }
-.domain-bar-wrapper { width: 45%; flex-shrink: 0; }
-.domain-table {
-  border: 1px solid var(--border-color); border-radius: var(--radius-md);
-  min-width: 520px; overflow: hidden;
-}
-.domain-table-header {
-  display: flex; background-color: var(--bg-hover); color: var(--text-secondary);
-  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
-}
-.domain-table-row { display: flex; border-top: 1px solid var(--border-color); transition: background-color var(--transition-fast); }
-.domain-table-row:hover { background-color: var(--bg-hover); }
-.domain-cell {
-  flex: 1; padding: 11px 12px; font-size: 14px; color: var(--text-primary);
-  box-sizing: border-box; font-weight: 500;
-}
-.domain-cell-domain { flex: 2; font-weight: 600; }
-.domain-cell-approved { color: var(--color-success); }
-.domain-cell-pending { color: var(--color-warning); }
-.domain-cell-rejected { color: var(--color-danger); }
-
 .chart-wrapper { margin-top: 4px; }
 .chart { width: 100%; height: 280px; }
-.chart-small { height: 240px; }
-
-@media (max-width: 1024px) {
-  .stats-overview-row { grid-template-columns: 1fr; }
-  .stats-charts-row { grid-template-columns: 1fr 1fr; }
-}
+.chart-small { height: 260px; }
 
 @media (max-width: 768px) {
   .stats-grid, .stats-grid-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stats-overview-row { grid-template-columns: 1fr; }
+  .stats-trend-row { grid-template-columns: 1fr; }
   .stats-charts-row { grid-template-columns: 1fr; }
-  .domain-stats-layout { flex-direction: column; }
-  .domain-bar-wrapper { width: 100%; }
   .chart { height: 240px; }
   .chart-small { height: 220px; }
 }
