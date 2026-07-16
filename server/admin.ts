@@ -1353,8 +1353,8 @@ async function getManagedSitesList(): Promise<ManagedSite[]> {
       sites = [];
     }
   }
-  // Auto-create default site only on first setup (settings key never set)
-  if (!raw) {
+  // Ensure the built-in default "blog" site always exists
+  if (!sites.some(s => s.siteId === 'blog')) {
     sites.unshift({
       id: DEFAULT_SITE_ID,
       name: '默认站点',
@@ -1363,6 +1363,18 @@ async function getManagedSitesList(): Promise<ManagedSite[]> {
       isDefault: true,
     });
     await saveManagedSitesList(sites);
+  } else {
+    // Make sure the blog site is always marked as default
+    const blogIdx = sites.findIndex(s => s.siteId === 'blog');
+    if (blogIdx > 0) {
+      const [blogSite] = sites.splice(blogIdx, 1);
+      blogSite.isDefault = true;
+      sites.unshift(blogSite);
+      await saveManagedSitesList(sites);
+    } else if (!sites[0].isDefault) {
+      sites[0].isDefault = true;
+      await saveManagedSitesList(sites);
+    }
   }
   return sites;
 }
