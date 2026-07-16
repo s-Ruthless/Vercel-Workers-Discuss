@@ -54,7 +54,7 @@ hexo clean && hexo generate
 
 **方法一：通过注入器（推荐）**
 
-编辑 ` themes/butterfly/_config.yml`（或站点 `_config.butterfly.yml`）：
+编辑 `themes/butterfly/_config.yml`（或站点 `_config.butterfly.yml`）：
 
 ```yaml
 inject:
@@ -226,14 +226,15 @@ hexo.extend.injector.register('body_end', `
 | --- | --- | --- | --- | --- |
 | `el` | `string \| HTMLElement` | 是 | — | 挂载元素选择器或 DOM 元素 |
 | `apiBaseUrl` | `string` | 是 | — | VWD 评论系统 API 地址 |
+| `mode` | `'says'` | 否 | — | 设为 `'says'` 开启说说渲染功能，页面展示说说列表 |
 | `siteId` | `string` | 否 | `default` | 站点 ID，用于多站点隔离 |
 | `postSlug` | `string` | 否 | `window.location.pathname` | 文章唯一标识 |
 | `postTitle` | `string` | 否 | `document.title` | 文章标题（用于通知邮件） |
-| `postUrl` | `string` | 否 | `window.location.href` | 文章 URL（用于通知邮件） |
+| `postUrl` | `string` | 否 | `window.location.origin + window.location.pathname` | 文章 URL（用于通知邮件） |
 | `theme` | `'light' \| 'dark'` | 否 | `light` | 主题 |
 | `pageSize` | `number` | 否 | `20` | 每页评论数 |
-| `lang` | `'zh-CN' \| 'en-US' \| 'auto'` | 否 | `auto` | 界面语言 |
-| `primaryColor` | `string` | 否 | `#2563eb` | 主题色（hex 格式） |
+| `lang` | `'zh-CN'` | 否 | `zh-CN` | 界面语言（当前仅支持中文） |
+| `primaryColor` | `string` | 否 | `#0969da` | 主题色（hex 格式） |
 | `customCssUrl` | `string` | 否 | — | 自定义 CSS 文件 URL |
 
 ### 使用示例
@@ -306,7 +307,7 @@ hexo.extend.injector.register('body_end', `
 | `siteId` | `string` | 否 | `default` | 站点 ID |
 | `pageSize` | `number` | 否 | `10` | 每页显示说说数（也可从后台设置） |
 | `theme` | `'light' \| 'dark'` | 否 | `light` | 主题 |
-| `primaryColor` | `string` | 否 | `#2563eb` | 主题色 |
+| `primaryColor` | `string` | 否 | `#0969da` | 主题色 |
 
 > 说说的开关、每页数量等也可在后台 `/admin/settings` 中配置，前端会自动读取服务器配置。
 
@@ -433,6 +434,6 @@ hexo.extend.injector.register('body_end', `
 | POST | `/api/says/like` | 说说点赞 |
 | GET | `/api/config/comments` | 获取公开配置 |
 
-> 表情包已改为前端配置（Waline 风格），不再提供 `/api/emotions` 接口。
+> 表情包已改为前端配置（Waline 风格），不再提供 `/api/emotions` 接口。内置阿鲁表情包和颜文字，可在后台 `/admin/settings` 中配置自定义表情包路径。
 
 完整 API 文档见项目根目录 `README.md`。

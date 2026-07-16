@@ -92,13 +92,13 @@
             <PhChatCircleDots class="menu-item-icon" :size="18" />
             <span>{{ t("menu.comments") }}</span>
           </li>
-          <li class="menu-item" :class="{ active: isRouteActive('stats') }" @click="goStats">
-            <PhSquaresFour class="menu-item-icon" :size="18" />
-            <span>{{ t("menu.stats") }}</span>
-          </li>
           <li class="menu-item" :class="{ active: isRouteActive('says') }" @click="goSays">
             <PhPenNib class="menu-item-icon" :size="18" />
             <span>{{ t("menu.says") }}</span>
+          </li>
+          <li class="menu-item" :class="{ active: isRouteActive('stats') }" @click="goStats">
+            <PhSquaresFour class="menu-item-icon" :size="18" />
+            <span>{{ t("menu.stats") }}</span>
           </li>
           <li class="menu-item" :class="{ active: isRouteActive('settings') }" @click="goSettings">
             <PhGear class="menu-item-icon" :size="18" />

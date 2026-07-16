@@ -1,25 +1,35 @@
-node_modules/
-.vercel/
-.wrangler/
-
-# Build output (built by Vite & copy-assets during build step)
+# ==================== Build output ====================
+# 以下为构建产物，npm run build 时自动生成，不需要提交到仓库
 public/admin/
 public/vwd.js
 
-# Widget build artifacts
+# ⚠️ 注意：public/ 下的其他文件是源文件，必须提交到仓库，请勿写成 public/
+#   - public/emotion/    表情图片资源（评论和说说依赖）
+#   - public/icon.png    项目图标
+#   - public/index.html  首页引导页
+#   - public/404.html    404 页面
+
+# ==================== Widget ====================
 widget/dist/
 widget/node_modules/
 
-# Environment
+# ==================== Dependencies ====================
+node_modules/
+
+# ==================== Vercel ====================
+.vercel/
+.wrangler/
+
+# ==================== Environment ====================
 .env
 .env.local
 .env.*.local
 
-# OS
+# ==================== OS ====================
 .DS_Store
 Thumbs.db
 
-# IDE
+# ==================== IDE ====================
 .idea/
 .vscode/
 *.swp

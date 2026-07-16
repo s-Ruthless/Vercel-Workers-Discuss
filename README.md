@@ -27,7 +27,7 @@
 - **Telegram 通知**：新评论实时推送到 Telegram，支持一键 Webhook 配置
 - **S3 备份**：兼容 AWS S3 / Cloudflare R2 / MinIO，支持自动备份与恢复
 - **点赞功能**：文章点赞、评论点赞和说说点赞
-- **表情系统**：Waline 风格表情包，内置阿鲁和 Twemoji，后台可配置自定义表情包路径（支持 unpkg 等 CDN）
+- **表情系统**：Waline 风格表情包，内置阿鲁表情包和颜文字，后台可配置自定义表情包路径（支持 unpkg 等 CDN），Admin 和 Widget 共享同一套表情逻辑（`scripts/emoji.js`）
 - **数据迁移**：支持从 Twikoo、Artalk、Valine 导入评论数据
 - **多站点**：支持多站点管理，通过 site_id 隔离数据
 - **安全**：IP/邮箱黑名单、域名白名单、评论审核机制
@@ -39,12 +39,11 @@ vwd/
 ├── api/                  # Vercel Serverless Functions（Hono 框架）
 │   ├── index.ts          #   路由入口（API 统一入口）
 │   └── health.ts         #   独立健康检查端点
-├── src/                  # API 逻辑层（非 Serverless Function）
-│   ├── admin.ts          #   管理后台 API 逻辑
-│   ├── public.ts         #   公开 API（评论、点赞、说说配置）
-│   └── say.ts            #   说说公开 API（列表、详情、点赞）
-├── lib/                  # 工具层
+├── server/               # API 逻辑层（Hono 路由 + 业务逻辑）
 │   ├── app.ts            #   Hono 应用实例与路由注册
+│   ├── admin.ts          #   管理后台 API 逻辑（设置、评论管理、说说管理等）
+│   ├── public.ts         #   公开 API（评论、点赞、配置）
+│   ├── say.ts            #   说说公开 API（列表、详情、点赞）
 │   ├── auth.ts           #   管理员鉴权中间件（基于 Vercel KV）
 │   ├── db.ts             #   Vercel Postgres 数据库访问层
 │   ├── kv.ts             #   Vercel KV 封装
@@ -52,43 +51,48 @@ vwd/
 │   ├── s3.ts             #   S3 兼容存储客户端（aws4fetch）
 │   ├── commentSettings.ts#   评论设置读写
 │   ├── featureSettings.ts#   功能开关设置
-│   ├── saySettings.ts   #   说说设置读写
-│   ├── emotion.ts        #   表情资源处理
+│   ├── saySettings.ts    #   说说设置读写
 │   └── utils.ts          #   通用工具（IP 获取、UA 解析、头像等）
+├── scripts/              # 共享脚本
+│   ├── emoji.js          #   表情包共享逻辑（Admin 和 Widget 通用，通过 @shared 别名引入）
+│   └── init-db.cjs       #   数据库初始化脚本
 ├── admin/                # 管理后台前端（Vue 3 + Vite + TypeScript）
 │   ├── src/
 │   │   ├── api/          #   API 请求封装
-│   │   ├── components/   #   通用组件
-│   │   ├── composables/  #   组合式函数
+│   │   ├── components/   #   通用组件（EmojiPicker、CountTo、TagInput）
+│   │   ├── composables/  #   组合式函数（主题、站点、配色）
 │   │   ├── locales/      #   中文语言包
 │   │   ├── router/       #   路由配置
 │   │   ├── styles/       #   样式（LESS + 暗黑模式）
+│   │   ├── utils/        #   工具（emoji.ts — 引入共享表情逻辑）
 │   │   └── views/        #   页面组件
 │   ├── index.html
-│   ├── vite.config.ts
+│   ├── vite.config.ts    #   @shared 别名指向 ../scripts
 │   └── package.json
 ├── widget/               # 评论 Widget（前端嵌入组件）
 │   ├── src/
 │   │   ├── core/         #   主类 VWDComments + API 通信 + 状态管理
-│   │   ├── components/   #   UI 组件（表单、列表、回复、表情等）
-│   │   ├── utils/        #   工具函数（markdown、emotion、日期、验证）
+│   │   ├── components/   #   UI 组件（评论表单、列表、回复、说说、表情选择器等）
+│   │   ├── utils/        #   工具函数（markdown、emotion、日期、验证等）
 │   │   ├── styles/       #   样式（CSS Variables + 暗黑模式）
 │   │   ├── locales/      #   中文语言包
 │   │   └── index.js      #   入口文件
-│   ├── vite.config.js
+│   ├── vite.config.js    #   @shared 别名指向 ../scripts
 │   └── package.json
 ├── public/               # 静态资源（构建时自动生成）
 │   ├── admin/            #   Admin SPA 构建产物（.gitignore）
 │   ├── vwd.js            #   Widget 构建产物（.gitignore）
-│   └── emotion/          #   表情图片资源
+│   ├── icon.png          #   项目图标
+│   ├── index.html        #   首页引导页
+│   ├── 404.html          #   404 页面
+│   └── emotion/          #   表情图片资源（含 alus 表情包 + 颜文字）
 ├── sql/
 │   └── schema.sql        #   PostgreSQL 数据表定义
-├── scripts/
-│   ├── copy-assets.cjs   #   构建脚本：复制表情资源
-│   └── init-db.cjs       #   数据库初始化脚本
+├── docs/
+│   └── hexo-integration.md #  Hexo 博客接入指南
 ├── vercel.json           #   Vercel 配置（路由、CORS、函数超时）
-├── package.json
-└── tsconfig.json
+├── tsconfig.json         #   TypeScript 配置（API + Server 层）
+└── package.json
 ```
 
 ## 技术栈
@@ -130,7 +134,7 @@ cd Vercel-Workers-Discuss
 2. 点击 **Add New → Project**
 3. 选择你 Fork 的仓库 `Vercel-Workers-Discuss`
 4. Vercel 会自动识别 `vercel.json` 配置，无需手动设置：
-   - **Build Command**：`npm run build`（自动构建 Widget + Admin + 表情资源）
+   - **Build Command**：`npm run build`（自动构建 Widget + Admin）
    - **Output Directory**：`public`
    - **Install Command**：`npm install`
 5. 点击 **Deploy**，等待构建完成
@@ -181,7 +185,7 @@ npx vercel login
 npm run deploy
 
 # 或分步操作
-npm run build        # 构建 Widget + Admin + 表情资源
+npm run build        # 构建 Widget + Admin
 npx vercel --prod    # 部署到生产环境
 ```
 
@@ -204,6 +208,8 @@ git commit -m "update: your changes"
 git push origin main
 # Vercel 自动触发部署
 ```
+
+> **注意**：确保修改的源文件使用 UTF-8 编码（无 BOM），否则 Vercel 构建时可能报 `SyntaxError: Invalid or unexpected token`。
 
 ## 接入组件
 
@@ -283,6 +289,7 @@ npm run build # 构建到 dist/ 并自动复制到 ../public/vwd.js
 | GET | `/api/comments` | 获取评论列表 |
 | POST | `/api/comments` | 提交评论 |
 | POST | `/api/comments/like` | 评论点赞 |
+| DELETE | `/api/comments/like` | 取消评论点赞 |
 | POST | `/api/verify-admin` | 管理员评论验证 |
 | GET | `/api/like` | 获取文章点赞状态 |
 | POST | `/api/like` | 文章点赞 |
@@ -316,7 +323,7 @@ npm run build # 构建到 dist/ 并自动复制到 ../public/vwd.js
 | --- | --- |
 | `Comment` | 评论数据（昵称、邮箱、内容、状态、点赞数等） |
 | `Settings` | 系统设置（键值对存储） |
-| `Likes` | 点赞记录（文章点赞，按 user_id 去重） |
+| `Likes` | 点赞记录（文章点赞、说说点赞，按 user_id 去重） |
 | `Say` | 说说/动态（Markdown 内容、状态、标签等） |
 
 完整定义见 [sql/schema.sql](./sql/schema.sql)。
@@ -341,27 +348,27 @@ npm run build # 构建到 dist/ 并自动复制到 ../public/vwd.js
 ## 本地开发
 
 ```bash
-# 安装依赖
-npm install
-cd admin && npm install && cd ..
-cd widget && npm install && cd ..
+# 一键安装所有依赖（根目录 + admin + widget）
+npm run install:all
 
 # 启动 Vercel Dev（包含 API + Admin 热更新）
 npm run dev
 
 # 单独开发 Admin 前端
-cd admin
-npm run dev
+cd admin && npm run dev
 
 # 单独开发 Widget
-cd widget
-npm run dev
+cd widget && npm run dev
 ```
+
+> 项目包含三个独立的 `package.json`（根目录服务端、`admin/` 后台前端、`widget/` 评论组件），`npm run install:all` 会一次性安装全部三个目录的依赖。
+>
+> Admin 和 Widget 通过 `@shared` 别名引用 `scripts/emoji.js` 中的共享表情逻辑。Vite 配置中 `@shared` 分别指向 `../scripts`。
 
 ## 构建脚本
 
 ```bash
-# 完整构建（Widget + Admin 前端 + 表情资源）
+# 完整构建（Widget + Admin 前端）
 npm run build
 
 # 仅构建 Widget
@@ -370,15 +377,14 @@ npm run build:widget
 # 仅构建 Admin 前端
 npm run build:admin
 
-# 仅复制表情资源
-npm run build:assets
-
 # 初始化数据库
 npm run db:init
 
 # 部署到 Vercel
 npm run deploy
 ```
+
+> 表情图片资源（`public/emotion/`）已随仓库提交，构建时无需额外复制步骤。
 
 ## License
 

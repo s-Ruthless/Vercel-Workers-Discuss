@@ -39,3 +39,4 @@
 .cell-content-text th { background: var(--vwd-bg-secondary, #f6f8fa); }
 .cell-content-text img, .cell-content-text video, .cell-content-text iframe { max-width: 100%; height: auto; max-height: 200px; }
 .cell-content-text .tk-owo-emotion { display: inline-block; vertical-align: bottom; max-width: 40px; }
+.cell-content-text .vwd-emotion-img { display: inline-block; vertical-align: -0.2em; width: 24px; height: 24px; max-width: 24px; max-height: 24px; margin: 0 1px; border-radius: 4px; }

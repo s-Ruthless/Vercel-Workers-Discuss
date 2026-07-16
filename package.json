@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vercel dev",
+    "install:all": "npm install && npm --prefix ./widget install && npm --prefix ./admin install",
     "build": "npm --prefix ./widget install && npm --prefix ./widget run build && npm --prefix ./admin install && npm --prefix ./admin run build",
     "build:widget": "npm --prefix ./widget install && npm --prefix ./widget run build",
     "build:admin": "npm --prefix ./admin install && npm --prefix ./admin run build",
