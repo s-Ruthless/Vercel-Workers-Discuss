@@ -82,6 +82,17 @@ export type CommentStatsResponse = {
     date: string;
     total: number;
   }[];
+  saySummary: {
+    total: number;
+    published: number;
+    draft: number;
+    hidden: number;
+    totalLikes: number;
+  };
+  sayLast7Days: {
+    date: string;
+    total: number;
+  }[];
 };
 
 export type SiteListResponse = {

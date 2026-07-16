@@ -35,6 +35,37 @@
     </div>
     <div class="card">
       <div class="card-title-row">
+        <h3 class="card-title">说说概览</h3>
+      </div>
+      <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
+      <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
+      <div v-else>
+        <div class="stats-grid">
+          <div class="stats-item">
+            <div class="stats-label">说说总数</div>
+            <div class="stats-value">{{ saySummary.total }}</div>
+          </div>
+          <div class="stats-item">
+            <div class="stats-label">已发布</div>
+            <div class="stats-value stats-value-approved">{{ saySummary.published }}</div>
+          </div>
+          <div class="stats-item">
+            <div class="stats-label">草稿</div>
+            <div class="stats-value stats-value-pending">{{ saySummary.draft }}</div>
+          </div>
+          <div class="stats-item">
+            <div class="stats-label">隐藏</div>
+            <div class="stats-value stats-value-rejected">{{ saySummary.hidden }}</div>
+          </div>
+          <div class="stats-item">
+            <div class="stats-label">总点赞</div>
+            <div class="stats-value">{{ saySummary.totalLikes }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title-row">
         <h3 class="card-title">{{ t("stats.trend") }}</h3>
         <div class="chart-tabs">
           <button class="chart-tab" :class="{ 'chart-tab-active': chartRange === '7' }" type="button" @click="changeChartRange('7')">
@@ -99,8 +130,10 @@ type DomainStat = { domain: string; total: number; approved: number; pending: nu
 const statsLoading = ref(false);
 const statsError = ref("");
 const statsSummary = ref({ total: 0, approved: 0, pending: 0, rejected: 0 });
+const saySummary = ref({ total: 0, published: 0, draft: 0, hidden: 0, totalLikes: 0 });
 const domainStats = ref<DomainStat[]>([]);
 const last7Days = ref<{ date: string; total: number }[]>([]);
+const sayLast7Days = ref<{ date: string; total: number }[]>([]);
 const chartRange = ref<"7" | "30">("7");
 const chartRangeStorageKey = "vwd-stats-chart-range";
 const { currentSiteId } = useSite();
@@ -136,8 +169,10 @@ async function loadStats() {
   try {
     const res = await fetchCommentStats(currentSiteId.value);
     statsSummary.value = { total: res.summary.total, approved: res.summary.approved, pending: res.summary.pending, rejected: res.summary.rejected };
+    saySummary.value = res.saySummary || { total: 0, published: 0, draft: 0, hidden: 0, totalLikes: 0 };
     domainStats.value = res.domains;
     last7Days.value = Array.isArray(res.last7Days) ? res.last7Days : [];
+    sayLast7Days.value = Array.isArray(res.sayLast7Days) ? res.sayLast7Days : [];
   } catch (e: any) {
     statsError.value = e.message || "加载统计数据失败";
     showToast(statsError.value, "error");

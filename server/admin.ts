@@ -395,7 +395,44 @@ export async function getStats(c: Context) {
     last7Days.push({ date: key, total: dailyMap.get(key) || 0 });
   }
 
-  return c.json({ summary, domains, last7Days });
+  // ==================== 说说统计 ====================
+  let sayWhere = `1=1`;
+  const sayParams: unknown[] = [];
+  let sayParamIndex = 1;
+  if (siteId) {
+    sayWhere = `site_id = $${sayParamIndex++}`;
+    sayParams.push(siteId);
+  }
+
+  const sayResults = await queryAll<{ created: number; status: string; likes: number }>(
+    `SELECT created, status, likes FROM "Say" WHERE ${sayWhere}`,
+    sayParams
+  );
+
+  const saySummary = { total: 0, published: 0, draft: 0, hidden: 0, totalLikes: 0 };
+  const sayDailyMap = new Map<string, number>();
+
+  for (const row of sayResults) {
+    saySummary.total++;
+    saySummary.totalLikes += Number(row.likes) || 0;
+    if (row.status === 'published') saySummary.published++;
+    else if (row.status === 'draft') saySummary.draft++;
+    else if (row.status === 'hidden') saySummary.hidden++;
+    if (row.created >= thirtyDaysAgo) {
+      const d = new Date(row.created);
+      const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+      sayDailyMap.set(key, (sayDailyMap.get(key) || 0) + 1);
+    }
+  }
+
+  const sayLast7Days: { date: string; total: number }[] = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now - i * 24 * 60 * 60 * 1000);
+    const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+    sayLast7Days.push({ date: key, total: sayDailyMap.get(key) || 0 });
+  }
+
+  return c.json({ summary, domains, last7Days, saySummary, sayLast7Days });
 }
 
 // ==================== 获取站点列表 ====================
