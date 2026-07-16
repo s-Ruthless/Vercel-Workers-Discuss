@@ -56,10 +56,10 @@ export async function setupAdmin(c: Context) {
   const password = data.password || '';
 
   if (!name || name.length < 2) {
-    return c.json({ message: '用户名至少 2 个字符' }, 400), 400);
+    return c.json({ message: '用户名至少 2 个字符' }, 400);
   }
   if (!password || password.length < 6) {
-    return c.json({ message: '密码至少 6 个字符 }, 400);
+    return c.json({ message: '密码至少 6 个字符' }, 400);
   }
 
   const passwordHash = await hashPassword(password);
@@ -548,7 +548,7 @@ export async function saveCommentSettings(c: Context) {
 
     const adminEmail = rawAdminEmail.trim();
     if (adminEmail && !isValidEmail(adminEmail)) {
-      return c.json({ message: '邮箱格式不正确' }, 400), 400);
+      return c.json({ message: '邮箱格式不正确' }, 400);
     }
 
     await saveCommentSettingsLib({
@@ -583,7 +583,7 @@ export async function setAdminEmail(c: Context) {
   try {
     const { email } = await c.req.json();
     if (!email || !isValidEmail(email)) {
-      return c.json({ message: '邮箱格式不正确' }, 400), 400);
+      return c.json({ message: '邮箱格式不正确' }, 400);
     }
     await setSetting('admin_notify_email', email.trim());
     return c.json({ message: '保存成功' });
@@ -630,7 +630,7 @@ export async function sendTestEmailHandler(c: Context) {
     // Fall back to saved settings
     const emailSettings = await loadEmailNotificationSettings();
     if (!emailSettings.smtp || !emailSettings.smtp.user || !emailSettings.smtp.pass) {
-      return c.json({ message: 'SMTP 配置不完整' }, 400), 400);
+      return c.json({ message: 'SMTP 配置不完整' }, 400);
     }
     const result = await sendTestEmail(toEmail, emailSettings.smtp);
     return c.json(
@@ -668,7 +668,7 @@ export async function updateFeatureSettings(c: Context) {
       emojiPaths: Array.isArray(body.emojiPaths) ? body.emojiPaths : undefined,
       visibleDomains: Array.isArray(body.visibleDomains) ? body.visibleDomains : undefined,
     });
-    return c.json({ message: '保存成功！' }););
+    return c.json({ message: '保存成功！' });
   } catch (e: any) {
     return c.json({ message: e.message || 'Failed to save feature settings' }, 500);
   }
@@ -703,7 +703,7 @@ export async function blockIp(c: Context) {
       return c.json({ message: 'IP 地址不能为空' }, 400);
     }
     await addToBlockedList('ip', ip.trim());
-    return c.json({ message: '已加入 IP 黑名单' }););
+    return c.json({ message: '已加入 IP 黑名单' });
   } catch (e: any) {
     return c.json({ message: e.message || '操作失败' }, 500);
   }
@@ -716,7 +716,7 @@ export async function blockEmail(c: Context) {
       return c.json({ message: '邮箱不能为空' }, 400);
     }
     if (!isValidEmail(email.trim())) {
-      return c.json({ message: '邮箱格式不正确' }, 400), 400);
+      return c.json({ message: '邮箱格式不正确' }, 400);
     }
     await addToBlockedList('email', email.trim());
     return c.json({ message: '已加入邮箱黑名单' });
@@ -887,7 +887,7 @@ export async function importConfig(c: Context) {
 
     const validConfigs = configs.filter((item: any) => item && item.key && typeof item.value === 'string');
     if (validConfigs.length === 0) {
-      return c.json({ message: '没有有效的配置数据' }, 400), 400);
+      return c.json({ message: '没有有效的配置数据' }, 400);
     }
 
     for (const item of validConfigs) {
@@ -1132,9 +1132,9 @@ export async function testTelegramMessageHandler(c: Context) {
       return c.json({ message: `发送失败： ${result.description || '未知错误'}` }, 400);
     }
 
-    return c.json({ message: '测试消息已发送' }););
+    return c.json({ message: '测试消息已发送' });
   } catch (e: any) {
-    return c.json({ message: e.message || '发送失败：' }, 500), 500);
+    return c.json({ message: e.message || '发送失败：' }, 500);
   }
 }
 
@@ -1235,7 +1235,7 @@ export async function listS3BackupsHandler(c: Context) {
   try {
     const s3 = await getS3Client();
     if (!s3) {
-      return c.json({ message: 'S3 配置不完整' }, 400), 400);
+      return c.json({ message: 'S3 配置不完整' }, 400);
     }
 
     const files = await s3.listObjects('vwd-backup-');
@@ -1252,7 +1252,7 @@ export async function deleteS3BackupHandler(c: Context) {
 
     const s3 = await getS3Client();
     if (!s3) {
-      return c.json({ message: 'S3 配置不完整' }, 400), 400);
+      return c.json({ message: 'S3 配置不完整' }, 400);
     }
 
     await s3.deleteObject(key);
@@ -1269,7 +1269,7 @@ export async function downloadS3BackupHandler(c: Context) {
 
     const s3 = await getS3Client();
     if (!s3) {
-      return c.json({ message: 'S3 配置不完整' }, 400), 400);
+      return c.json({ message: 'S3 配置不完整' }, 400);
     }
 
     const s3Response = await s3.getObject(key);
@@ -1385,7 +1385,7 @@ export async function updateSay(c: Context) {
     }
 
     const existing = await queryFirst<{ id: number }>(`SELECT id FROM "Say" WHERE id = $1`, [id]);
-    if (!existing) return c.json({ message: '说说不存在' }, 404), 404);
+    if (!existing) return c.json({ message: '说说不存在' }, 404);
 
     const content = typeof body.content === 'string' ? body.content.trim() : '';
     const status = typeof body.status === 'string' ? body.status : 'published';
@@ -1437,9 +1437,9 @@ export async function updateSayStatus(c: Context) {
 
     const success = await execute(`UPDATE "Say" SET status = $1 WHERE id = $2`, [status, id]);
     if (!success) return c.json({ message: '更新失败' }, 500);
-    return c.json({ message: '状态更新成功' }););
+    return c.json({ message: '状态更新成功' });
   } catch (e: any) {
-    return c.json({ message: e.message || '更新状态失败' }, 500), 500);
+    return c.json({ message: e.message || '更新状态失败' }, 500);
   }
 }
 
