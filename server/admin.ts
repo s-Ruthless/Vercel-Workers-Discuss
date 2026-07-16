@@ -1,5 +1,5 @@
-﻿/**
- * 绠＄悊 API 璺敱
+/**
+ * 管理 API 路由
  */
 import { Context } from 'hono';
 import { marked } from 'marked';
@@ -24,7 +24,7 @@ const xssModule = require('xss') as any;
 const xss = xssModule as ((html: string, options?: any) => string);
 const xssWhiteList = xssModule.whiteList;
 
-// ==================== 鍒濆鍖栬缃?====================
+// ==================== 初始化设置 ====================
 
 async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -39,16 +39,16 @@ export async function checkSetupStatus(c: Context) {
     const adminName = await getSetting('admin_name');
     return c.json({ setupCompleted: !!adminName });
   } catch (e: any) {
-    // Database not connected yet 鈥?treat as not set up
+    // Database not connected yet — treat as not set up
     return c.json({ setupCompleted: false, error: 'database_not_connected' });
   }
 }
 
 export async function setupAdmin(c: Context) {
-  // 濡傛灉宸茬粡璁剧疆杩囩鐞嗗憳锛屾嫆缁濆啀娆¤缃?
+  // 如果已经设置过管理员，拒绝再次设置
   const existing = await getSetting('admin_name');
   if (existing) {
-    return c.json({ message: '绠＄悊鍛樿处鎴峰凡鍒濆鍖栵紝濡傞渶淇敼璇风櫥褰曞悗鍦ㄨ缃腑鎿嶄綔' }, 400);
+    return c.json({ message: '管理员账户已初始化，如需修改请登录后在设置中操作' }, 400);
   }
 
   const data = await c.req.json();
@@ -56,25 +56,25 @@ export async function setupAdmin(c: Context) {
   const password = data.password || '';
 
   if (!name || name.length < 2) {
-    return c.json({ message: '鐢ㄦ埛鍚嶈嚦灏?2 涓瓧绗? }, 400);
+    return c.json({ message: '用户名至少 2 个字符' }, 400), 400);
   }
   if (!password || password.length < 6) {
-    return c.json({ message: '瀵嗙爜鑷冲皯 6 涓瓧绗? }, 400);
+    return c.json({ message: '密码至少 6 个字符 }, 400);
   }
 
   const passwordHash = await hashPassword(password);
   await setSetting('admin_name', name);
   await setSetting('admin_password_hash', passwordHash);
 
-  // 鑷姩鐧诲綍锛岄鍙?token
+  // 自动登录，颁发 token
   const ip = getClientIp(c);
   const tempKey = crypto.randomUUID();
   await kvSet(`token:${tempKey}`, JSON.stringify({ user: name, ip }), 172800);
 
-  return c.json({ data: { key: tempKey, message: '璁剧疆鎴愬姛' } });
+  return c.json({ data: { key: tempKey, message: '设置成功' } });
 }
 
-// ==================== 鐧诲綍 ====================
+// ==================== 登录 ====================
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 30 * 60;
 
@@ -86,14 +86,14 @@ export async function adminLogin(c: Context) {
   const attemptKey = `attempts:${ip}`;
 
   const isBlocked = await kvGet(blockKey);
-  if (isBlocked) return c.json({ message: 'IP 宸茶灏佺锛?0 鍒嗛挓鍚庨噸璇? }, 403);
+  if (isBlocked) return c.json({ message: 'IP 已被封禁，30 分钟后重试' }, 403);
 
-  // 浠庢暟鎹簱璇诲彇绠＄悊鍛樺嚟鎹?
+  // 从数据库读取管理员凭证
   const adminName = await getSetting('admin_name');
   const adminPasswordHash = await getSetting('admin_password_hash');
 
   if (!adminName || !adminPasswordHash) {
-    return c.json({ message: '绠＄悊鍛樿处鎴峰皻鏈垵濮嬪寲锛岃鍏堝畬鎴愬垵濮嬭缃?, needSetup: true }, 400);
+    return c.json({ message: '管理员账户尚未初始化，请先完成初始设置', needSetup: true }, 400);
   }
 
   const inputHash = await hashPassword(data.password || '');
@@ -104,10 +104,10 @@ export async function adminLogin(c: Context) {
     if (attempts >= MAX_ATTEMPTS) {
       await kvSet(blockKey, '1', LOCK_TIME);
       await kvDelete(attemptKey);
-      return c.json({ message: 'IP 宸茶灏佺锛?0 鍒嗛挓鍚庨噸璇? }, 403);
+      return c.json({ message: 'IP 已被封禁，30 分钟后重试' }, 403);
     } else {
       await kvSet(attemptKey, attempts.toString(), 600);
-      return c.json({ message: '鐢ㄦ埛鍚嶆垨瀵嗙爜鏃犳晥', failedAttempts: attempts }, 401);
+      return c.json({ message: '用户名或密码无效', failedAttempts: attempts }, 401);
     }
   }
 
@@ -118,7 +118,7 @@ export async function adminLogin(c: Context) {
   return c.json({ data: { key: tempKey } });
 }
 
-// ==================== 鑾峰彇璇勮鍒楄〃锛堢鐞嗭級 ====================
+// ==================== 获取评论列表（管理） ====================
 export async function getAdminComments(c: Context) {
   const page = parseInt(c.req.query('page') || '1');
   const limit = Math.min(parseInt(c.req.query('limit') || '20'), 50);
@@ -172,7 +172,7 @@ export async function getAdminComments(c: Context) {
   });
 }
 
-// ==================== 鍒犻櫎璇勮 ====================
+// ==================== 删除评论 ====================
 export async function deleteComment(c: Context) {
   const id = c.req.query('id');
   if (!id) return c.json({ message: 'Missing id' }, 400);
@@ -182,7 +182,7 @@ export async function deleteComment(c: Context) {
   return c.json({ message: `Comment deleted, id: ${id}.` });
 }
 
-// ==================== 鏇存柊璇勮鐘舵€?====================
+// ==================== 更新评论状态====================
 export async function updateStatus(c: Context) {
   const id = c.req.query('id');
   const status = c.req.query('status');
@@ -191,7 +191,7 @@ export async function updateStatus(c: Context) {
   const success = await execute(`UPDATE "Comment" SET status = $1 WHERE id = $2`, [status, id]);
   if (!success) return c.json({ message: 'Update failed' }, 500);
 
-  // 瀹℃牳閫氳繃鏃跺彂閫侀偖浠堕€氱煡璇勮鑰?
+  // 审核通过时发送邮件通知评论者
   if (status === 'approved') {
     try {
       const comment = await queryFirst<{ email: string; name: string; post_title: string; post_url: string | null; post_slug: string; content_html: string; status: string }>(
@@ -221,7 +221,7 @@ export async function updateStatus(c: Context) {
   return c.json({ message: `Comment status updated, id: ${id}, status: ${status}.` });
 }
 
-// ==================== 鏇存柊璇勮鍐呭 ====================
+// ==================== 更新评论内容 ====================
 export async function updateComment(c: Context) {
   let body: any;
   try {
@@ -309,19 +309,19 @@ export async function updateComment(c: Context) {
   }
 
   if (!name) {
-    return c.json({ message: '鏄电О涓嶈兘涓虹┖' }, 400);
+    return c.json({ message: '昵称不能为空' }, 400);
   }
   if (!email) {
-    return c.json({ message: '閭涓嶈兘涓虹┖' }, 400);
+    return c.json({ message: '邮箱不能为空' }, 400);
   }
 
   const cleanedContent = checkContent(contentSource);
   if (!cleanedContent) {
-    return c.json({ message: '璇勮鍐呭涓嶈兘涓虹┖' }, 400);
+    return c.json({ message: '评论内容不能为空' }, 400);
   }
   const contentText = cleanedContent;
 
-  // 灏嗘棫鐗堣〃鎯呰娉曡浆涓虹煭浠ｇ爜锛屽墠绔覆鏌?
+  // 将旧版表情语法转为短代码，前端渲染
   const contentWithEmoji = replaceEmotionSyntax(cleanedContent);
   const html = await marked.parse(contentWithEmoji, { async: true });
   const contentHtml = xss(html, {
@@ -342,7 +342,7 @@ export async function updateComment(c: Context) {
   return c.json({ message: `Comment updated, id: ${id}.` });
 }
 
-// ==================== 鑾峰彇璇勮缁熻 ====================
+// ==================== 获取评论统计 ====================
 export async function getStats(c: Context) {
   const rawSiteId = c.req.query('siteId');
   const siteId = rawSiteId && rawSiteId !== 'default' ? rawSiteId : null;
@@ -398,7 +398,7 @@ export async function getStats(c: Context) {
   return c.json({ summary, domains, last7Days });
 }
 
-// ==================== 鑾峰彇绔欑偣鍒楄〃 ====================
+// ==================== 获取站点列表 ====================
 export async function getSiteList(c: Context) {
   try {
     const sites = new Set<string>();
@@ -415,11 +415,11 @@ export async function getSiteList(c: Context) {
 
     return c.json({ sites: list });
   } catch (e: any) {
-    return c.json({ message: e.message || '鑾峰彇绔欑偣鍒楄〃澶辫触' }, 500);
+    return c.json({ message: e.message || '获取站点列表失败' }, 500);
   }
 }
 
-// ==================== 鐐硅禐缁熻 ====================
+// ==================== 点赞统计 ====================
 export async function getLikeStats(c: Context) {
   try {
     const siteId = c.req.query('siteId');
@@ -448,11 +448,11 @@ export async function getLikeStats(c: Context) {
 
     return c.json({ items });
   } catch (e: any) {
-    return c.json({ message: e.message || '鑾峰彇鐐硅禐缁熻澶辫触' }, 500);
+    return c.json({ message: e.message || '获取点赞统计失败' }, 500);
   }
 }
 
-// ==================== 鐐硅禐璁板綍鍒楄〃 ====================
+// ==================== 点赞记录列表 ====================
 export async function listLikes(c: Context) {
   try {
     const page = parseInt(c.req.query('page') || '1', 10) || 1;
@@ -519,17 +519,17 @@ export async function listLikes(c: Context) {
       pagination: { page, limit, total: totalPages },
     });
   } catch (e: any) {
-    return c.json({ message: e.message || '鑾峰彇鐐硅禐璁板綍澶辫触' }, 500);
+    return c.json({ message: e.message || '获取点赞记录失败' }, 500);
   }
 }
 
-// ==================== 璇勮璁剧疆 ====================
+// ==================== 评论设置 ====================
 export async function getCommentSettings(c: Context) {
   try {
     const settings = await loadCommentSettings();
     return c.json(settings);
   } catch (e: any) {
-    return c.json({ message: e.message || '鍔犺浇璇勮閰嶇疆澶辫触' }, 500);
+    return c.json({ message: e.message || '加载评论配置失败' }, 500);
   }
 }
 
@@ -548,7 +548,7 @@ export async function saveCommentSettings(c: Context) {
 
     const adminEmail = rawAdminEmail.trim();
     if (adminEmail && !isValidEmail(adminEmail)) {
-      return c.json({ message: '閭鏍煎紡涓嶆纭? }, 400);
+      return c.json({ message: '邮箱格式不正确' }, 400), 400);
     }
 
     await saveCommentSettingsLib({
@@ -563,13 +563,13 @@ export async function saveCommentSettings(c: Context) {
       blockedEmails: rawBlockedEmails.map((d: any) => (typeof d === 'string' ? d.trim() : '')).filter(Boolean),
     });
 
-    return c.json({ message: '淇濆瓨鎴愬姛' });
+    return c.json({ message: '保存成功' });
   } catch (e: any) {
-    return c.json({ message: e.message || '淇濆瓨澶辫触' }, 500);
+    return c.json({ message: e.message || '保存失败' }, 500);
   }
 }
 
-// ==================== 绠＄悊鍛橀€氱煡閭 ====================
+// ==================== 管理员通知邮箱 ====================
 export async function getAdminEmail(c: Context) {
   try {
     const email = await getSetting('admin_notify_email');
@@ -583,22 +583,22 @@ export async function setAdminEmail(c: Context) {
   try {
     const { email } = await c.req.json();
     if (!email || !isValidEmail(email)) {
-      return c.json({ message: '閭鏍煎紡涓嶆纭? }, 400);
+      return c.json({ message: '邮箱格式不正确' }, 400), 400);
     }
     await setSetting('admin_notify_email', email.trim());
-    return c.json({ message: '淇濆瓨鎴愬姛' });
+    return c.json({ message: '保存成功' });
   } catch (e: any) {
     return c.json({ message: e.message }, 500);
   }
 }
 
-// ==================== 閭欢閫氱煡閰嶇疆 ====================
+// ==================== 邮件通知配置 ====================
 export async function getEmailNotifySettings(c: Context) {
   try {
     const settings = await loadEmailNotificationSettings();
     return c.json(settings);
   } catch (e: any) {
-    return c.json({ message: e.message || '鍔犺浇閭欢閫氱煡閰嶇疆澶辫触' }, 500);
+    return c.json({ message: e.message || '加载邮件通知配置失败' }, 500);
   }
 }
 
@@ -610,19 +610,19 @@ export async function saveEmailNotifySettings(c: Context) {
       smtp: body.smtp && typeof body.smtp === 'object' ? body.smtp : undefined,
       templates: body.templates && typeof body.templates === 'object' ? body.templates : undefined,
     });
-    return c.json({ message: '淇濆瓨鎴愬姛' });
+    return c.json({ message: '保存成功' });
   } catch (e: any) {
-    return c.json({ message: e.message || '淇濆瓨澶辫触' }, 500);
+    return c.json({ message: e.message || '保存失败' }, 500);
   }
 }
 
-// ==================== 娴嬭瘯閭欢 ====================
+// ==================== 测试邮件 ====================
 export async function sendTestEmailHandler(c: Context) {
   const data = await c.req.json();
   const toEmail = data.toEmail || data.to;
 
   if (!toEmail || !isValidEmail(toEmail)) {
-    return c.json({ message: '璇疯緭鍏ユ湁鏁堢殑鎺ユ敹閭' }, 400);
+    return c.json({ message: '请输入有效的接收邮箱' }, 400);
   }
 
   const smtp = data.smtp;
@@ -630,23 +630,23 @@ export async function sendTestEmailHandler(c: Context) {
     // Fall back to saved settings
     const emailSettings = await loadEmailNotificationSettings();
     if (!emailSettings.smtp || !emailSettings.smtp.user || !emailSettings.smtp.pass) {
-      return c.json({ message: 'SMTP 閰嶇疆涓嶅畬鏁? }, 400);
+      return c.json({ message: 'SMTP 配置不完整' }, 400), 400);
     }
     const result = await sendTestEmail(toEmail, emailSettings.smtp);
     return c.json(
-      result.success ? { message: '閭欢鍙戦€佹垚鍔? } : { message: '閭欢鍙戦€佸け璐? ' + result.message },
+      result.success ? { message: '邮件发送成功' } : { message: '邮件发送失败： ' + result.message },
       result.success ? 200 : 500
     );
   }
 
   const result = await sendTestEmail(toEmail, smtp);
   return c.json(
-    result.success ? { message: '閭欢鍙戦€佹垚鍔? } : { message: '閭欢鍙戦€佸け璐? ' + result.message },
+    result.success ? { message: '邮件发送成功' } : { message: '邮件发送失败： ' + result.message },
     result.success ? 200 : 500
   );
 }
 
-// ==================== 鍔熻兘寮€鍏宠缃?====================
+// ==================== 功能开关设置====================
 export async function getFeatureSettings(c: Context) {
   try {
     const settings = await loadFeatureSettings();
@@ -668,19 +668,19 @@ export async function updateFeatureSettings(c: Context) {
       emojiPaths: Array.isArray(body.emojiPaths) ? body.emojiPaths : undefined,
       visibleDomains: Array.isArray(body.visibleDomains) ? body.visibleDomains : undefined,
     });
-    return c.json({ message: '淇濆瓨鎴愬姛锛? });
+    return c.json({ message: '保存成功！' }););
   } catch (e: any) {
     return c.json({ message: e.message || 'Failed to save feature settings' }, 500);
   }
 }
 
-// ==================== 绠＄悊鍚庡彴鏄剧ず璁剧疆 ====================
+// ==================== 管理后台显示设置 ====================
 export async function getAdminDisplaySettings(c: Context) {
   try {
     const settings = await loadAdminDisplaySettings();
     return c.json(settings);
   } catch (e: any) {
-    return c.json({ message: e.message || '鍔犺浇鏄剧ず閰嶇疆澶辫触' }, 500);
+    return c.json({ message: e.message || '加载显示配置失败' }, 500);
   }
 }
 
@@ -689,23 +689,23 @@ export async function saveAdminDisplaySettings(c: Context) {
     const body = await c.req.json();
     const layoutTitle = typeof body.layoutTitle === 'string' ? body.layoutTitle : undefined;
     await saveAdminDisplaySettingsLib({ layoutTitle });
-    return c.json({ message: '淇濆瓨鎴愬姛' });
+    return c.json({ message: '保存成功' });
   } catch (e: any) {
-    return c.json({ message: e.message || '淇濆瓨澶辫触' }, 500);
+    return c.json({ message: e.message || '保存失败' }, 500);
   }
 }
 
-// ==================== 灏佺绠＄悊 ====================
+// ==================== 封禁管理 ====================
 export async function blockIp(c: Context) {
   try {
     const { ip } = await c.req.json();
     if (!ip || typeof ip !== 'string' || !ip.trim()) {
-      return c.json({ message: 'IP 鍦板潃涓嶈兘涓虹┖' }, 400);
+      return c.json({ message: 'IP 地址不能为空' }, 400);
     }
     await addToBlockedList('ip', ip.trim());
-    return c.json({ message: '宸插姞鍏?IP 榛戝悕鍗? });
+    return c.json({ message: '已加入 IP 黑名单' }););
   } catch (e: any) {
-    return c.json({ message: e.message || '鎿嶄綔澶辫触' }, 500);
+    return c.json({ message: e.message || '操作失败' }, 500);
   }
 }
 
@@ -713,19 +713,19 @@ export async function blockEmail(c: Context) {
   try {
     const { email } = await c.req.json();
     if (!email || typeof email !== 'string' || !email.trim()) {
-      return c.json({ message: '閭涓嶈兘涓虹┖' }, 400);
+      return c.json({ message: '邮箱不能为空' }, 400);
     }
     if (!isValidEmail(email.trim())) {
-      return c.json({ message: '閭鏍煎紡涓嶆纭? }, 400);
+      return c.json({ message: '邮箱格式不正确' }, 400), 400);
     }
     await addToBlockedList('email', email.trim());
-    return c.json({ message: '宸插姞鍏ラ偖绠遍粦鍚嶅崟' });
+    return c.json({ message: '已加入邮箱黑名单' });
   } catch (e: any) {
-    return c.json({ message: e.message || '鎿嶄綔澶辫触' }, 500);
+    return c.json({ message: e.message || '操作失败' }, 500);
   }
 }
 
-// ==================== 瀵煎嚭/瀵煎叆锛氳瘎璁?====================
+// ==================== 导出/导入：评论====================
 export async function exportComments(c: Context) {
   try {
     const results = await queryAll<any>(
@@ -733,7 +733,7 @@ export async function exportComments(c: Context) {
     );
     return c.json(results);
   } catch (e: any) {
-    return c.json({ message: e.message || '瀵煎嚭澶辫触' }, 500);
+    return c.json({ message: e.message || '导出失败' }, 500);
   }
 }
 
@@ -743,7 +743,7 @@ export async function importComments(c: Context) {
     const rawComments = Array.isArray(body) ? body : [body];
 
     if (rawComments.length === 0) {
-      return c.json({ message: '瀵煎叆鏁版嵁涓虹┖' }, 400);
+      return c.json({ message: '导入数据为空' }, 400);
     }
 
     // Map Twikoo / Artalk / Valine data to VWD structure
@@ -859,20 +859,20 @@ export async function importComments(c: Context) {
       }
     }
 
-    return c.json({ message: `鎴愬姛瀵煎叆 ${imported} 鏉¤瘎璁篳 });
+    return c.json({ message: `成功导入 ${imported} 条评论` });
   } catch (e: any) {
     console.error(e);
-    return c.json({ message: e.message || '瀵煎叆澶辫触' }, 500);
+    return c.json({ message: e.message || '导入失败' }, 500);
   }
 }
 
-// ==================== 瀵煎嚭/瀵煎叆锛氶厤缃?====================
+// ==================== 导出/导入：配置 ====================
 export async function exportConfig(c: Context) {
   try {
     const results = await queryAll<{ key: string; value: string }>(`SELECT * FROM "Settings"`);
     return c.json(results);
   } catch (e: any) {
-    return c.json({ message: e.message || '瀵煎嚭閰嶇疆澶辫触' }, 500);
+    return c.json({ message: e.message || '导出配置失败' }, 500);
   }
 }
 
@@ -882,26 +882,26 @@ export async function importConfig(c: Context) {
     const configs = Array.isArray(body) ? body : [body];
 
     if (configs.length === 0) {
-      return c.json({ message: '瀵煎叆鏁版嵁涓虹┖' }, 400);
+      return c.json({ message: '导入数据为空' }, 400);
     }
 
     const validConfigs = configs.filter((item: any) => item && item.key && typeof item.value === 'string');
     if (validConfigs.length === 0) {
-      return c.json({ message: '娌℃湁鏈夋晥鐨勯厤缃暟鎹? }, 400);
+      return c.json({ message: '没有有效的配置数据' }, 400), 400);
     }
 
     for (const item of validConfigs) {
       await setSetting(item.key, item.value);
     }
 
-    return c.json({ message: `鎴愬姛瀵煎叆 ${validConfigs.length} 鏉￠厤缃甡 });
+    return c.json({ message: `成功导入 ${validConfigs.length} 条配置` });
   } catch (e: any) {
     console.error(e);
-    return c.json({ message: e.message || '瀵煎叆閰嶇疆澶辫触' }, 500);
+    return c.json({ message: e.message || '导入配置失败' }, 500);
   }
 }
 
-// ==================== 瀵煎嚭/瀵煎叆锛氱粺璁℃暟鎹?====================
+// ==================== 导出/导入：统计数据 ====================
 export async function exportStats(c: Context) {
   try {
     const siteId = c.req.query('siteId');
@@ -918,7 +918,7 @@ export async function exportStats(c: Context) {
 
     return c.json({ likes });
   } catch (e: any) {
-    return c.json({ message: e.message || '瀵煎嚭缁熻鏁版嵁澶辫触' }, 500);
+    return c.json({ message: e.message || '导出统计数据失败' }, 500);
   }
 }
 
@@ -926,7 +926,7 @@ export async function importStats(c: Context) {
   try {
     const body = await c.req.json();
     if (!body || typeof body !== 'object') {
-      return c.json({ message: '鏁版嵁鏍煎紡閿欒' }, 400);
+      return c.json({ message: '数据格式错误' }, 400);
     }
 
     let count = 0;
@@ -943,14 +943,14 @@ export async function importStats(c: Context) {
       }
     }
 
-    return c.json({ message: `鎴愬姛瀵煎叆 ${count} 鏉＄粺璁℃暟鎹甡 });
+    return c.json({ message: `成功导入 ${count} 条统计数据` });
   } catch (e: any) {
     console.error(e);
-    return c.json({ message: e.message || '瀵煎叆缁熻鏁版嵁澶辫触' }, 500);
+    return c.json({ message: e.message || '导入统计数据失败' }, 500);
   }
 }
 
-// ==================== 鍏ㄩ噺瀵煎嚭/瀵煎叆锛堝浠斤級 ====================
+// ==================== 全量导出/导入（备份） ====================
 export async function exportBackup(c: Context) {
   try {
     const comments = await queryAll<any>(`SELECT * FROM "Comment" ORDER BY priority DESC, created DESC`);
@@ -965,7 +965,7 @@ export async function exportBackup(c: Context) {
       likes,
     });
   } catch (e: any) {
-    return c.json({ message: e.message || '鍏ㄩ噺瀵煎嚭澶辫触' }, 500);
+    return c.json({ message: e.message || '全量导出失败' }, 500);
   }
 }
 
@@ -973,10 +973,10 @@ export async function importBackup(c: Context) {
   try {
     const body = await c.req.json();
     if (!body || typeof body !== 'object') {
-      return c.json({ message: '鏁版嵁鏍煎紡閿欒' }, 400);
+      return c.json({ message: '数据格式错误' }, 400);
     }
 
-    let message = '瀵煎叆缁撴灉锛?;
+    let message = '导入结果：';
 
     // 1. Comments
     if (Array.isArray(body.comments) && body.comments.length > 0) {
@@ -1011,7 +1011,7 @@ export async function importBackup(c: Context) {
           console.error('Import backup comment error:', e);
         }
       }
-      message += ` 璇勮 ${count} 鏉?`;
+      message += ` 评论 ${count} 条`;
     }
 
     // 2. Settings
@@ -1023,7 +1023,7 @@ export async function importBackup(c: Context) {
           count++;
         }
       }
-      message += ` 閰嶇疆 ${count} 鏉?`;
+      message += ` 配置 ${count} 条`;
     }
 
     // 3. Stats (likes only)
@@ -1037,16 +1037,16 @@ export async function importBackup(c: Context) {
         statsCount++;
       }
     }
-    if (statsCount > 0) message += ` 鐐硅禐鏁版嵁 ${statsCount} 鏉?`;
+    if (statsCount > 0) message += ` 点赞数据 ${statsCount} 条`;
 
     return c.json({ message });
   } catch (e: any) {
     console.error(e);
-    return c.json({ message: e.message || '鍏ㄩ噺瀵煎叆澶辫触' }, 500);
+    return c.json({ message: e.message || '全量导入失败' }, 500);
   }
 }
 
-// ==================== Telegram 璁剧疆 ====================
+// ==================== Telegram 设置 ====================
 const TG_BOT_TOKEN_KEY = 'telegram_bot_token';
 const TG_CHAT_ID_KEY = 'telegram_chat_id';
 const TG_NOTIFY_ENABLED_KEY = 'telegram_notify_enabled';
@@ -1060,7 +1060,7 @@ export async function getTelegramSettings(c: Context) {
       notifyEnabled: settings.get(TG_NOTIFY_ENABLED_KEY) === '1',
     });
   } catch (e: any) {
-    return c.json({ message: e.message || '鍔犺浇閰嶇疆澶辫触' }, 500);
+    return c.json({ message: e.message || '加载配置失败' }, 500);
   }
 }
 
@@ -1077,9 +1077,9 @@ export async function saveTelegramSettingsHandler(c: Context) {
     else await deleteSetting(TG_CHAT_ID_KEY);
     await setSetting(TG_NOTIFY_ENABLED_KEY, notifyEnabled ? '1' : '0');
 
-    return c.json({ message: '淇濆瓨鎴愬姛' });
+    return c.json({ message: '保存成功' });
   } catch (e: any) {
-    return c.json({ message: e.message || '淇濆瓨澶辫触' }, 500);
+    return c.json({ message: e.message || '保存失败' }, 500);
   }
 }
 
@@ -1087,7 +1087,7 @@ export async function setupTelegramWebhookHandler(c: Context) {
   try {
     const botToken = await getSetting(TG_BOT_TOKEN_KEY);
     if (!botToken) {
-      return c.json({ message: '璇峰厛淇濆瓨鏈哄櫒浜?Token' }, 400);
+      return c.json({ message: '请先保存机器人 Token' }, 400);
     }
 
     const url = new URL(c.req.url);
@@ -1101,12 +1101,12 @@ export async function setupTelegramWebhookHandler(c: Context) {
     const result: any = await response.json();
 
     if (!result.ok) {
-      return c.json({ message: `Webhook 璁剧疆澶辫触: ${result.description}` }, 400);
+      return c.json({ message: `Webhook 设置失败: ${result.description}` }, 400);
     }
 
-    return c.json({ message: 'Webhook 璁剧疆鎴愬姛', webhookUrl });
+    return c.json({ message: 'Webhook 设置成功', webhookUrl });
   } catch (e: any) {
-    return c.json({ message: e.message || '璁剧疆澶辫触' }, 500);
+    return c.json({ message: e.message || '设置失败' }, 500);
   }
 }
 
@@ -1117,10 +1117,10 @@ export async function testTelegramMessageHandler(c: Context) {
     const chatId = settings.get(TG_CHAT_ID_KEY);
 
     if (!botToken || !chatId) {
-      return c.json({ message: '璇峰厛閰嶇疆 Bot Token 鍜?Chat ID' }, 400);
+      return c.json({ message: '请先配置 Bot Token 和 Chat ID' }, 400);
     }
 
-    const text = `VWD 璇勮绯荤粺娴嬭瘯娑堟伅\n鏃堕棿: ${new Date().toISOString()}`;
+    const text = `VWD 评论系统测试消息\n时间: ${new Date().toISOString()}`;
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1129,16 +1129,16 @@ export async function testTelegramMessageHandler(c: Context) {
     const result: any = await response.json();
 
     if (!result.ok) {
-      return c.json({ message: `鍙戦€佸け璐? ${result.description || '鏈煡閿欒'}` }, 400);
+      return c.json({ message: `发送失败： ${result.description || '未知错误'}` }, 400);
     }
 
-    return c.json({ message: '娴嬭瘯娑堟伅宸插彂閫? });
+    return c.json({ message: '测试消息已发送' }););
   } catch (e: any) {
-    return c.json({ message: e.message || '鍙戦€佸け璐? }, 500);
+    return c.json({ message: e.message || '发送失败：' }, 500), 500);
   }
 }
 
-// ==================== S3 璁剧疆 ====================
+// ==================== S3 设置 ====================
 const S3_CONFIG_KEY = 's3_config';
 
 export async function getS3SettingsHandler(c: Context) {
@@ -1159,7 +1159,7 @@ export async function getS3SettingsHandler(c: Context) {
       return c.json(defaults);
     }
   } catch (e: any) {
-    return c.json({ message: e.message || '鍔犺浇 S3 閰嶇疆澶辫触' }, 500);
+    return c.json({ message: e.message || '加载 S3 配置失败' }, 500);
   }
 }
 
@@ -1174,13 +1174,13 @@ export async function saveS3SettingsHandler(c: Context) {
       region: typeof body.region === 'string' ? body.region.trim() : 'auto',
     };
     await setSetting(S3_CONFIG_KEY, JSON.stringify(settings));
-    return c.json({ message: '淇濆瓨鎴愬姛' });
+    return c.json({ message: '保存成功' });
   } catch (e: any) {
-    return c.json({ message: e.message || '淇濆瓨澶辫触' }, 500);
+    return c.json({ message: e.message || '保存失败' }, 500);
   }
 }
 
-// ==================== S3 澶囦唤 ====================
+// ==================== S3 备份 ====================
 async function getS3Client(): Promise<S3Client | null> {
   const row = await getSetting(S3_CONFIG_KEY);
   if (!row) return null;
@@ -1202,7 +1202,7 @@ export async function triggerS3BackupHandler(c: Context) {
   try {
     const s3 = await getS3Client();
     if (!s3) {
-      return c.json({ message: 'S3 閰嶇疆涓嶅畬鏁达紝璇峰厛閰嶇疆 S3 淇℃伅' }, 400);
+      return c.json({ message: 'S3 配置不完整，请先配置 S3 信息' }, 400);
     }
 
     // Gather backup data
@@ -1224,10 +1224,10 @@ export async function triggerS3BackupHandler(c: Context) {
 
     await s3.putObject(fileName, jsonString);
 
-    return c.json({ message: '澶囦唤鎴愬姛', file: fileName });
+    return c.json({ message: '备份成功', file: fileName });
   } catch (e: any) {
     console.error('S3 Backup Error:', e);
-    return c.json({ message: e.message || 'S3 澶囦唤澶辫触' }, 500);
+    return c.json({ message: e.message || 'S3 备份失败' }, 500);
   }
 }
 
@@ -1235,41 +1235,41 @@ export async function listS3BackupsHandler(c: Context) {
   try {
     const s3 = await getS3Client();
     if (!s3) {
-      return c.json({ message: 'S3 閰嶇疆涓嶅畬鏁? }, 400);
+      return c.json({ message: 'S3 配置不完整' }, 400), 400);
     }
 
     const files = await s3.listObjects('vwd-backup-');
     return c.json({ files });
   } catch (e: any) {
-    return c.json({ message: e.message || '鑾峰彇澶囦唤鍒楄〃澶辫触' }, 500);
+    return c.json({ message: e.message || '获取备份列表失败' }, 500);
   }
 }
 
 export async function deleteS3BackupHandler(c: Context) {
   try {
     const key = c.req.query('key');
-    if (!key) return c.json({ message: '缂哄皯 key 鍙傛暟' }, 400);
+    if (!key) return c.json({ message: '缺少 key 参数' }, 400);
 
     const s3 = await getS3Client();
     if (!s3) {
-      return c.json({ message: 'S3 閰嶇疆涓嶅畬鏁? }, 400);
+      return c.json({ message: 'S3 配置不完整' }, 400), 400);
     }
 
     await s3.deleteObject(key);
-    return c.json({ message: '鍒犻櫎鎴愬姛' });
+    return c.json({ message: '删除成功' });
   } catch (e: any) {
-    return c.json({ message: e.message || '鍒犻櫎澶囦唤澶辫触' }, 500);
+    return c.json({ message: e.message || '删除备份失败' }, 500);
   }
 }
 
 export async function downloadS3BackupHandler(c: Context) {
   try {
     const key = c.req.query('key');
-    if (!key) return c.json({ message: '缂哄皯 key 鍙傛暟' }, 400);
+    if (!key) return c.json({ message: '缺少 key 参数' }, 400);
 
     const s3 = await getS3Client();
     if (!s3) {
-      return c.json({ message: 'S3 閰嶇疆涓嶅畬鏁? }, 400);
+      return c.json({ message: 'S3 配置不完整' }, 400), 400);
     }
 
     const s3Response = await s3.getObject(key);
@@ -1280,11 +1280,11 @@ export async function downloadS3BackupHandler(c: Context) {
 
     return c.body(body);
   } catch (e: any) {
-    return c.json({ message: e.message || '涓嬭浇澶囦唤澶辫触' }, 500);
+    return c.json({ message: e.message || '下载备份失败' }, 500);
   }
 }
 
-// ==================== 璇磋绠＄悊 ====================
+// ==================== 说说管理 ====================
 import { loadSaySettings, saveSaySettings as saveSaySettingsLib } from './saySettings.js';
 
 export async function getAdminSays(c: Context) {
@@ -1338,7 +1338,7 @@ export async function getAdminSays(c: Context) {
       pagination: { page, limit, total: Math.ceil(totalCount / limit), totalCount },
     });
   } catch (e: any) {
-    return c.json({ message: e.message || '鑾峰彇璇磋鍒楄〃澶辫触' }, 500);
+    return c.json({ message: e.message || '获取说说列表失败' }, 500);
   }
 }
 
@@ -1350,7 +1350,7 @@ export async function createSay(c: Context) {
     const tags = Array.isArray(body.tags) ? body.tags.filter((t: any) => typeof t === 'string' && t.trim()).map((t: string) => t.trim()) : [];
     const siteId = typeof body.siteId === 'string' ? body.siteId.trim() : '';
 
-    if (!content) return c.json({ message: '鍐呭涓嶈兘涓虹┖' }, 400);
+    if (!content) return c.json({ message: '内容不能为空' }, 400);
 
     const contentWithEmoji = replaceEmotionSyntax(content);
     const html = await marked.parse(contentWithEmoji, { async: true });
@@ -1370,9 +1370,9 @@ export async function createSay(c: Context) {
     );
 
     const sayId = result.rows[0]?.id;
-    return c.json({ message: '鍙戝竷鎴愬姛', data: { id: sayId } });
+    return c.json({ message: '发布成功', data: { id: sayId } });
   } catch (e: any) {
-    return c.json({ message: e.message || '鍙戝竷璇磋澶辫触' }, 500);
+    return c.json({ message: e.message || '发布说说失败' }, 500);
   }
 }
 
@@ -1385,13 +1385,13 @@ export async function updateSay(c: Context) {
     }
 
     const existing = await queryFirst<{ id: number }>(`SELECT id FROM "Say" WHERE id = $1`, [id]);
-    if (!existing) return c.json({ message: '璇磋涓嶅瓨鍦? }, 404);
+    if (!existing) return c.json({ message: '说说不存在' }, 404), 404);
 
     const content = typeof body.content === 'string' ? body.content.trim() : '';
     const status = typeof body.status === 'string' ? body.status : 'published';
     const tags = Array.isArray(body.tags) ? body.tags.filter((t: any) => typeof t === 'string' && t.trim()).map((t: string) => t.trim()) : [];
 
-    if (!content) return c.json({ message: '鍐呭涓嶈兘涓虹┖' }, 400);
+    if (!content) return c.json({ message: '内容不能为空' }, 400);
 
     const contentWithEmoji = replaceEmotionSyntax(content);
     const html = await marked.parse(contentWithEmoji, { async: true });
@@ -1409,23 +1409,23 @@ export async function updateSay(c: Context) {
       [content, contentHtml, status, tags.join(',') || null, id]
     );
 
-    if (!success) return c.json({ message: '鏇存柊澶辫触' }, 500);
-    return c.json({ message: '鏇存柊鎴愬姛' });
+    if (!success) return c.json({ message: '更新失败' }, 500);
+    return c.json({ message: '更新成功' });
   } catch (e: any) {
-    return c.json({ message: e.message || '鏇存柊璇磋澶辫触' }, 500);
+    return c.json({ message: e.message || '更新说说失败' }, 500);
   }
 }
 
 export async function deleteSay(c: Context) {
   try {
     const id = c.req.query('id');
-    if (!id) return c.json({ message: '缂哄皯 id 鍙傛暟' }, 400);
+    if (!id) return c.json({ message: '缺少 id 参数' }, 400);
 
     const success = await execute(`DELETE FROM "Say" WHERE id = $1`, [id]);
-    if (!success) return c.json({ message: '鍒犻櫎澶辫触' }, 500);
-    return c.json({ message: '鍒犻櫎鎴愬姛' });
+    if (!success) return c.json({ message: '删除失败' }, 500);
+    return c.json({ message: '删除成功' });
   } catch (e: any) {
-    return c.json({ message: e.message || '鍒犻櫎璇磋澶辫触' }, 500);
+    return c.json({ message: e.message || '删除说说失败' }, 500);
   }
 }
 
@@ -1433,13 +1433,13 @@ export async function updateSayStatus(c: Context) {
   try {
     const id = c.req.query('id');
     const status = c.req.query('status');
-    if (!id || !status) return c.json({ message: '缂哄皯 id 鎴?status 鍙傛暟' }, 400);
+    if (!id || !status) return c.json({ message: '缺少 id 或 status 参数' }, 400);
 
     const success = await execute(`UPDATE "Say" SET status = $1 WHERE id = $2`, [status, id]);
-    if (!success) return c.json({ message: '鏇存柊澶辫触' }, 500);
-    return c.json({ message: '鐘舵€佹洿鏂版垚鍔? });
+    if (!success) return c.json({ message: '更新失败' }, 500);
+    return c.json({ message: '状态更新成功' }););
   } catch (e: any) {
-    return c.json({ message: e.message || '鏇存柊鐘舵€佸け璐? }, 500);
+    return c.json({ message: e.message || '更新状态失败' }, 500), 500);
   }
 }
 
@@ -1448,7 +1448,7 @@ export async function getSaySettingsHandler(c: Context) {
     const settings = await loadSaySettings();
     return c.json(settings);
   } catch (e: any) {
-    return c.json({ message: e.message || '鍔犺浇璇磋閰嶇疆澶辫触' }, 500);
+    return c.json({ message: e.message || '加载说说配置失败' }, 500);
   }
 }
 
@@ -1460,8 +1460,8 @@ export async function saveSaySettingsHandler(c: Context) {
       sayAllowComments: typeof body.sayAllowComments === 'boolean' ? body.sayAllowComments : undefined,
       sayPageSize: typeof body.sayPageSize === 'number' ? body.sayPageSize : undefined,
     });
-    return c.json({ message: '淇濆瓨鎴愬姛' });
+    return c.json({ message: '保存成功' });
   } catch (e: any) {
-    return c.json({ message: e.message || '淇濆瓨澶辫触' }, 500);
+    return c.json({ message: e.message || '保存失败' }, 500);
   }
 }
