@@ -10,10 +10,10 @@ import {
   getLikeStatus, likePage,
   likeComment,
   getPublicConfig,
-} from '../src/public.js';
+} from './public.js';
 import {
   getSays, getSayById, likeSay,
-} from '../src/say.js';
+} from './say.js';
 import {
   adminLogin, getAdminComments, deleteComment, updateStatus,
   updateComment, getStats, getVisitOverview, getVisitPages,
@@ -37,7 +37,7 @@ import {
   triggerS3BackupHandler, listS3BackupsHandler,
   deleteS3BackupHandler, downloadS3BackupHandler,
   checkSetupStatus, setupAdmin,
-} from '../src/admin.js';
+} from './admin.js';
 
 // Initialize schema on first cold start
 let schemaInitialized = false;

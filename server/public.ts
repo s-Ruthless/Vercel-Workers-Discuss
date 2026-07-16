@@ -4,19 +4,19 @@
 import { Context } from 'hono';
 import { marked } from 'marked';
 import { createRequire } from 'module';
-import { queryAll, queryFirst, execute, query } from '../lib/db.js';
-import { kvGet, kvSet, kvDelete } from '../lib/kv.js';
+import { queryAll, queryFirst, execute, query } from './db.js';
+import { kvGet, kvSet, kvDelete } from './kv.js';
 import {
   getCravatar, decodePostSlug, getAllSlugFormats, getClientIp,
   checkContent, isValidEmail, replaceEmotionSyntax,
-} from '../lib/utils.js';
-import { loadCommentSettings, saveCommentSettings, addToBlockedList } from '../lib/commentSettings.js';
-import { loadFeatureSettings, saveFeatureSettings } from '../lib/featureSettings.js';
-import { loadSaySettings } from '../lib/saySettings.js';
+} from './utils.js';
+import { loadCommentSettings, saveCommentSettings, addToBlockedList } from './commentSettings.js';
+import { loadFeatureSettings, saveFeatureSettings } from './featureSettings.js';
+import { loadSaySettings } from './saySettings.js';
 import {
   loadEmailNotificationSettings, saveEmailNotificationSettings,
   sendCommentReplyNotification, sendCommentNotification, getAdminNotifyEmail,
-} from '../lib/email.js';
+} from './email.js';
 
 const require = createRequire(import.meta.url);
 const xssModule = require('xss') as any;

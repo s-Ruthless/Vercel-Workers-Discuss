@@ -17,6 +17,6 @@
     "allowImportingTsExtensions": false,
     "noEmit": true
   },
-  "include": ["api/**/*", "lib/**/*", "src/**/*"],
+  "include": ["api/**/*", "server/**/*"],
   "exclude": ["node_modules"]
 }

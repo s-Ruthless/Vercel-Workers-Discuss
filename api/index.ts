@@ -4,7 +4,7 @@
  * Hono 应用根据原始 URL 进行内部路由
  */
 import { handle } from 'hono/vercel';
-import { app } from '../lib/app.js';
+import { app } from '../server/app.js';
 
 export const GET = handle(app);
 export const POST = handle(app);

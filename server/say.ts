@@ -2,9 +2,9 @@
  * 说说 (Moments) 公开 API
  */
 import { Context } from 'hono';
-import { queryAll, queryFirst, execute } from '../lib/db.js';
-import { getClientIp } from '../lib/utils.js';
-import { loadSaySettings } from '../lib/saySettings.js';
+import { queryAll, queryFirst, execute } from './db.js';
+import { getClientIp } from './utils.js';
+import { loadSaySettings } from './saySettings.js';
 
 // ==================== 获取说说列表 ====================
 export async function getSays(c: Context) {
