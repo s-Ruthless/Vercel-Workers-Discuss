@@ -3,8 +3,9 @@
  */
 import { Context } from 'hono';
 import { queryAll, queryFirst, execute } from './db.js';
-import { getClientIp } from './utils.js';
+import { getClientIp, getCravatar } from './utils.js';
 import { loadSaySettings } from './saySettings.js';
+import { loadCommentSettings } from './commentSettings.js';
 
 // ==================== 获取说说列表 ====================
 export async function getSays(c: Context) {
@@ -13,6 +14,13 @@ export async function getSays(c: Context) {
   const settings = await loadSaySettings();
   const limit = Math.min(parseInt(c.req.query('limit') || String(settings.sayPageSize)), 50);
   const offset = (page - 1) * limit;
+
+  const commentSettings = await loadCommentSettings();
+  const adminEmail = commentSettings.adminEmail || '';
+  const adminBadge = commentSettings.adminBadge || '';
+  const avatarPrefix = commentSettings.avatarPrefix || undefined;
+  const authorName = adminBadge || '博主';
+  const authorAvatar = await getCravatar(adminEmail, authorName, avatarPrefix);
 
   let where = `status = 'published'`;
   const params: unknown[] = [];
@@ -42,6 +50,8 @@ export async function getSays(c: Context) {
     created: Number(row.created),
     likes: Number(row.likes) || 0,
     tags: row.tags ? row.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
+    author: authorName,
+    avatar: authorAvatar,
   }));
 
   return c.json({

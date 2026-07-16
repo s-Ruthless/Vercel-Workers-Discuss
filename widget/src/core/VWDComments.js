@@ -829,11 +829,6 @@ export class VWDComments {
     this.mountPoint.innerHTML = '';
     this.mountPoint.className = 'vwd-says-container';
 
-    const headerEl = document.createElement('div');
-    headerEl.className = 'vwd-says-header';
-    headerEl.innerHTML = `<h3 class="vwd-says-title">说说</h3>`;
-    this.mountPoint.appendChild(headerEl);
-
     // Render site warning for says mode too
     this._renderSiteWarning();
 
