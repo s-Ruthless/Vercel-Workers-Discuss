@@ -26,11 +26,17 @@ async function request<T>(method: HttpMethod, path: string, body?: unknown): Pro
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
+  const contentType = res.headers.get('content-type') || '';
   let data: any = null;
-  try {
-    data = await res.json();
-  } catch {
-    data = null;
+  if (contentType.includes('application/json')) {
+    try {
+      data = await res.json();
+    } catch {
+      data = null;
+    }
+  } else {
+    // Response is not JSON (e.g. HTML error page), consume body to avoid hanging
+    try { await res.text(); } catch {}
   }
   if (!res.ok) {
     const message = data && data.message ? data.message : `请求失败，状态码 ${res.status}`;
@@ -49,6 +55,10 @@ async function request<T>(method: HttpMethod, path: string, body?: unknown): Pro
       }
     }
     throw new Error(message);
+  }
+  // Guard: 200 OK but no JSON body means something went wrong (e.g. HTML fallback)
+  if (data === null) {
+    throw new Error('服务器返回了非预期的响应，请检查后端是否已部署最新版本');
   }
   return data as T;
 }
