@@ -344,7 +344,7 @@ watch(currentSiteId, () => { page.value = 1; loadSays(1); });
 .cell-content-text :deep(p) { margin: 0 0 8px; }
 .cell-content-text :deep(p:last-child) { margin-bottom: 0; }
 .cell-content-text :deep(img) { max-width: 100%; height: auto; border-radius: 8px; }
-.cell-content-text :deep(.vwd-emotion-img) { display: inline-block; vertical-align: -0.2em; width: 24px; height: 24px; max-width: 24px; max-height: 24px; margin: 0 1px; border-radius: 4px; }
+.cell-content-text :deep(.vwd-emotion-img) { display: inline-block; vertical-align: middle; width: auto; max-height: 2em; max-width: 60px; margin: 0 2px; border-radius: 4px; }
 .cell-content-text :deep(pre) { padding: 12px; overflow-x: auto; background: var(--bg-secondary); border-radius: 6px; font-size: 0.9em; }
 .cell-content-text :deep(code) { font-family: ui-monospace, monospace; background: var(--bg-secondary); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.9em; }
 .cell-content-text :deep(pre code) { padding: 0; background: transparent; }
