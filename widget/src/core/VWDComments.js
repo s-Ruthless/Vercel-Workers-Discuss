@@ -408,7 +408,7 @@ export class VWDComments {
         enableEmoji: this.config.enableEmoji,
         onRetry: () => this.store.loadComments(),
         onReply: (commentId) => this.store.startReply(commentId),
-        onSubmitReply: (commentId) => this.store.submitReply(commentId),
+        onSubmitReply: (commentId) => this._handleSubmitReply(commentId),
         onCancelReply: () => this.store.cancelReply(),
         onUpdateReplyContent: (content) => this.store.updateReplyContent(content),
         onClearReplyError: () => this.store.clearReplyError(),
@@ -569,6 +569,7 @@ export class VWDComments {
         existing.classList.add('vwd-site-warning-flash');
         setTimeout(() => existing.classList.remove('vwd-site-warning-flash'), 600);
       }
+      return;
     }
     const success = await this.store.submitNewComment();
     if (success) {
@@ -578,6 +579,18 @@ export class VWDComments {
         this.commentForm.render();
       }
     }
+  }
+
+  async _handleSubmitReply(commentId) {
+    if (this._siteWarning) {
+      const existing = this.mountPoint?.querySelector('.vwd-site-warning');
+      if (existing) {
+        existing.classList.add('vwd-site-warning-flash');
+        setTimeout(() => existing.classList.remove('vwd-site-warning-flash'), 600);
+      }
+      return;
+    }
+    await this.store.submitReply(commentId);
   }
 
   updateConfig(newConfig) {
