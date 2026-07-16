@@ -195,6 +195,10 @@ async function loadStats() {
     await nextTick();
     if (!statsError.value) {
       renderAllCharts();
+      // Ensure charts resize after DOM layout settles (grid cards need a tick)
+      requestAnimationFrame(() => {
+        allChartInstances().forEach(inst => { if (inst) inst.resize(); });
+      });
     }
   }
 }
@@ -222,7 +226,7 @@ function renderCommentTrendChart() {
       symbol: "circle", symbolSize: 4,
       itemStyle: { color: "#0ea5e9" },
     }],
-  });
+  }, true);
 }
 
 function renderSayTrendChart() {
@@ -249,7 +253,7 @@ function renderSayTrendChart() {
         borderRadius: [4, 4, 0, 0],
       },
     }],
-  });
+  }, true);
 }
 
 function renderCommentPieChart() {

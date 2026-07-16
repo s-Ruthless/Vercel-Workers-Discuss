@@ -28,7 +28,6 @@
               <PhCheck v-if="site.value === currentSiteId" :size="14" weight="bold" class="site-switcher-check" />
               <span v-else class="site-switcher-check-placeholder"></span>
               <span class="site-switcher-item-name">{{ site.label }}</span>
-              <span v-if="site.isDefault" class="site-switcher-tag">默认</span>
             </div>
           </div>
         </div>
@@ -88,7 +87,6 @@
               @click="selectSite(site.value); closeActions();"
             >
               {{ site.label }}
-              <span v-if="site.isDefault" class="layout-actions-item-tag">默认</span>
             </button>
             <div class="layout-actions-divider"></div>
           </template>
