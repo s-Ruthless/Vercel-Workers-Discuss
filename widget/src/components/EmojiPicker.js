@@ -80,12 +80,12 @@ export class EmojiPicker extends Component {
 
     return [
       this.createElement('div', {
-        className: 'vwd-emoji-grid',
-        children: gridItems,
-      }),
-      this.createElement('div', {
         className: 'vwd-emoji-tabs',
         children: tabs,
+      }),
+      this.createElement('div', {
+        className: 'vwd-emoji-grid',
+        children: gridItems,
       }),
     ];
   }

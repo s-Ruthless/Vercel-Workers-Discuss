@@ -1248,19 +1248,20 @@ white-space: nowrap;
 
 .vwd-emoji-tabs {
   display: flex;
-  border-top: 1px solid var(--vwd-border, #d0d7de);
-  background: var(--vwd-bg-secondary, #f6f8fa);
+  gap: 2px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--vwd-border, #d0d7de);
   overflow-x: auto;
+  flex-shrink: 0;
 }
 
 .vwd-emoji-tab {
-  flex: 1;
-  min-width: 60px;
-  padding: 8px 4px;
+  padding: 4px 10px;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--vwd-text-secondary, #6e7781);
   cursor: pointer;
+  border-radius: 4px;
   transition: background-color 0.15s, color 0.15s;
   white-space: nowrap;
   user-select: none;
