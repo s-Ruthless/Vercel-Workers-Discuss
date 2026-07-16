@@ -65,7 +65,7 @@ async function handleSubmit() {
   submitting.value = true;
   try {
     await loginAdmin(name.value, password.value);
-    router.push({ name: "comments" });
+    router.push({ name: "stats" });
   } catch (e: any) {
     const msg = e.message || "登录失败";
     if (msg.includes("尚未初始化") || msg.includes("needSetup")) {

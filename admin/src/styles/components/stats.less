@@ -57,9 +57,26 @@
 .stats-value-pending { color: var(--color-warning); }
 .stats-value-rejected { color: var(--color-danger); }
 
+/* —– Overview Row (two cards side by side) —– */
+.stats-overview-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.stats-overview-card { min-width: 0; }
+
+/* —– Charts Row (three charts side by side) —– */
+.stats-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+.stats-chart-card { min-width: 0; }
+
 /* —– Domain Stats Layout —– */
 .domain-stats-layout { display: flex; align-items: stretch; gap: 16px; }
 .domain-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; flex: 1; }
+.domain-bar-wrapper { width: 45%; flex-shrink: 0; }
 .domain-table {
   border: 1px solid var(--border-color); border-radius: var(--radius-md);
   min-width: 520px; overflow: hidden;
@@ -75,15 +92,25 @@
   box-sizing: border-box; font-weight: 500;
 }
 .domain-cell-domain { flex: 2; font-weight: 600; }
-
-.domain-pie-wrapper { width: 40%; display: flex; align-items: center; justify-content: center; }
-.domain-pie-chart { width: 100%; max-width: 400px; height: 260px; }
+.domain-cell-approved { color: var(--color-success); }
+.domain-cell-pending { color: var(--color-warning); }
+.domain-cell-rejected { color: var(--color-danger); }
 
 .chart-wrapper { margin-top: 4px; }
-.chart { width: 100%; height: 260px; }
+.chart { width: 100%; height: 280px; }
+.chart-small { height: 240px; }
+
+@media (max-width: 1024px) {
+  .stats-overview-row { grid-template-columns: 1fr; }
+  .stats-charts-row { grid-template-columns: 1fr 1fr; }
+}
 
 @media (max-width: 768px) {
   .stats-grid, .stats-grid-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats-overview-row { grid-template-columns: 1fr; }
+  .stats-charts-row { grid-template-columns: 1fr; }
   .domain-stats-layout { flex-direction: column; }
-  .domain-pie-wrapper { width: 100%; }
+  .domain-bar-wrapper { width: 100%; }
+  .chart { height: 240px; }
+  .chart-small { height: 220px; }
 }

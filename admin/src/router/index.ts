@@ -25,19 +25,19 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        redirect: '/comments',
-      },
-      {
-        path: 'comments',
-        name: 'comments',
-        component: () => import('../views/CommentsView/index.vue'),
-        meta: { title: '评论管理' },
+        redirect: '/stats',
       },
       {
         path: 'stats',
         name: 'stats',
         component: () => import('../views/StatsView/index.vue'),
         meta: { title: '数据看板' },
+      },
+      {
+        path: 'comments',
+        name: 'comments',
+        component: () => import('../views/CommentsView/index.vue'),
+        meta: { title: '评论管理' },
       },
       {
         path: 'says',
