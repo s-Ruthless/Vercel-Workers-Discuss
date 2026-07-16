@@ -1,7 +1,15 @@
 /**
- * 表情渲染工具 (Waline 风格)
- * 将 :prefix_item: 短代码渲染为 <img> 标签
+ * Admin 表情渲染工具
+ * 从 shared/emoji.js 引入公共逻辑，保留 TypeScript 类型声明
  */
+import {
+  initEmojiPacks as _initEmojiPacks,
+  getEmojiPacks as _getEmojiPacks,
+  reloadEmojiPacks as _reloadEmojiPacks,
+  getEmojiUrl as _getEmojiUrl,
+  replaceEmojiSyntax as _replaceEmojiSyntax,
+  renderContent as _renderContent,
+} from '@shared/emoji.js';
 
 export interface EmojiPack {
   name: string;
@@ -13,123 +21,15 @@ export interface EmojiPack {
   remote?: boolean;
 }
 
-let _packs: EmojiPack[] = [];
-let _loaded = false;
-let _loadingPromise: Promise<EmojiPack[]> | null = null;
-
-/**
- * 重置表情包缓存，允许重新加载
- */
-export function reloadEmojiPacks() {
-  _packs = [];
-  _loaded = false;
-  _loadingPromise = null;
-}
-
-/**
- * 初始化表情包
- * @param apiOrigin - API 源地址
- * @param emojiPaths - 用户配置的表情包路径数组（可选）
- */
-export async function initEmojiPacks(apiOrigin: string, emojiPaths?: string[]): Promise<EmojiPack[]> {
-  if (_loaded) return _packs;
-  if (_loadingPromise) return _loadingPromise;
-
-  const origin = (apiOrigin || '').replace(/\/+$/, '');
-  const defaultEmoji = [
-    `${origin}/emotion/alus`,
-  ];
-
-  _loadingPromise = (async () => {
-    const packs: EmojiPack[] = [];
-
-    // 加载颜文字（文本表情）
-    try {
-      const res = await fetch(`${origin}/emotion/emoticons.json`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data && Array.isArray(data.container)) {
-          packs.push({
-            name: '颜文字',
-            type: 'text',
-            prefix: '',
-            icon: '',
-            items: data.container.map((i: any) => i.icon),
-            folder: '',
-          });
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load emoticons:', e);
-    }
-
-    // 用户配置的表情包路径优先，否则使用默认
-    const emojiUrls = (emojiPaths && emojiPaths.length > 0) ? emojiPaths : defaultEmoji;
-
-    for (const url of emojiUrls) {
-      try {
-        const folder = url.replace(/\/+$/, '');
-        const res = await fetch(`${folder}/info.json`);
-        if (res.ok) {
-          const info = await res.json();
-          packs.push({
-            ...info,
-            folder,
-            remote: true,
-          });
-        }
-      } catch (e) {
-        console.error('Failed to load emoji pack:', url, e);
-      }
-    }
-
-    _packs = packs;
-    _loaded = true;
-    _loadingPromise = null;
-    return packs;
-  })();
-
-  return _loadingPromise;
-}
-
-/**
- * 获取已加载的表情包
- */
-export function getEmojiPacks(): EmojiPack[] {
-  return _packs;
-}
+export const reloadEmojiPacks = _reloadEmojiPacks;
+export const initEmojiPacks = _initEmojiPacks;
+export const getEmojiPacks = _getEmojiPacks;
+export const getEmojiUrl = _getEmojiUrl;
+export const renderContent = _renderContent;
 
 /**
  * 替换 HTML 中的 :prefix_item: 短代码为 img 标签
  */
 export function replaceEmojiSyntax(html: string): string {
-  if (!html || _packs.length === 0) return html;
-
-  const prefixMap: Record<string, EmojiPack> = {};
-  for (const pack of _packs) {
-    if (pack.prefix) {
-      prefixMap[pack.prefix] = pack;
-    }
-  }
-
-  return html.replace(/:([a-zA-Z]+)_(\w+):/g, (match, packKey, item) => {
-    const prefix = packKey + '_';
-    const pack = prefixMap[prefix];
-    if (!pack) return match;
-
-    const folder = (pack.folder || '').replace(/\/+$/, '');
-    const ext = pack.type || 'png';
-    const pf = pack.prefix || '';
-    const url = `${folder}/${pf}${item}.${ext}`;
-
-    return `<img src="${url}" alt="${packKey}_${item}" class="vwd-emotion-img" referrerpolicy="no-referrer" loading="lazy" style="display:inline-block;vertical-align:middle;height:3.0em;width:auto;margin:0 2px;">`;
-  });
-}
-
-/**
- * 渲染评论内容（处理旧版 img URL + 新版短代码）
- */
-export function renderContent(html: string): string {
-  if (!html) return html;
-  return replaceEmojiSyntax(html);
+  return _replaceEmojiSyntax(html);
 }
