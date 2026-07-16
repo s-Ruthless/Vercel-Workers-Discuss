@@ -84,8 +84,7 @@ async function togglePanel() {
 function getEmojiUrl(pack: EmojiPack, item: string): string {
   const folder = (pack.folder || "").replace(/\/+$/, "");
   const ext = pack.type || "png";
-  const pf = pack.prefix || "";
-  return `${folder}/${pf}${item}.${ext}`;
+  return `${folder}/${item}.${ext}`;
 }
 
 function insertText(text: string) {

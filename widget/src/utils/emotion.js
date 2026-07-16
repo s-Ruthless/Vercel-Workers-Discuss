@@ -72,10 +72,9 @@ export async function loadEmojiPacks(emojiConfig, apiOrigin) {
  * @returns {string} 图片 URL
  */
 export function getEmojiUrl(pack, item) {
-  const folder = (pack.folder || '').replace(/\/+$/, '');
-  const ext = pack.type || 'png';
-  const prefix = pack.prefix || '';
-  return `${folder}/${prefix}${item}.${ext}`;
+const folder = (pack.folder || '').replace(/\/+$/, '');
+const ext = pack.type || 'png';
+return `${folder}/${item}.${ext}`;
 }
 
 /**
