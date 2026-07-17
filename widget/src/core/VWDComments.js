@@ -115,6 +115,12 @@ export class VWDComments {
       this._applyPrimaryColor();
     }
 
+    // 说说模式：在配置加载前立即显示 loading，消除空白延迟
+    if (this.config.mode === 'says' && this.mountPoint) {
+      this.mountPoint.className = 'vwd-says-container';
+      this.mountPoint.innerHTML = '<div class="vwd-loading"><div class="vwd-spinner"></div><span class="vwd-loading-text">加载中...</span></div>';
+    }
+
     (async () => {
       const serverConfig = await this._loadServerConfig();
       if (!this._mounted) return;
