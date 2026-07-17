@@ -32,10 +32,11 @@
           </div>
         </div>
         <div class="layout-actions">
-          <a class="layout-button" href="https://github.com/s-Ruthless/Vercel-Workers-Discuss" target="_blank">
-            Github
-          </a>
-          <button class="layout-button" @click="toggleAccent" title="主题色" type="button">
+          <button class="layout-button lang-switcher" @click="onToggleLang" :title="t('layout.language')" type="button">
+            <PhTranslate :size="16" />
+            <span class="lang-switcher-label">{{ currentLangLabel }}</span>
+          </button>
+          <button class="layout-button" @click="toggleAccent" :title="t('layout.accentColor')" type="button">
             <PhPalette :size="16" />
           </button>
           <button class="layout-button" @click="cycleTheme" :title="themeTitle" type="button">
@@ -44,7 +45,7 @@
             <PhAirplay v-else :size="16" />
           </button>
           <div v-if="isAccentOpen" class="accent-dropdown">
-            <div class="accent-dropdown-title">主题色</div>
+            <div class="accent-dropdown-title">{{ t('layout.accentColor') }}</div>
             <div class="accent-swatches">
               <button
                 v-for="preset in accentPresets"
@@ -58,10 +59,10 @@
               />
             </div>
             <div class="accent-custom">
-              <label class="accent-custom-label">自定义</label>
+              <label class="accent-custom-label">{{ t('layout.accentCustom') }}</label>
               <input type="color" :value="accentColor" @input="setAccent(($event.target as HTMLInputElement).value)" class="accent-color-input" />
             </div>
-            <button class="accent-reset" @click="selectAccent('#007aff')" type="button">重置默认</button>
+            <button class="accent-reset" @click="selectAccent('#007aff')" type="button">{{ t('layout.accentReset') }}</button>
           </div>
           <button class="layout-button" @click="handleLogout">
             {{ t("layout.logout") }}
@@ -77,7 +78,7 @@
         </button>
         <div v-if="isActionsOpen" class="layout-actions-dropdown">
           <template v-if="allSiteOptions.length > 0">
-            <div class="layout-actions-section-label">站点</div>
+            <div class="layout-actions-section-label">{{ t('layout.defaultSite') }}</div>
             <button
               v-for="site in allSiteOptions"
               :key="site.value"
@@ -90,8 +91,8 @@
             </button>
             <div class="layout-actions-divider"></div>
           </template>
-          <button class="layout-actions-item" type="button" @click="openGithub">
-            Github
+          <button class="layout-actions-item" type="button" @click="onToggleLang(); closeActions();">
+            {{ currentLangLabel }}
           </button>
           <button
             class="layout-actions-item layout-actions-item-danger"
@@ -131,11 +132,15 @@
             <span>{{ t("menu.sites") }}</span>
           </li>
         </ul>
-        <div class="layout-sider-footer" @click="openVersionModal">
-          <div class="layout-sider-footer-line">
-            <span>API {{ apiVersion }}</span>
+        <div class="layout-sider-footer">
+          <a class="layout-sider-github" href="https://github.com/s-Ruthless/Vercel-Workers-Discuss" target="_blank" rel="noopener">
+            <PhGithubLogo :size="14" weight="fill" />
+            <span>GitHub</span>
+          </a>
+          <div class="layout-sider-version" @click="openVersionModal">
+            <span>API {{ apiVersion || '--' }}</span>
+            <span>Admin {{ adminVersion }}</span>
           </div>
-          <div class="layout-sider-footer-line">Admin {{ adminVersion }}</div>
         </div>
       </nav>
       <div v-if="isMobileSiderOpen" class="layout-sider-mask" @click="closeSider" />
@@ -189,6 +194,7 @@ import { logoutAdmin, fetchAdminDisplaySettings, fetchManagedSites, type Managed
 import { useTheme } from "../../composables/useTheme";
 import { useAccentColor, ACCENT_PRESETS } from "../../composables/useAccentColor";
 import { useSite } from "../../composables/useSite";
+import { toggleLanguage, getLanguage } from "../../i18n";
 
 const SITE_TITLE_KEY = "vwd_admin_site_title";
 
@@ -208,6 +214,14 @@ const checkedApiBaseUrl = ref("");
 const apiVersionError = ref("");
 const versionModalVisible = ref(false);
 const layoutTitle = ref(localStorage.getItem(SITE_TITLE_KEY) || "VWD 评论系统");
+const currentLang = ref(getLanguage());
+
+const currentLangLabel = computed(() => currentLang.value === 'zh-CN' ? '中文' : 'EN');
+
+function onToggleLang() {
+  toggleLanguage();
+  currentLang.value = getLanguage();
+}
 
 const themeTitle = computed(() => {
   if (theme.value === "light") return t("layout.theme.light");
@@ -228,7 +242,7 @@ function selectAccent(color: string) { setAccent(color); closeAccent(); }
 
 function closeDropdownsOnOutside(e: MouseEvent) {
   const el = e.target as HTMLElement;
-  if (!el.closest(".accent-dropdown") && !el.closest("[title=\"主题色\"]")) {
+  if (!el.closest(".accent-dropdown") && !el.closest(`[title="${t('layout.accentColor')}"]`)) {
     isAccentOpen.value = false;
   }
   if (!el.closest(".site-switcher-dropdown") && !el.closest(".site-switcher-btn")) {
@@ -276,20 +290,20 @@ async function loadVersion() {
   checkedApiBaseUrl.value = window.location.origin;
   apiVersionError.value = "";
   try {
-    const res = await fetch(window.location.origin);
+    const res = await fetch(`${window.location.origin}/api/version`);
     const contentType = res.headers.get("content-type") || "";
     if (!res.ok || !contentType.includes("application/json")) {
-      apiVersionError.value = "当前 API 版本较旧，未提供版本信息接口。";
+      apiVersionError.value = t("layout.version.notFetched");
       return;
     }
     const data = await res.json().catch(() => null);
     if (data && typeof data.version === "string") {
       apiVersion.value = data.version;
     } else {
-      apiVersionError.value = "当前 API 版本较旧，未提供版本信息接口。";
+      apiVersionError.value = t("layout.version.notFetched");
     }
   } catch (e) {
-    apiVersionError.value = (e as Error).message || "获取接口版本失败";
+    apiVersionError.value = (e as Error).message || t("layout.version.fetchError");
   }
 }
 
@@ -347,8 +361,6 @@ function goSays() { router.push({ name: "says" }); closeSider(); }
 function goData() { router.push({ name: "data" }); closeSider(); }
 function goSettings() { router.push({ name: "settings" }); closeSider(); }
 function goSites() { router.push({ name: "sites" }); closeSider(); }
-
-function openGithub() { window.open("https://github.com/s-Ruthless/Vercel-Workers-Discuss", "_blank"); closeActions(); }
 
 function handleLogout() { logoutAdmin(); router.push({ name: "login" }); closeSider(); }
 function handleLogoutFromActions() { closeActions(); handleLogout(); }
@@ -551,5 +563,50 @@ function closeVersionModal() { versionModalVisible.value = false; }
 .accent-reset:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
+}
+
+/* Language switcher */
+.lang-switcher {
+  gap: 5px;
+}
+.lang-switcher-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Sider footer (GitHub + version) */
+.layout-sider-footer {
+  padding: 0;
+  border-top: 1px solid var(--border-color);
+}
+.layout-sider-github {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.layout-sider-github:hover {
+  color: var(--primary-color);
+}
+.layout-sider-version {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 16px 10px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  line-height: 1.6;
+  transition: background-color var(--transition-fast);
+}
+.layout-sider-version:hover {
+  background-color: var(--bg-hover);
 }
 </style>

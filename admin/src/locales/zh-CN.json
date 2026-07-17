@@ -13,6 +13,10 @@
     "logout": "退出",
     "moreActions": "更多操作",
     "defaultSite": "默认站点",
+    "language": "语言",
+    "accentColor": "主题色",
+    "accentCustom": "自定义",
+    "accentReset": "重置默认",
     "theme": {
       "light": "明亮模式",
       "dark": "暗黑模式",
@@ -330,6 +334,36 @@
     "saveSuccess": "保存成功",
     "saveFailed": "保存失败",
     "loading": "加载中..."
+  },
+  "login": {
+    "subtitle": "Vercel Workers Discuss · 评论系统",
+    "account": "管理员账号",
+    "password": "密码",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "submit": "登录",
+    "submitting": "登录中...",
+    "errorRequired": "请输入账号和密码",
+    "errorFailed": "登录失败",
+    "errorNeedSetup": "尚未初始化"
+  },
+  "setup": {
+    "subtitle": "初始化管理员账户",
+    "hint": "首次使用，请设置管理员账号和密码。设置完成后将自动登录。",
+    "account": "管理员账号",
+    "accountPlaceholder": "至少 2 个字符",
+    "password": "密码",
+    "passwordPlaceholder": "至少 6 个字符",
+    "confirmPassword": "确认密码",
+    "confirmPlaceholder": "再次输入密码",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "submit": "完成设置",
+    "submitting": "设置中...",
+    "errorNameShort": "用户名至少 2 个字符",
+    "errorPasswordShort": "密码至少 6 个字符",
+    "errorMismatch": "两次输入的密码不一致",
+    "errorFailed": "设置失败"
   },
   "sites": {
     "title": "站点管理",

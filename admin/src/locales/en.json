@@ -1,0 +1,407 @@
+{
+  "menu": {
+    "comments": "Comments",
+    "stats": "Dashboard",
+    "says": "Moments",
+    "settings": "Settings",
+    "data": "Data",
+    "sites": "Sites"
+  },
+  "layout": {
+    "toggleMenu": "Toggle Menu",
+    "docs": "Docs",
+    "logout": "Logout",
+    "moreActions": "More Actions",
+    "defaultSite": "Default Site",
+    "language": "Language",
+    "accentColor": "Accent Color",
+    "accentCustom": "Custom",
+    "accentReset": "Reset to Default",
+    "theme": {
+      "light": "Light Mode",
+      "dark": "Dark Mode",
+      "system": "System"
+    },
+    "version": {
+      "title": "Version Info",
+      "apiAddress": "API Address",
+      "apiVersion": "API Version",
+      "adminVersion": "Admin Version",
+      "match": "Admin and API versions match. Everything works fine.",
+      "mismatch": "Admin and API versions mismatch. It is recommended to update the API service to match the admin version to avoid potential compatibility issues.",
+      "fetchError": "Failed to fetch API version: ",
+      "loading": "Loading...",
+      "notConfigured": "Not Configured",
+      "notFetched": "Not Fetched",
+      "ok": "OK"
+    }
+  },
+  "stats": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "total": "Total Comments",
+    "approved": "Approved",
+    "pending": "Pending",
+    "rejected": "Rejected",
+    "trend": "Comment Trend",
+    "bySite": "By Site",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "noData": "No comment data",
+    "table": {
+      "domain": "Domain",
+      "total": "Total",
+      "approved": "Approved",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    },
+    "loadError": "Failed to load stats"
+  },
+  "says": {
+    "title": "Moments",
+    "createBtn": "New Moment",
+    "editTitle": "Edit Moment",
+    "createTitle": "New Moment",
+    "content": "Content (Markdown supported)",
+    "contentPlaceholder": "Write something...",
+    "status": "Status",
+    "tags": "Tags",
+    "tagsHint": "Separate tags with commas",
+    "statusPublished": "Published",
+    "statusDraft": "Draft",
+    "statusHidden": "Hidden",
+    "statusAll": "All Status",
+    "publish": "Publish",
+    "saveDraft": "Save as Draft",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "submitting": "Submitting...",
+    "empty": "No moments yet",
+    "confirmDelete": "Delete this moment?",
+    "delete": "Delete",
+    "edit": "Edit",
+    "actions": {
+      "publish": "Publish",
+      "draft": "Draft",
+      "hide": "Hide"
+    },
+    "likes": "Likes",
+    "time": "Time"
+  },
+  "data": {
+    "title": "Data Management",
+    "sections": {
+      "comments": {
+        "title": "Comment Data",
+        "desc": "Manage comments and migrate data from other comment systems.",
+        "exportLabel": "Export:",
+        "exporting": "Exporting...",
+        "exportJson": "Export JSON",
+        "importLabel": "Import:",
+        "importButton": "Import Comments",
+        "source": {
+          "cwd": "VWD (.json)",
+          "twikoo": "Twikoo (.json)",
+          "artalk": "Artalk (.json)",
+          "valine": "Valine (.jsonl)"
+        }
+      },
+      "config": {
+        "title": "System Config",
+        "desc": "Manage admin settings, email config, blocklists, etc.",
+        "export": "Export Config",
+        "import": "Import Config"
+      },
+      "stats": {
+        "title": "Likes Data",
+        "desc": "Manage like records data.",
+        "export": "Export Stats",
+        "import": "Import Stats"
+      },
+      "backup": {
+        "title": "Full Backup",
+        "desc": "Backup or restore all system data (comments + config + likes).",
+        "export": "Full Export",
+        "import": "Full Restore"
+      },
+      "s3": {
+        "title": "S3 Backup",
+        "desc": "Configure S3-compatible storage (AWS S3, Cloudflare R2, MinIO, etc.) and trigger backups manually.",
+        "endpoint": "Endpoint",
+        "endpointHint": "e.g. https://[account_id].r2.cloudflarestorage.com",
+        "region": "Region",
+        "regionHint": "e.g. auto, us-east-1",
+        "bucket": "Bucket",
+        "accessKey": "Access Key ID",
+        "secretKey": "Secret Access Key",
+        "save": "Save Config",
+        "saving": "Saving...",
+        "backup": "Backup to S3 Now",
+        "backingUp": "Backing up...",
+        "success": "Backup successful! File: {file}",
+        "viewBackups": "View Backups",
+        "loadingBackups": "Loading...",
+        "backupListTitle": "S3 Backups",
+        "emptyBackupList": "No backup files",
+        "download": "Download",
+        "delete": "Delete",
+        "confirmDelete": "Delete backup {file}?",
+        "deleteSuccess": "Deleted"
+      }
+    },
+    "logs": {
+      "title": "Action Logs"
+    },
+    "siteIdModal": {
+      "title": "Select Target Site",
+      "desc": "Select the site ID for imported comments, or enter a custom site ID.",
+      "selectLabel": "Select Site",
+      "customLabel": "Custom Site ID (leave empty to use the selected site)",
+      "customPlaceholder": "Enter custom site ID",
+      "cancel": "Cancel",
+      "confirm": "Confirm Import"
+    },
+    "messages": {
+      "exportSuccess": "Export successful",
+      "exportFailed": "Export failed",
+      "fileReadFailed": "Failed to read file",
+      "jsonParseFailed": "JSON parse failed, please check the file format",
+      "importConfigSuccess": "Config imported successfully",
+      "importStatsSuccess": "Stats imported successfully",
+      "importBackupSuccess": "Full restore successful",
+      "importCommentsSuccess": "Comments imported successfully",
+      "importStart": "Importing: {name} (mode: {mode})",
+      "fileParseSuccess": "File parsed, processing...",
+      "errorWithMessage": "Error: {msg}",
+      "parsedCommentsCount": "Parsed {count} comment(s)",
+      "siteIdSelected": "Selected site: {siteId}",
+      "importCancelled": "Import cancelled",
+      "readFileFailedLog": "Failed to read file",
+      "importCommentsDone": "Import done: {message}"
+    }
+  },
+  "comments": {
+    "title": "Comments",
+    "statusFilter": {
+      "all": "All Status",
+      "approved": "Approved",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    },
+    "refresh": "Refresh",
+    "table": {
+      "author": "Author",
+      "content": "Content",
+      "path": "Path",
+      "status": "Status",
+      "actions": "Actions",
+      "admin": "Admin",
+      "time": "Time",
+      "ip": "IP",
+      "email": "Email"
+    },
+    "actions": {
+      "approve": "Approve",
+      "pending": "Pending",
+      "reject": "Reject",
+      "edit": "Edit",
+      "delete": "Delete",
+      "blockIp": "Block IP",
+      "blockEmail": "Block Email",
+      "pin": "Pin"
+    },
+    "pagination": {
+      "prev": "Prev",
+      "next": "Next",
+      "jumpTo": "Go to",
+      "page": "",
+      "confirm": "OK"
+    },
+    "confirmDelete": "Delete comment {id}?",
+    "confirmBlockIp": "Block IP {ip}?",
+    "confirmBlockEmail": "Block email {email}?",
+    "successBlockIp": "IP blocked",
+    "successBlockEmail": "Email blocked",
+    "empty": "No data",
+    "editModal": {
+      "title": "Edit Comment",
+      "name": "Nickname",
+      "email": "Email",
+      "url": "URL",
+      "postSlug": "Page Slug",
+      "postUrl": "Comment URL",
+      "content": "Content",
+      "status": "Status",
+      "priority": "Pin weight (1 = not pinned, higher = closer to top)",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving..."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "tabs": {
+      "comment": "Comment & Security",
+      "feature": "Features",
+      "emailNotify": "Email Notify",
+      "telegramNotify": "Telegram Notify",
+      "display": "Display"
+    },
+    "comment": {
+      "title": "Comment Display Config",
+      "adminEmail": "Admin Email",
+      "adminBadge": "Admin Badge Text (leave empty for default icon)",
+      "adminEnabled": "Show Admin Badge",
+      "avatarPrefix": "Avatar Prefix (default: https://weavatar.com/avatar)",
+      "securityTitle": "Security Settings",
+      "requireReview": "Require review before showing new comments",
+      "adminKey": "Admin Comment Key (required when commenting with admin email)",
+      "adminKeyPlaceholder": "Enter key to set or change",
+      "allowedDomains": "Allowed Domains (leave empty to allow all; separate with space or comma)",
+      "blockedIps": "IP Blocklist (separate with comma or newline; empty = none)",
+      "blockedEmails": "Email Blocklist (separate with comma or newline; empty = none)",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "feature": {
+      "title": "Features",
+      "articleLike": "Article Likes",
+      "articleLikeHint": "Show a like button at the top of the comment section.",
+      "commentLike": "Comment Likes",
+      "commentLikeHint": "Show a like button on each comment in the list.",
+      "imageLightbox": "Image Lightbox",
+      "imageLightboxHint": "Click images in comments to preview in full screen.",
+      "placeholder": "Comment Placeholder",
+      "placeholderHint": "Customize the placeholder text of the comment input. Supports line breaks. Leave empty for default.",
+      "emoji": "Emoji",
+      "emojiHint": "Show an emoji button in the comment and reply forms.",
+      "sayLike": "Moment Likes",
+      "sayLikeHint": "Show a like button in each moment bubble on the moments page. Hide when off.",
+      "emojiPaths": "Emoji Pack Paths",
+      "emojiPathsHint": "One path per line, pointing to a directory containing info.json. Leave empty for built-in Alus and Twemoji packs. Changing packs may break emoji rendering in old comments. Prefer appending new paths over replacing old ones.",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "emailNotify": {
+      "title": "Email Notification Settings",
+      "enable": "Enable Email Notification",
+      "smtpTitle": "1. SMTP Config",
+      "provider": "Provider",
+      "host": "SMTP Server",
+      "port": "SMTP Port",
+      "secure": "SSL Secure Connection",
+      "user": "Sender Account",
+      "pass": "Auth Code / Password",
+      "qqHint": "Note: QQ Mail requires an auth code, not your QQ password. Enable POP3/SMTP service in QQ Mail web settings and generate an auth code.",
+      "163Hint": "Note: 163 Mail requires an auth code, not your login password. Enable the service in 163 Mail web settings and generate an auth code.",
+      "templateTitle": "2. Email Templates",
+      "adminTemplate": "Admin Notification Template (HTML)",
+      "adminTemplateHint": "Variables: ${commentAuthor}, ${postTitle}, ${postUrl}, ${commentContent}",
+      "replyTemplate": "Reply Notification Template (HTML)",
+      "replyTemplateHint": "Variables: ${toName}, ${replyAuthor}, ${postTitle}, ${postUrl}, ${parentComment}, ${replyContent}",
+      "approvedTemplate": "Approved Notification Template (HTML)",
+      "approvedTemplateHint": "Variables: ${commentAuthor}, ${postTitle}, ${postUrl}, ${commentContent}",
+      "testBtn": "Send Test Email",
+      "testingBtn": "Sending...",
+      "resetBtn": "Reset to Default",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "telegramNotify": {
+      "title": "Telegram Notification Settings",
+      "enable": "Enable Telegram Notification",
+      "botToken": "Bot Token",
+      "botTokenHint": "Create a bot via BotFather in Telegram to get the token",
+      "chatId": "Chat ID",
+      "chatIdHint": "The user or group ID that receives notifications. Send a message to the bot then fetch the ID via API, or use userinfobot.",
+      "webhookBtn": "Setup Webhook",
+      "webhookSetting": "Setting up...",
+      "testBtn": "Send Test Message",
+      "testingBtn": "Sending...",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "display": {
+      "title": "Display Settings",
+      "layoutTitle": "Admin Title",
+      "layoutTitleHint": "Shown on the top-left of the admin navbar.",
+      "save": "Save",
+      "saving": "Saving..."
+    }
+  },
+  "common": {
+    "saveSuccess": "Saved successfully",
+    "saveFailed": "Save failed",
+    "loading": "Loading..."
+  },
+  "login": {
+    "subtitle": "Vercel Workers Discuss · Comment System",
+    "account": "Admin Account",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "submit": "Login",
+    "submitting": "Logging in...",
+    "errorRequired": "Please enter account and password",
+    "errorFailed": "Login failed",
+    "errorNeedSetup": "Not initialized"
+  },
+  "setup": {
+    "subtitle": "Initialize Admin Account",
+    "hint": "First time setup: set the admin account and password. You will be logged in automatically after setup.",
+    "account": "Admin Account",
+    "accountPlaceholder": "At least 2 characters",
+    "password": "Password",
+    "passwordPlaceholder": "At least 6 characters",
+    "confirmPassword": "Confirm Password",
+    "confirmPlaceholder": "Enter password again",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "submit": "Complete Setup",
+    "submitting": "Setting up...",
+    "errorNameShort": "Username must be at least 2 characters",
+    "errorPasswordShort": "Password must be at least 6 characters",
+    "errorMismatch": "Passwords do not match",
+    "errorFailed": "Setup failed"
+  },
+  "sites": {
+    "title": "Sites",
+    "createBtn": "Add Site",
+    "editTitle": "Edit Site",
+    "createTitle": "Add Site",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
+    "submitting": "Saving...",
+    "empty": "No sites yet, please add one",
+    "copySiteId": "Click to copy site ID",
+    "copied": "Copied",
+    "confirmDelete": "Delete site \"{name}\"?",
+    "createSuccess": "Created successfully",
+    "updateSuccess": "Updated successfully",
+    "deleteSuccess": "Deleted successfully",
+    "operationFailed": "Operation failed",
+    "table": {
+      "name": "Name",
+      "siteId": "Site ID",
+      "url": "URL",
+      "actions": "Actions"
+    },
+    "field": {
+      "name": "Site Name",
+      "namePlaceholder": "e.g. My Blog",
+      "siteId": "Site ID",
+      "siteIdPlaceholder": "e.g. blog",
+      "siteIdHint": "This ID must match the siteId in the frontend widget config, used to separate comments and moments across sites.",
+      "siteIdLocked": "The default site ID is reserved and cannot be changed.",
+      "url": "URL",
+      "urlPlaceholder": "e.g. https://example.com"
+    },
+    "validation": {
+      "nameRequired": "Site name is required",
+      "siteIdRequired": "Site ID is required"
+    }
+  }
+}
