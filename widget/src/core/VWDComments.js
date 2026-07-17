@@ -816,6 +816,12 @@ export class VWDComments {
         emojiPacks: this.config.emojiPacks || [],
       });
     }
+    // 更新说说列表，使其中的表情能被正确渲染
+    if (this._sayList) {
+      this._sayList.setProps({
+        emojiPacks: this.config.emojiPacks || [],
+      });
+    }
   }
 
   getConfig() {
