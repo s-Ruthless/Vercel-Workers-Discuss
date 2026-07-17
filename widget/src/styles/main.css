@@ -1358,29 +1358,31 @@
   object-fit: cover;
 }
 
-/* 气泡 - 低于头像，宽度根据内容自适应 */
+/* 气泡 - 低于头像，宽度根据内容自适应，纯白背景 */
 .vwd-say-bubble {
-  background: var(--vwd-bg-secondary, #f6f8fa);
+  background: #ffffff;
+  border: 1px solid var(--vwd-border-light, #eaeef2);
   border-radius: 4px 18px 18px 18px;
   padding: 12px 16px;
   position: relative;
   transition: background 0.2s ease;
   max-width: calc(100% - 54px);
   width: fit-content;
-  margin-top: 8px;
+  margin-top: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-/* 气泡小尖角 */
+/* 气泡小尖角 - 从头像方向出来 */
 .vwd-say-bubble::before {
   content: '';
   position: absolute;
-  top: 6px;
-  left: -6px;
+  top: 8px;
+  left: -7px;
   width: 12px;
   height: 12px;
-  background: var(--vwd-bg-secondary, #f6f8fa);
-  border-left: 2px solid transparent;
-  border-bottom: 2px solid transparent;
+  background: #ffffff;
+  border-left: 1px solid var(--vwd-border-light, #eaeef2);
+  border-bottom: 1px solid var(--vwd-border-light, #eaeef2);
   transform: rotate(45deg);
   z-index: 0;
 }

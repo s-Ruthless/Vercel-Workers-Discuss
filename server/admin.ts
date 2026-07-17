@@ -382,8 +382,9 @@ export async function getStats(c: Context) {
     if (row.status === 'approved') summary.approved++;
     else if (row.status === 'pending') summary.pending++;
     else if (row.status === 'rejected') summary.rejected++;
-    if (row.created >= thirtyDaysAgo) {
-      const d = new Date(row.created);
+    const createdTs = Number(row.created);
+    if (createdTs >= thirtyDaysAgo) {
+      const d = new Date(createdTs);
       const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
       dailyMap.set(key, (dailyMap.get(key) || 0) + 1);
     }
@@ -426,8 +427,9 @@ export async function getStats(c: Context) {
     if (row.status === 'published') saySummary.published++;
     else if (row.status === 'draft') saySummary.draft++;
     else if (row.status === 'hidden') saySummary.hidden++;
-    if (row.created >= thirtyDaysAgo) {
-      const d = new Date(row.created);
+    const createdTs = Number(row.created);
+    if (createdTs >= thirtyDaysAgo) {
+      const d = new Date(createdTs);
       const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
       sayDailyMap.set(key, (sayDailyMap.get(key) || 0) + 1);
     }
