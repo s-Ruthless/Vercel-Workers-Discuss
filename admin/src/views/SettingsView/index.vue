@@ -99,6 +99,13 @@
                   </div>
                   <div class="form-hint">{{ t("settings.feature.emojiHint") }}</div>
                 </div>
+                <div class="form-item bg">
+                  <div class="form-item-flex">
+                    <label class="form-label">{{ t("settings.feature.sayLike") }}</label>
+                    <label class="switch"><input v-model="enableSayLike" type="checkbox" /><span class="slider" /></label>
+                  </div>
+                  <div class="form-hint">{{ t("settings.feature.sayLikeHint") }}</div>
+                </div>
                 <div class="form-item">
                   <label class="form-label">{{ t("settings.feature.placeholder") }}</label>
                   <textarea v-model="commentPlaceholder" class="form-input" rows="3" style="height: 90px; resize: none" :placeholder="t('settings.feature.placeholderHint')"></textarea>
@@ -285,6 +292,7 @@ const enableArticleLike = ref(true);
 const enableCommentLike = ref(true);
 const enableImageLightbox = ref(true);
 const enableEmoji = ref(true);
+const enableSayLike = ref(true);
 const commentPlaceholder = ref("");
 const emojiPathsText = ref("");
 const telegramBotToken = ref("");
@@ -413,7 +421,8 @@ async function load() {
     enableArticleLike.value = featureRes.enableArticleLike;
     enableCommentLike.value = featureRes.enableCommentLike;
     enableImageLightbox.value = featureRes.enableImageLightbox;
-enableEmoji.value = featureRes.enableEmoji;
+    enableEmoji.value = featureRes.enableEmoji;
+    enableSayLike.value = featureRes.enableSayLike;
 commentPlaceholder.value = featureRes.commentPlaceholder || "";
 emojiPathsText.value = Array.isArray(featureRes.emojiPaths) ? featureRes.emojiPaths.join("\n") : "";
     telegramBotToken.value = telegramRes.botToken || "";
@@ -492,6 +501,7 @@ async function saveFeature() {
 const res = await saveFeatureSettings({
 enableArticleLike: enableArticleLike.value, enableCommentLike: enableCommentLike.value,
 enableImageLightbox: enableImageLightbox.value, enableEmoji: enableEmoji.value,
+enableSayLike: enableSayLike.value,
 commentPlaceholder: commentPlaceholder.value,
 emojiPaths: emojiPathsText.value.trim() ? emojiPathsText.value.split("\n").map(s => s.trim()).filter(Boolean) : [],
 });

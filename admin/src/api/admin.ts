@@ -116,6 +116,7 @@ enableCommentLike: boolean;
 enableArticleLike: boolean;
 enableImageLightbox: boolean;
 enableEmoji: boolean;
+enableSayLike: boolean;
 commentPlaceholder?: string;
 emojiPaths?: string[];
 };
@@ -298,6 +299,7 @@ enableCommentLike?: boolean;
 enableArticleLike?: boolean;
 enableImageLightbox?: boolean;
 enableEmoji?: boolean;
+enableSayLike?: boolean;
 commentPlaceholder?: string;
 emojiPaths?: string[];
 }): Promise<{ message: string }> {

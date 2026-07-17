@@ -711,6 +711,7 @@ export async function updateFeatureSettings(c: Context) {
       enableArticleLike: typeof body.enableArticleLike === 'boolean' ? body.enableArticleLike : undefined,
       enableImageLightbox: typeof body.enableImageLightbox === 'boolean' ? body.enableImageLightbox : undefined,
       enableEmoji: typeof body.enableEmoji === 'boolean' ? body.enableEmoji : undefined,
+      enableSayLike: typeof body.enableSayLike === 'boolean' ? body.enableSayLike : undefined,
       commentPlaceholder: typeof body.commentPlaceholder === 'string' ? body.commentPlaceholder.trim() : undefined,
       emojiPaths: Array.isArray(body.emojiPaths) ? body.emojiPaths : undefined,
       visibleDomains: Array.isArray(body.visibleDomains) ? body.visibleDomains : undefined,

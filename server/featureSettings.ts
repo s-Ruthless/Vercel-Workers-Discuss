@@ -8,6 +8,7 @@ export type FeatureSettings = {
   enableArticleLike: boolean;
   enableImageLightbox: boolean;
   enableEmoji: boolean;
+  enableSayLike: boolean;
   commentPlaceholder?: string;
   emojiPaths?: string[];
   visibleDomains?: string[];
@@ -19,6 +20,7 @@ export async function loadFeatureSettings(): Promise<FeatureSettings> {
     'comment_feature_article_like',
     'comment_feature_image_lightbox',
     'comment_feature_emoji',
+    'comment_feature_say_like',
     'comment_feature_placeholder',
     'comment_feature_emoji_paths',
     'admin_visible_domains',
@@ -28,6 +30,7 @@ export async function loadFeatureSettings(): Promise<FeatureSettings> {
   const enableArticleLike = map.get('comment_feature_article_like') !== '0';
   const enableImageLightbox = map.get('comment_feature_image_lightbox') === '1';
   const enableEmoji = map.get('comment_feature_emoji') !== '0';
+  const enableSayLike = map.get('comment_feature_say_like') !== '0';
   const commentPlaceholder = map.get('comment_feature_placeholder') || undefined;
 
   let emojiPaths: string[] | undefined;
@@ -43,7 +46,7 @@ export async function loadFeatureSettings(): Promise<FeatureSettings> {
   }
 
   return {
-    enableCommentLike, enableArticleLike, enableImageLightbox, enableEmoji,
+    enableCommentLike, enableArticleLike, enableImageLightbox, enableEmoji, enableSayLike,
     commentPlaceholder, emojiPaths, visibleDomains,
   };
 }
@@ -57,6 +60,8 @@ export async function saveFeatureSettings(settings: Partial<FeatureSettings>): P
     await setSetting('comment_feature_image_lightbox', settings.enableImageLightbox ? '1' : '0');
   if (settings.enableEmoji !== undefined)
     await setSetting('comment_feature_emoji', settings.enableEmoji ? '1' : '0');
+  if (settings.enableSayLike !== undefined)
+    await setSetting('comment_feature_say_like', settings.enableSayLike ? '1' : '0');
   if (settings.commentPlaceholder !== undefined)
     await setSetting('comment_feature_placeholder', settings.commentPlaceholder);
   if (settings.emojiPaths !== undefined)

@@ -84,6 +84,7 @@ export class VWDComments {
         enableCommentLike: typeof data.enableCommentLike === 'boolean' ? data.enableCommentLike : true,
         enableArticleLike: typeof data.enableArticleLike === 'boolean' ? data.enableArticleLike : true,
         enableImageLightbox: typeof data.enableImageLightbox === 'boolean' ? data.enableImageLightbox : false,
+        enableSayLike: typeof data.enableSayLike === 'boolean' ? data.enableSayLike : true,
         commentPlaceholder: typeof data.commentPlaceholder === 'string' ? data.commentPlaceholder : undefined,
         enableEmoji: typeof data.enableEmoji === 'boolean' ? data.enableEmoji : true,
         emojiPaths: Array.isArray(data.emojiPaths) ? data.emojiPaths : undefined,
@@ -161,6 +162,7 @@ export class VWDComments {
       this.config.enableArticleLike = serverConfig.enableArticleLike;
       this.config.enableImageLightbox = serverConfig.enableImageLightbox;
       this.config.enableEmoji = serverConfig.enableEmoji;
+      this.config.enableSayLike = serverConfig.enableSayLike;
       this.config.commentPlaceholder = typeof serverConfig.commentPlaceholder === 'string' ? serverConfig.commentPlaceholder : this.config.commentPlaceholder;
       this.config.managedSiteIds = serverConfig.managedSiteIds || [];
 
@@ -856,6 +858,7 @@ export class VWDComments {
       apiOrigin: this.config.apiOrigin || '',
       enableComments: this.config.enableComments !== false,
       emojiPacks: this.config.emojiPacks || [],
+      enableSayLike: this.config.enableSayLike !== false,
       onLike: (id) => this._handleSayLike(id),
       onPrevPage: () => this._goSayPage(this._sayState.currentPage - 1),
       onNextPage: () => this._goSayPage(this._sayState.currentPage + 1),
