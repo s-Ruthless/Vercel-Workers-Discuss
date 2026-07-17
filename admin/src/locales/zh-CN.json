@@ -48,6 +48,17 @@
     "last7Days": "最近 7 天",
     "last30Days": "最近 30 天",
     "noData": "暂无评论数据",
+    "commentOverview": "评论概览",
+    "sayOverview": "说说概览",
+    "totalLikes": "总点赞",
+    "sayTotal": "说说总数",
+    "published": "已发布",
+    "draft": "草稿",
+    "hidden": "隐藏",
+    "sayTrend": "说说趋势",
+    "commentStatusDist": "评论状态分布",
+    "sayStatusDist": "说说状态分布",
+    "noDataChart": "暂无数据",
     "table": {
       "domain": "域名",
       "total": "总数",
@@ -87,7 +98,34 @@
       "hide": "隐藏"
     },
     "likes": "点赞",
-    "time": "时间"
+    "time": "时间",
+    "table": {
+      "content": "内容",
+      "tags": "标签",
+      "site": "站点",
+      "time": "时间",
+      "status": "状态",
+      "actions": "操作"
+    },
+    "pagination": {
+      "prev": "上一页",
+      "next": "下一页"
+    },
+    "modal": {
+      "content": "📝 内容",
+      "tags": "🏷 标签",
+      "status": "📋 状态"
+    },
+    "defaultSite": "默认站点",
+    "loadFailed": "加载失败",
+    "statusUpdateSuccess": "状态更新成功",
+    "updateFailed": "更新失败",
+    "contentEmpty": "内容不能为空",
+    "updateSuccess": "更新成功",
+    "publishSuccess": "发布成功",
+    "operationFailed": "操作失败",
+    "deleteSuccess": "删除成功",
+    "deleteFailed": "删除失败"
   },
   "data": {
     "title": "数据管理",

@@ -48,6 +48,17 @@
     "last7Days": "Last 7 Days",
     "last30Days": "Last 30 Days",
     "noData": "No comment data",
+    "commentOverview": "Comment Overview",
+    "sayOverview": "Moment Overview",
+    "totalLikes": "Total Likes",
+    "sayTotal": "Total Moments",
+    "published": "Published",
+    "draft": "Draft",
+    "hidden": "Hidden",
+    "sayTrend": "Moment Trend",
+    "commentStatusDist": "Comment Status Distribution",
+    "sayStatusDist": "Moment Status Distribution",
+    "noDataChart": "No Data",
     "table": {
       "domain": "Domain",
       "total": "Total",
@@ -87,7 +98,34 @@
       "hide": "Hide"
     },
     "likes": "Likes",
-    "time": "Time"
+    "time": "Time",
+    "table": {
+      "content": "Content",
+      "tags": "Tags",
+      "site": "Site",
+      "time": "Time",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "pagination": {
+      "prev": "Prev",
+      "next": "Next"
+    },
+    "modal": {
+      "content": "📝 Content",
+      "tags": "🏷 Tags",
+      "status": "📋 Status"
+    },
+    "defaultSite": "Default Site",
+    "loadFailed": "Failed to load",
+    "statusUpdateSuccess": "Status updated",
+    "updateFailed": "Update failed",
+    "contentEmpty": "Content cannot be empty",
+    "updateSuccess": "Updated successfully",
+    "publishSuccess": "Published successfully",
+    "operationFailed": "Operation failed",
+    "deleteSuccess": "Deleted successfully",
+    "deleteFailed": "Delete failed"
   },
   "data": {
     "title": "Data Management",

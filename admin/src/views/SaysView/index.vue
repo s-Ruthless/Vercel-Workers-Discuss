@@ -20,20 +20,16 @@
     <div v-else>
       <div class="comment-table">
         <div class="table-header">
-          <div class="table-cell table-cell-content">内容</div>
-          <div class="table-cell table-cell-tags">标签</div>
-          <div class="table-cell table-cell-site">站点</div>
-          <div class="table-cell table-cell-time">时间</div>
-          <div class="table-cell table-cell-status">状态</div>
-          <div class="table-cell table-cell-actions">操作</div>
+          <div class="table-cell table-cell-content">{{ t("says.table.content") }}</div>
+          <div class="table-cell table-cell-tags">{{ t("says.table.tags") }}</div>
+          <div class="table-cell table-cell-site">{{ t("says.table.site") }}</div>
+          <div class="table-cell table-cell-time">{{ t("says.table.time") }}</div>
+          <div class="table-cell table-cell-status">{{ t("says.table.status") }}</div>
+          <div class="table-cell table-cell-actions">{{ t("says.table.actions") }}</div>
         </div>
         <div v-for="item in filteredSays" :key="item.id" class="table-row">
           <div class="table-cell table-cell-content">
             <div class="cell-content-text" v-html="emojiReady ? renderContent(item.contentHtml) : item.contentHtml"></div>
-            <span v-if="item.likes" class="cell-likes-number">
-              <PhThumbsUp :size="13" />
-              {{ item.likes }}
-            </span>
           </div>
           <div class="table-cell table-cell-tags">
             <div class="cell-tags-wrapper" v-if="item.tags && item.tags.length">
@@ -70,7 +66,7 @@
         </div>
       </div>
       <div v-if="totalPages > 1" class="pagination">
-        <button class="pagination-button" :disabled="page <= 1" @click="goPage(page - 1)">上一页</button>
+        <button class="pagination-button" :disabled="page <= 1" @click="goPage(page - 1)">{{ t("says.pagination.prev") }}</button>
         <template v-for="p in visiblePages" :key="p">
           <button
             class="pagination-button"
@@ -79,7 +75,7 @@
             @click="goPage(p)"
           >{{ p }}</button>
         </template>
-        <button class="pagination-button" :disabled="page >= totalPages" @click="goPage(page + 1)">下一页</button>
+        <button class="pagination-button" :disabled="page >= totalPages" @click="goPage(page + 1)">{{ t("says.pagination.next") }}</button>
       </div>
     </div>
 
@@ -95,7 +91,7 @@
         </div>
         <div class="modal-body">
           <div class="modal-section">
-            <div class="modal-section-title">📝 内容</div>
+            <div class="modal-section-title">{{ t("says.modal.content") }}</div>
             <div class="form-group form-group-content">
               <textarea ref="modalTextareaRef" v-model="modalContent" class="form-input form-textarea" rows="8" :placeholder="t('says.contentPlaceholder')" @click="closeEmojiPanel"></textarea>
               <div class="textarea-toolbar">
@@ -105,13 +101,13 @@
           </div>
           <div class="modal-row">
             <div class="modal-section modal-section-half">
-              <div class="modal-section-title">🏷 标签</div>
+              <div class="modal-section-title">{{ t("says.modal.tags") }}</div>
               <div class="form-group">
                 <input v-model="modalTags" class="form-input" :placeholder="t('says.tagsHint')" />
               </div>
             </div>
             <div class="modal-section modal-section-half">
-              <div class="modal-section-title">📋 状态</div>
+              <div class="modal-section-title">{{ t("says.modal.status") }}</div>
               <div class="form-group">
                 <select v-model="modalStatus" class="form-input">
                   <option value="published">{{ t("says.statusPublished") }}</option>
@@ -151,7 +147,7 @@ const { emojiReady, ensureEmojiLoaded } = useEmojiReady();
 const managedSites = inject<import('vue').Ref<ManagedSite[]>>("managedSites", ref([]));
 
 function getSiteName(siteId?: string): string {
-  if (!siteId || siteId === 'blog' || siteId === '') return '默认站点';
+  if (!siteId || siteId === 'blog' || siteId === '') return t("says.defaultSite");
   const site = managedSites.value.find(s => s.siteId === siteId);
   return site ? site.name : siteId;
 }
@@ -220,7 +216,7 @@ async function loadSays(targetPage?: number) {
     page.value = res.pagination.page;
     totalPages.value = res.pagination.total;
   } catch (e: any) {
-    error.value = e.message || "加载失败";
+    error.value = e.message || t("says.loadFailed");
   } finally {
     loading.value = false;
   }
@@ -241,10 +237,10 @@ function handleStatusChange(item: SayItem, event: Event) {
 async function changeStatus(id: number, status: string) {
   try {
     await updateSayStatus(id, status);
-    showToast("状态更新成功");
+    showToast(t("says.statusUpdateSuccess"));
     await loadSays();
   } catch (e: any) {
-    showToast(e.message || "更新失败", "error");
+    showToast(e.message || t("says.updateFailed"), "error");
   }
 }
 
@@ -291,21 +287,21 @@ function handleEmojiInsert(text: string) {
 function closeEmojiPanel() {}
 
 async function handleSubmit() {
-  if (!modalContent.value.trim()) { showToast("内容不能为空", "error"); return; }
+  if (!modalContent.value.trim()) { showToast(t("says.contentEmpty"), "error"); return; }
   submitting.value = true;
   try {
     const tags = modalTags.value.split(",").map(s => s.trim()).filter(Boolean);
     if (editingId.value) {
       await updateSay({ id: editingId.value, content: modalContent.value, status: modalStatus.value, tags });
-      showToast("更新成功");
+      showToast(t("says.updateSuccess"));
     } else {
       await createSay({ content: modalContent.value, status: modalStatus.value, tags, siteId: currentSiteId.value });
-      showToast("发布成功");
+      showToast(t("says.publishSuccess"));
     }
     modalVisible.value = false;
     await loadSays();
   } catch (e: any) {
-    showToast(e.message || "操作失败", "error");
+    showToast(e.message || t("says.operationFailed"), "error");
   } finally {
     submitting.value = false;
   }
@@ -315,10 +311,10 @@ async function handleDelete(id: number) {
   if (!confirm(t("says.confirmDelete"))) return;
   try {
     await deleteSay(id);
-    showToast("删除成功");
+    showToast(t("says.deleteSuccess"));
     await loadSays();
   } catch (e: any) {
-    showToast(e.message || "删除失败", "error");
+    showToast(e.message || t("says.deleteFailed"), "error");
   }
 }
 

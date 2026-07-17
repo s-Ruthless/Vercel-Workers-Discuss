@@ -9,7 +9,7 @@
     <div class="stats-overview-row">
       <div class="card stats-overview-card">
         <div class="card-title-row">
-          <h3 class="card-title">评论概览</h3>
+          <h3 class="card-title">{{ t("stats.commentOverview") }}</h3>
         </div>
         <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
         <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
@@ -31,36 +31,36 @@
             <div class="stats-value stats-value-rejected">{{ statsSummary.rejected }}</div>
           </div>
           <div class="stats-item">
-            <div class="stats-label">总点赞</div>
+            <div class="stats-label">{{ t("stats.totalLikes") }}</div>
             <div class="stats-value">{{ statsSummary.totalLikes }}</div>
           </div>
         </div>
       </div>
       <div class="card stats-overview-card">
         <div class="card-title-row">
-          <h3 class="card-title">说说概览</h3>
+          <h3 class="card-title">{{ t("stats.sayOverview") }}</h3>
         </div>
         <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
         <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
         <div v-else class="stats-grid stats-grid-5">
           <div class="stats-item">
-            <div class="stats-label">说说总数</div>
+            <div class="stats-label">{{ t("stats.sayTotal") }}</div>
             <div class="stats-value">{{ saySummary.total }}</div>
           </div>
           <div class="stats-item">
-            <div class="stats-label">已发布</div>
+            <div class="stats-label">{{ t("stats.published") }}</div>
             <div class="stats-value stats-value-approved">{{ saySummary.published }}</div>
           </div>
           <div class="stats-item">
-            <div class="stats-label">草稿</div>
+            <div class="stats-label">{{ t("stats.draft") }}</div>
             <div class="stats-value stats-value-pending">{{ saySummary.draft }}</div>
           </div>
           <div class="stats-item">
-            <div class="stats-label">隐藏</div>
+            <div class="stats-label">{{ t("stats.hidden") }}</div>
             <div class="stats-value stats-value-rejected">{{ saySummary.hidden }}</div>
           </div>
           <div class="stats-item">
-            <div class="stats-label">总点赞</div>
+            <div class="stats-label">{{ t("stats.totalLikes") }}</div>
             <div class="stats-value">{{ saySummary.totalLikes }}</div>
           </div>
         </div>
@@ -89,7 +89,7 @@
       </div>
       <div class="card stats-trend-card">
         <div class="card-title-row">
-          <h3 class="card-title">说说趋势</h3>
+          <h3 class="card-title">{{ t("stats.sayTrend") }}</h3>
         </div>
         <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
         <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
@@ -103,7 +103,7 @@
     <div class="stats-charts-row">
       <div class="card stats-chart-card">
         <div class="card-title-row">
-          <h3 class="card-title">评论状态分布</h3>
+          <h3 class="card-title">{{ t("stats.commentStatusDist") }}</h3>
         </div>
         <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
         <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
@@ -113,7 +113,7 @@
       </div>
       <div class="card stats-chart-card">
         <div class="card-title-row">
-          <h3 class="card-title">说说状态分布</h3>
+          <h3 class="card-title">{{ t("stats.sayStatusDist") }}</h3>
         </div>
         <div v-if="statsLoading" class="page-hint">{{ t("common.loading") }}</div>
         <div v-else-if="statsError" class="page-error">{{ statsError }}</div>
@@ -132,7 +132,7 @@ import * as echarts from "echarts";
 import { fetchCommentStats } from "../../api/admin";
 import { useSite } from "../../composables/useSite";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const statsLoading = ref(false);
 const statsError = ref("");
@@ -188,7 +188,7 @@ async function loadStats() {
     last7Days.value = Array.isArray(res.last7Days) ? res.last7Days : [];
     sayLast7Days.value = Array.isArray(res.sayLast7Days) ? res.sayLast7Days : [];
   } catch (e: any) {
-    statsError.value = e.message || "加载统计数据失败";
+    statsError.value = e.message || t("stats.loadError");
     showToast(statsError.value, "error");
   } finally {
     statsLoading.value = false;
@@ -261,9 +261,9 @@ function renderCommentPieChart() {
   if (!el) return;
   if (!commentPieInstance) commentPieInstance = echarts.init(el);
   const data = [
-    { name: "已通过", value: statsSummary.value.approved, itemStyle: { color: "#34c759" } },
-    { name: "待审核", value: statsSummary.value.pending, itemStyle: { color: "#ff9500" } },
-    { name: "已拒绝", value: statsSummary.value.rejected, itemStyle: { color: "#ff3b30" } },
+    { name: t("stats.approved"), value: statsSummary.value.approved, itemStyle: { color: "#34c759" } },
+    { name: t("stats.pending"), value: statsSummary.value.pending, itemStyle: { color: "#ff9500" } },
+    { name: t("stats.rejected"), value: statsSummary.value.rejected, itemStyle: { color: "#ff3b30" } },
   ].filter(d => d.value > 0);
   commentPieInstance.setOption({
     tooltip: { trigger: "item", formatter: "{b}: {c} ({d}%)" },
@@ -273,7 +273,7 @@ function renderCommentPieChart() {
       avoidLabelOverlap: false,
       label: { show: true, formatter: "{b}\n{c}", fontSize: 12 },
       labelLine: { show: true, length: 8, length2: 8 },
-      data: data.length > 0 ? data : [{ name: "暂无数据", value: 1, itemStyle: { color: "#e0e0e0" } }],
+      data: data.length > 0 ? data : [{ name: t("stats.noDataChart"), value: 1, itemStyle: { color: "#e0e0e0" } }],
       emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0,0,0,0.3)" } },
     }],
   });
@@ -284,9 +284,9 @@ function renderSayPieChart() {
   if (!el) return;
   if (!sayPieInstance) sayPieInstance = echarts.init(el);
   const data = [
-    { name: "已发布", value: saySummary.value.published, itemStyle: { color: "#34c759" } },
-    { name: "草稿", value: saySummary.value.draft, itemStyle: { color: "#ff9500" } },
-    { name: "隐藏", value: saySummary.value.hidden, itemStyle: { color: "#8e8e93" } },
+    { name: t("stats.published"), value: saySummary.value.published, itemStyle: { color: "#34c759" } },
+    { name: t("stats.draft"), value: saySummary.value.draft, itemStyle: { color: "#ff9500" } },
+    { name: t("stats.hidden"), value: saySummary.value.hidden, itemStyle: { color: "#8e8e93" } },
   ].filter(d => d.value > 0);
   sayPieInstance.setOption({
     tooltip: { trigger: "item", formatter: "{b}: {c} ({d}%)" },
@@ -296,7 +296,7 @@ function renderSayPieChart() {
       avoidLabelOverlap: false,
       label: { show: true, formatter: "{b}\n{c}", fontSize: 12 },
       labelLine: { show: true, length: 8, length2: 8 },
-      data: data.length > 0 ? data : [{ name: "暂无数据", value: 1, itemStyle: { color: "#e0e0e0" } }],
+      data: data.length > 0 ? data : [{ name: t("stats.noDataChart"), value: 1, itemStyle: { color: "#e0e0e0" } }],
       emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0,0,0,0.3)" } },
     }],
   });
@@ -328,6 +328,12 @@ onMounted(() => {
 });
 
 watch(currentSiteId, () => { loadStats(); });
+
+watch(locale, () => {
+  if (!statsLoading.value && !statsError.value) {
+    renderAllCharts();
+  }
+});
 
 onBeforeUnmount(() => {
   window.removeEventListener("resize", handleResize);
