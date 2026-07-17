@@ -216,7 +216,7 @@ const versionModalVisible = ref(false);
 const layoutTitle = ref(localStorage.getItem(SITE_TITLE_KEY) || "VWD 评论系统");
 const currentLang = ref(getLanguage());
 
-const currentLangLabel = computed(() => currentLang.value === 'zh-CN' ? '中文' : 'EN');
+const currentLangLabel = computed(() => currentLang.value === 'zh-CN' ? 'ZH' : 'EN');
 
 function onToggleLang() {
   toggleLanguage();

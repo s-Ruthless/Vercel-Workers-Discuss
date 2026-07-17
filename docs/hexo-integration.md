@@ -309,7 +309,7 @@ hexo.extend.injector.register('body_end', `
 | `theme` | `'light' \| 'dark'` | 否 | `light` | 主题 |
 | `primaryColor` | `string` | 否 | `#0969da` | 主题色 |
 
-> 说说的开关、每页数量等也可在后台 `/admin/settings` 中配置，前端会自动读取服务器配置。
+> 说说的开关、点赞、每页数量等也可在后台 `/admin/settings` 中配置，前端会自动读取服务器配置。
 
 ---
 
