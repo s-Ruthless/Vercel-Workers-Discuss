@@ -1,5 +1,7 @@
 # Hexo 博客接入 VWD 评论系统指南
 
+**中文** | [English](./hexo-integration-en.md)
+
 ## 前置条件
 
 - 已部署 VWD 评论系统（假设地址为 `https://vercel-workers-discuss.vercel.app`）

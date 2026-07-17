@@ -2,6 +2,8 @@
 
 # VWD (Vercel Workers Discuss)
 
+**中文** | [English](./README_EN.md)
+
 ![Vercel](https://img.shields.io/badge/Vercel-Serverless-000000?logo=vercel&logoColor=white&style=flat-square)
 ![PostgreSQL](https://img.shields.io/badge/Vercel-Postgres-4169E1?logo=postgresql&logoColor=white&style=flat-square)
 ![KV](https://img.shields.io/badge/Vercel-KV-FF0000?logo=redis&logoColor=white&style=flat-square)
@@ -89,7 +91,8 @@ vwd/
 ├── sql/
 │   └── schema.sql        #   PostgreSQL 数据表定义
 ├── docs/
-│   └── hexo-integration.md #  Hexo 博客接入指南
+│   ├── hexo-integration.md     #  Hexo 博客接入指南（中文）
+│   └── hexo-integration-en.md  #  Hexo 博客接入指南（英文）
 ├── vercel.json           #   Vercel 配置（路由、CORS、函数超时）
 ├── tsconfig.json         #   TypeScript 配置（API + Server 层）
 └── package.json
