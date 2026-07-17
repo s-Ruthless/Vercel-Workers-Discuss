@@ -74,7 +74,7 @@ app.options('*', (c) => {
 });
 
 // ==================== Public API ====================
-app.get('/api/version', (c) => c.json({ version: '0.2.0' }));
+app.get('/api/version', (c) => c.json({ version: '1.0.0' }));
 app.get('/api/comments', getComments);
 app.post('/api/comments', postComment);
 app.post('/api/comments/like', likeComment);
