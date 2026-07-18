@@ -21,7 +21,6 @@
         <div v-for="item in sites" :key="item.id" class="table-row">
           <div class="table-cell table-cell-name">
             <span class="cell-name">{{ item.name }}</span>
-            <span v-if="item.isDefault" class="cell-default-tag">默认</span>
           </div>
           <div class="table-cell table-cell-siteid">
             <span class="cell-siteid" @click="copySiteId(item.siteId)" :title="t('sites.copySiteId')">
@@ -226,12 +225,6 @@ onMounted(() => {
 }
 .cell-url:hover { text-decoration: underline; opacity: 0.85; }
 .cell-url-empty { color: var(--text-tertiary); }
-.cell-default-tag {
-  display: inline-block; margin-left: 6px; padding: 1px 6px;
-  font-size: 11px; font-weight: 600; color: var(--color-success);
-  background-color: rgba(52, 199, 89, 0.12); border-radius: var(--radius-pill);
-}
-
 /* Modal */
 .modal-overlay {
   position: fixed; inset: 0; background-color: rgba(0,0,0,0.25); backdrop-filter: blur(4px);

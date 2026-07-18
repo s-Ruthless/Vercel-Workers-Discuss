@@ -7,6 +7,7 @@
     { "source": "/admin", "destination": "/admin/" },
     { "source": "/admin/(.*)", "destination": "/admin/index.html" },
     { "source": "/doc", "destination": "/doc/" },
+    { "source": "/doc/(.*)", "destination": "/doc/$1.html" },
     { "source": "/(.*)", "destination": "/404.html" }
   ],
   "headers": [
