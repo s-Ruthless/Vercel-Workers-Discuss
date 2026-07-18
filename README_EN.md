@@ -90,9 +90,12 @@ vwd/
 │   └── emotion/          #   Emoji image assets (includes alus pack + kaomoji)
 ├── sql/
 │   └── schema.sql        #   PostgreSQL table definitions
-├── docs/
-│   ├── hexo-integration.md     # Hexo blog integration guide (Chinese)
-│   └── hexo-integration-en.md  # Hexo blog integration guide (English)
+├── docs/                       # VitePress docs site (accessible at /doc)
+│   ├── .vitepress/config.ts    #   VitePress config (base: /doc/)
+│   ├── index.md                #   Docs homepage
+│   ├── guide/                  #   Guides (quick start, deploy, Hexo, widget config, says)
+│   ├── api/                    #   API docs
+│   └── common-problems.md      #   FAQ
 ├── vercel.json           #   Vercel config (routes, CORS, function timeout)
 ├── tsconfig.json         #   TypeScript config (API + Server layer)
 └── package.json

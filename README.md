@@ -90,9 +90,12 @@ vwd/
 │   └── emotion/          #   表情图片资源（含 alus 表情包 + 颜文字）
 ├── sql/
 │   └── schema.sql        #   PostgreSQL 数据表定义
-├── docs/
-│   ├── hexo-integration.md     #  Hexo 博客接入指南（中文）
-│   └── hexo-integration-en.md  #  Hexo 博客接入指南（英文）
+├── docs/                       # VitePress 文档站（访问 /doc 打开）
+│   ├── .vitepress/config.ts    #   VitePress 配置（base: /doc/）
+│   ├── index.md                #   文档首页
+│   ├── guide/                  #   指南（快速开始、部署、Hexo 接入、Widget 配置、说说）
+│   ├── api/                    #   API 文档
+│   └── common-problems.md      #   常见问题
 ├── vercel.json           #   Vercel 配置（路由、CORS、函数超时）
 ├── tsconfig.json         #   TypeScript 配置（API + Server 层）
 └── package.json
@@ -196,6 +199,8 @@ npx vercel --prod    # 部署到生产环境
 
 | 地址 | 说明 |
 | --- | --- |
+| `https://your-project.vercel.app/` | 首页引导页 |
+| `https://your-project.vercel.app/doc/` | 使用文档（VitePress 文档站，也可通过 `/doc` 访问） |
 | `https://your-project.vercel.app/api/health` | 健康检查 |
 | `https://your-project.vercel.app/admin/` | 管理后台（首次访问引导设置管理员） |
 | `https://your-project.vercel.app/vwd.js` | Widget JS 文件 |

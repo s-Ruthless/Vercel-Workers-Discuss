@@ -8,10 +8,12 @@
   },
   "scripts": {
     "dev": "vercel dev",
-    "install:all": "npm install && npm --prefix ./widget install && npm --prefix ./admin install",
-    "build": "npm --prefix ./widget install && npm --prefix ./widget run build && npm --prefix ./admin install && npm --prefix ./admin run build",
+    "install:all": "npm install && npm --prefix ./widget install && npm --prefix ./admin install && npm --prefix ./docs install",
+    "build": "npm --prefix ./widget install && npm --prefix ./widget run build && npm --prefix ./admin install && npm --prefix ./admin run build && npm --prefix ./docs install && npm --prefix ./docs run build",
     "build:widget": "npm --prefix ./widget install && npm --prefix ./widget run build",
     "build:admin": "npm --prefix ./admin install && npm --prefix ./admin run build",
+    "build:docs": "npm --prefix ./docs install && npm --prefix ./docs run build",
+    "dev:docs": "npm --prefix ./docs run dev",
     "deploy": "npm run build && vercel --prod",
     "db:init": "node scripts/init-db.cjs"
   },
