@@ -99,7 +99,15 @@ export class VWDComments {
     if (this._mounted) return;
 
     if (this.hostElement) {
-      this.shadowRoot = this.hostElement.attachShadow({ mode: 'open' });
+      // 复用已存在的 Shadow Root，避免重复 attachShadow 报错
+      if (this.hostElement.shadowRoot) {
+        this.shadowRoot = this.hostElement.shadowRoot;
+        while (this.shadowRoot.firstChild) {
+          this.shadowRoot.removeChild(this.shadowRoot.firstChild);
+        }
+      } else {
+        this.shadowRoot = this.hostElement.attachShadow({ mode: 'open' });
+      }
       const styleElement = document.createElement('style');
       if (typeof styles === 'string') {
         styleElement.textContent = styles;
@@ -271,9 +279,9 @@ export class VWDComments {
       this.unsubscribe = null;
     }
 
-    if (this.hostElement) {
-      while (this.hostElement.firstChild) {
-        this.hostElement.removeChild(this.hostElement.firstChild);
+    if (this.shadowRoot) {
+      while (this.shadowRoot.firstChild) {
+        this.shadowRoot.removeChild(this.shadowRoot.firstChild);
       }
     }
 
