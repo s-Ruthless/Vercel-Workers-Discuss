@@ -30,16 +30,35 @@ export default defineConfig({
     ],
 
     sidebar: {
-      // API 页面单独一个侧边栏
+      // API 页面单独一个侧边栏（嵌套分组）
       '/api/': [
         {
           text: 'API 文档',
           items: [
-            { text: 'API 总览', link: '/api/overview' },
-            { text: '评论 API', link: '/api/comments' },
-            { text: '说说 API', link: '/api/says' },
-            { text: '点赞 API', link: '/api/like' },
-            { text: '管理 API', link: '/api/admin' },
+            { text: '概览', link: '/api/overview' },
+            {
+              text: '公开 API',
+              items: [
+                { text: '评论接口', link: '/api/public/comments' },
+                { text: '点赞接口', link: '/api/public/like' },
+                { text: '说说接口', link: '/api/public/says' },
+                { text: '配置接口', link: '/api/public/config' },
+                { text: '身份验证', link: '/api/public/auth' },
+              ],
+            },
+            {
+              text: '管理员 API',
+              items: [
+                { text: '概览', link: '/api/admin' },
+                { text: '评论管理', link: '/api/admin/comments' },
+                { text: '数据管理', link: '/api/admin/data-migration' },
+                { text: '评论设置', link: '/api/admin/settings' },
+                { text: '邮件通知', link: '/api/admin/email-notify' },
+                { text: 'Telegram 通知', link: '/api/admin/telegram-notify' },
+                { text: '统计数据', link: '/api/admin/stats' },
+                { text: '功能设置', link: '/api/admin/feature-settings' },
+              ],
+            },
           ],
         },
       ],
