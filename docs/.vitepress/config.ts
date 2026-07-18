@@ -24,6 +24,7 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '快速开始', link: '/guide/getting-started' },
+      { text: '功能', link: '/function/admin-panel' },
       { text: 'API 文档', link: '/api/overview' },
       { text: '常见问题', link: '/common-problems' },
       { text: '管理后台', link: 'https://vwd.zishu.me' },
@@ -32,13 +33,37 @@ export default defineConfig({
     sidebar: {
       '/guide/': [
         {
-          text: '指南',
+          text: '快速开始',
           items: [
-            { text: '快速开始', link: '/guide/getting-started' },
-            { text: '部署到 Vercel', link: '/guide/deploy' },
+            { text: '项目介绍', link: '/guide/getting-started' },
+            { text: '后端配置', link: '/guide/backend-config' },
+            { text: '前端配置', link: '/guide/frontend-config' },
             { text: 'Hexo 博客接入', link: '/guide/hexo-integration' },
-            { text: 'Widget 配置项', link: '/guide/widget-config' },
-            { text: '说说功能', link: '/guide/says' },
+            { text: '更新部署', link: '/guide/update-version' },
+          ],
+        },
+      ],
+      '/function/': [
+        {
+          text: '功能',
+          items: [
+            { text: '后台设置', link: '/function/admin-panel' },
+            { text: '邮箱提醒', link: '/function/email-reminder' },
+            { text: 'Telegram 通知', link: '/function/telegram-notify' },
+            { text: '安全设置', link: '/function/security-settings' },
+            { text: '功能开关', link: '/function/feature-settings' },
+            { text: '说说功能', link: '/function/says' },
+            { text: '数据看板', link: '/function/data-statistics' },
+            { text: '数据管理', link: '/function/data-migration' },
+          ],
+        },
+      ],
+      '/config/': [
+        {
+          text: '配置',
+          items: [
+            { text: '站点隔离', link: '/config/site-isolation' },
+            { text: '反馈', link: '/config/feedback' },
           ],
         },
       ],

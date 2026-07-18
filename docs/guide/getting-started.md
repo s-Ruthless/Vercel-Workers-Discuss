@@ -84,7 +84,7 @@ cd Vercel-Workers-Discuss
 
 ## 配置
 
-- [部署到 Vercel（详细）](./deploy)
+- [后端配置](./backend-config)
+- [前端配置](./frontend-config)
 - [Hexo 博客接入](./hexo-integration)
-- [Widget 配置项](./widget-config)
-- [说说功能](./says)
+- [更新部署](./update-version)
