@@ -13,7 +13,7 @@ export default defineConfig({
   description: 'Vercel Workers Discuss · 基于 Vercel Serverless 的自托管评论系统',
 
   head: [
-    ['link', { rel: 'icon', href: '/icon.png' }],
+    ['link', { rel: 'icon', href: '/doc/icon.png' }],
     ['meta', { name: 'viewport', content: 'width=device-width, initial-scale=1' }],
   ],
 
