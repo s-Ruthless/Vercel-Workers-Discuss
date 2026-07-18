@@ -1,10 +1,10 @@
-# 快速开始
+# Vercel Workers Discuss
 
 **VWD 评论系统** 是基于 Vercel Serverless 平台的免服务器、极速安全、即插即用评论系统。
 
-数据存储在 Vercel Postgres（Neon PostgreSQL）中，会话与限流使用 Vercel KV（Upstash Redis）。深度适配 Vercel 生态，部署成本为零，开箱即用。
+数据存储在 Vercel Postgres（Neon PostgreSQL）中，会话与限流使用 Vercel KV（Upstash Redis）。深度适配 Vercel 生态，根据对 Vercel 免费计划的分析，VWD 评论系统的部署成本为零，不需要任何成本。
 
-**指标分析：** 你可以根据你的站点日常承接能力，确认选择使用该评论系统。Vercel Hobby（免费）计划额度如下：
+**指标分析：** 你可以根据你的站点日常承接能力，确认选择使用该评论系统。
 
 | 指标 | 免费每月额度 | 单次消耗 | 理论极限 |
 | --- | --- | --- | --- |
@@ -32,7 +32,7 @@
 - 👍 **点赞功能**：文章点赞、评论点赞和说说点赞
 - 😊 **表情系统**：Waline 风格表情包，内置阿鲁表情包和颜文字
 - 🔄 **数据迁移**：支持从 Twikoo、Artalk、Valine 导入评论数据
-- 🌐 **多站点**：支持多站点管理，通过 `site_id` 隔离数据
+- 🌐 **多站点**：支持多站点管理，通过 `siteId` 隔离数据
 
 ## 前置要求
 
@@ -41,50 +41,15 @@
 
 ## 安装
 
-### 1. Fork / 克隆仓库
-
 ```bash
+# 克隆项目
 git clone https://github.com/s-Ruthless/Vercel-Workers-Discuss.git
 cd Vercel-Workers-Discuss
+# 部署请查看文档
+npm install
 ```
-
-或直接在 GitHub 上 Fork [Vercel-Workers-Discuss](https://github.com/s-Ruthless/Vercel-Workers-Discuss) 仓库。
-
-### 2. 在 Vercel 导入
-
-1. 登录 [Vercel 控制台](https://vercel.com/dashboard)
-2. 点击 **Add New → Project**
-3. 选择你 Fork 的仓库 `Vercel-Workers-Discuss`
-4. Vercel 会自动识别 `vercel.json` 配置，点击 **Deploy**
-
-### 3. 创建数据库资源
-
-在 Vercel 控制台创建以下资源并连接到项目：
-
-1. **Vercel Postgres** — 存储评论、设置、说说数据
-2. **Vercel KV** — 管理会话 Token 和限流
-
-> 以下环境变量会自动注入，无需手动配置：`POSTGRES_URL`、`KV_REST_API_URL`、`KV_REST_API_TOKEN`
-
-### 4. 重新部署并设置管理员
-
-关联数据库后点击 **Redeploy**，数据库表会在首次请求时自动创建。
-
-部署成功后，打开 `https://your-project.vercel.app/admin/`，首次访问会引导你设置管理员账号和密码。
-
-## 部署完成
-
-| 地址 | 说明 |
-| --- | --- |
-| `https://your-project.vercel.app/` | 首页引导页 |
-| `https://your-project.vercel.app/doc/` | 使用文档（本站） |
-| `https://your-project.vercel.app/admin/` | 管理后台 |
-| `https://your-project.vercel.app/vwd.js` | Widget JS 文件 |
-| `https://your-project.vercel.app/api/health` | 健康检查 |
 
 ## 配置
 
 - [后端配置](./backend-config)
 - [前端配置](./frontend-config)
-- [Hexo 博客接入](./hexo-integration)
-- [更新部署](./update-version)

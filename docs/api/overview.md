@@ -1,67 +1,77 @@
-# API 总览
+# API 概览
 
-VWD 提供完整的 REST API，支持评论、点赞、说说、管理等功能。
+## 基础信息
 
-## 基础地址
+- **接口地址**：`https://your-project.vercel.app/api` 或你的自定义域名
+- **数据格式**：JSON
+- **字符编码**：UTF-8
 
+所有 API 均为 RESTful 风格，无会话 Cookie，认证全部通过 `Authorization` 请求头完成。
+
+## 功能特性
+
+### 评论点赞
+
+- 支持对单条评论进行点赞
+- 每个用户对同一条评论只能点赞一次（通过 localStorage 本地记录用户 ID 和点赞状态）
+- 点赞数实时更新
+- 可通过管理员后台功能设置页面开启/关闭评论点赞功能
+
+### 文章点赞
+
+- 支持对整篇文章进行点赞
+- 每个用户对同一篇文章只能点赞一次
+- 点赞数实时显示
+- 可通过管理员后台功能设置页面开启/关闭文章点赞功能
+
+### 说说点赞
+
+- 支持对单条说说进行点赞
+- 每个用户对同一条说说只能点赞一次
+- 可通过管理员后台功能设置页面开启/关闭说说点赞功能
+
+## 版本信息
+
+部署成功后，访问健康检查接口 `/api/health`，成功时返回：
+
+```json
+{
+  "status": "ok",
+  "version": "1.0.0"
+}
 ```
-https://your-project.vercel.app/api
+
+## 鉴权方式
+
+公开接口与管理员接口的鉴权要求不同：
+
+- 公开接口（Public API）
+  - `/api/comments`
+  - `/api/like`
+  - `/api/says`
+  - `/api/config/comments`
+  - 默认无需认证，可直接访问。
+- 管理员接口（Admin API）
+  - 路径前缀：`/api/admin/*`
+  - 除 `/api/admin/login` 外，其余接口都需要携带管理员 Token。
+
+管理员接口需要使用 Bearer Token 认证：
+
+```http
+Authorization: Bearer <token>
 ```
 
-## 公开 API
+Token 通过登录接口获取，服务端会在 KV 中存储会话信息并在每次请求时进行校验。
 
-| 方法 | 路径 | 说明 |
+## HTTP 状态码
+
+常见状态码及含义如下：
+
+| 状态码 | 说明 | 典型场景 |
 | --- | --- | --- |
-| GET | `/api/comments` | 获取评论列表 |
-| POST | `/api/comments` | 提交评论 |
-| POST | `/api/comments/like` | 评论点赞 |
-| DELETE | `/api/comments/like` | 取消评论点赞 |
-| POST | `/api/verify-admin` | 管理员评论验证 |
-| GET | `/api/like` | 获取文章点赞状态 |
-| POST | `/api/like` | 文章点赞 |
-| GET | `/api/says` | 获取说说列表 |
-| GET | `/api/says/:id` | 获取单条说说 |
-| POST | `/api/says/like` | 说说点赞 |
-| GET | `/api/config/comments` | 获取公开配置（含表情包路径） |
-| GET | `/api/health` | 健康检查 |
-
-## 管理 API（需鉴权）
-
-| 方法 | 路径 | 说明 |
-| --- | --- | --- |
-| POST | `/api/admin/login` | 管理员登录 |
-| GET | `/api/admin/comments/list` | 评论列表 |
-| DELETE | `/api/admin/comments/delete` | 删除评论 |
-| PUT | `/api/admin/comments/status` | 更新评论状态 |
-| PUT | `/api/admin/comments/update` | 编辑评论 |
-| GET/PUT | `/api/admin/settings/*` | 各项设置 |
-| GET/POST | `/api/admin/export/*` | 数据导出 |
-| POST | `/api/admin/import/*` | 数据导入 |
-| GET | `/api/admin/stats/*` | 评论统计 |
-| GET/POST/PUT/DELETE | `/api/admin/says/*` | 说说管理 |
-| GET/PUT | `/api/admin/settings/says` | 说说设置 |
-
-> 所有管理 API（除 login 外）需在请求头中携带 `Authorization: Bearer <token>`。
-
-## 直接调用 API 示例
-
-```html
-<!-- 获取评论列表 -->
-<script>
-  fetch('https://your-project.vercel.app/api/comments?post_slug=/your-page')
-    .then(res => res.json())
-    .then(data => console.log(data));
-</script>
-```
-
-## CORS 支持
-
-所有 `/api/*` 端点均开启 CORS，允许任意域名调用：
-
-```
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
-Access-Control-Allow-Headers: Content-Type, Authorization, X-VWD-Like-User, X-CWD-Like-User
-```
-
-> 表情包已改为前端配置（Waline 风格），不再提供 `/api/emotions` 接口。内置阿鲁表情包和颜文字，可在后台 `/admin/settings` 中配置自定义表情包路径。
+| 200 | 请求成功 | 正常查询、操作成功 |
+| 400 | 请求参数错误 | 缺少必填字段、格式不正确等 |
+| 401 | 未授权 | 未携带 Token 或 Token 失效 |
+| 403 | 禁止访问 | 登录失败次数过多导致 IP 被暂时封禁 |
+| 429 | 请求过于频繁 | 评论频率超过限制 |
+| 500 | 服务器内部错误 | 未捕获异常、数据库错误等 |

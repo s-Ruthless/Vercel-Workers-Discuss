@@ -24,26 +24,36 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '快速开始', link: '/guide/getting-started' },
-      { text: '功能', link: '/function/admin-panel' },
       { text: 'API 文档', link: '/api/overview' },
       { text: '常见问题', link: '/common-problems' },
       { text: '管理后台', link: 'https://vwd.zishu.me' },
     ],
 
     sidebar: {
-      '/guide/': [
+      // API 页面单独一个侧边栏
+      '/api/': [
+        {
+          text: 'API 文档',
+          items: [
+            { text: 'API 总览', link: '/api/overview' },
+            { text: '评论 API', link: '/api/comments' },
+            { text: '说说 API', link: '/api/says' },
+            { text: '点赞 API', link: '/api/like' },
+            { text: '管理 API', link: '/api/admin' },
+          ],
+        },
+      ],
+      // 所有其他页面都显示完整的三组侧边栏
+      '/': [
         {
           text: '快速开始',
           items: [
             { text: '项目介绍', link: '/guide/getting-started' },
             { text: '后端配置', link: '/guide/backend-config' },
             { text: '前端配置', link: '/guide/frontend-config' },
-            { text: 'Hexo 博客接入', link: '/guide/hexo-integration' },
             { text: '更新部署', link: '/guide/update-version' },
           ],
         },
-      ],
-      '/function/': [
         {
           text: '功能',
           items: [
@@ -57,25 +67,11 @@ export default defineConfig({
             { text: '数据管理', link: '/function/data-migration' },
           ],
         },
-      ],
-      '/config/': [
         {
           text: '配置',
           items: [
             { text: '站点隔离', link: '/config/site-isolation' },
             { text: '反馈', link: '/config/feedback' },
-          ],
-        },
-      ],
-      '/api/': [
-        {
-          text: 'API 文档',
-          items: [
-            { text: 'API 总览', link: '/api/overview' },
-            { text: '评论 API', link: '/api/comments' },
-            { text: '说说 API', link: '/api/says' },
-            { text: '点赞 API', link: '/api/like' },
-            { text: '管理 API', link: '/api/admin' },
           ],
         },
       ],
